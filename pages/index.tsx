@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FilledInput, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { Close as CloseIcon } from '@mui/icons-material'
 import type { NextPage } from 'next'
@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { database } from '../firebase/config'
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
+import Link from 'next/link'
 
 export type Job = {
   id: string
@@ -78,11 +79,11 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box py={1} bgcolor='primary.main' color='white' sx={{ position: 'fixed', width: '100%', zIndex: 999 }}>
+      <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
           <Grid container justifyContent='center'>
-              <Grid xs={10} display='flex' justifyContent='space-between'>
-                  <Typography variant='h4'>React Jobs</Typography>
-                  <Button href='/post' variant='contained' color='secondary' disableElevation>Post a Job</Button>
+              <Grid xs={10} display='flex' justifyContent='space-between' alignContent='center'>
+                  <Link href='/'><Typography  color='#fff' variant='h4' sx={{ cursor: 'pointer', textDecoration: 'none' }}>React Jobs</Typography></Link>
+                  <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
               </Grid>
           </Grid>
       </Box>
@@ -90,8 +91,9 @@ const Home: NextPage = () => {
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         {/* <Box py={10} bgcolor='primary.main' color='white'> */}
         <Grid container justifyContent='center'>
-          <Grid xs={10}>
-            <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'url("/hero.jpeg")', backgroundPosition: 'center', height: 'calc(50vh - 58px)'}}>
+          <Grid xs={9}>
+            <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/hero.jpeg")', backgroundPosition: 'center', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-end'}}>
+              <Typography color='#fff' variant='h1' fontSize='48px' fontWeight='bold'>Find your dream React job</Typography>
               {/* <Grid container justifyContent='center'>
                 <Grid xs={10} display='flex' justifyContent='space-between'> */}
                   {/* <Box /> */}
@@ -104,7 +106,7 @@ const Home: NextPage = () => {
         </Grid>
 
         <Grid container justifyContent='center'>
-          <Grid xs={10}>
+          <Grid xs={9}>
             <Box p={2} mt={-5} mb={2} sx={{
               alignItems: 'center',
               backgroundColor: '#fff',
@@ -117,6 +119,7 @@ const Home: NextPage = () => {
                 margin: 1
               }
             }}>
+              <FilledInput disableUnderline placeholder='Position, company, etc.' />
               <Select onChange={handleFilterChange} name='type' value={filters.type} variant='filled' disableUnderline defaultValue='fulltime'>
                 <MenuItem value='fulltime'>Full time</MenuItem>
                 <MenuItem value='parttime'>Part time</MenuItem>
@@ -134,7 +137,7 @@ const Home: NextPage = () => {
                 <CircularProgress />
               </Box>
               ) : (
-              <Box mb={4}>
+              <Box pb={4}>
                 {filtersApplied && (
                   <Box mb={1}>
                     <Button onClick={fetchJobs}>
@@ -181,7 +184,6 @@ type ListItemProps = Job & {
 
 // TO DO: 
 //  Add image url
-//  If differenceInDays === 0 job is "new", else X days ago
 //  Capitalize type & location
 const ListItem = ({
   id,
@@ -201,11 +203,11 @@ const ListItem = ({
   const router = useRouter()
 
   const difference = differenceInDays(Date.now(), datePosted)
-  const differenceText = difference === 0 ? 'new' : `${difference} days ago`
+  const differenceText = difference === 0 ? 'new' : `${difference} day${difference === 1 ? '' : 's'} ago`
 
   return (
     <Box onClick={() => router.push(`jobs/${id}`)} p={2} sx={{ 
-      backgroundColor: '#fff',
+      backgroundColor: first ? 'lightyellow' : '#fff',
       border: '1px solid #e8e8e8',
       borderTopLeftRadius: first ? 4 : 0,
       borderTopRightRadius: first ? 4 : 0,
@@ -221,7 +223,7 @@ const ListItem = ({
       <Grid container alignItems='center'>
         <Grid xs container alignItems='center'>
           <Grid mr={2}>
-            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60px', width: '60px', backgroundColor: 'lightyellow' }}>
+            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#fff' }}>
               <Image src="/company_logo.png" alt="Treasure Data logo" width={'40%'} height={'40%'} />
             </Box>
           </Grid>
