@@ -1,5 +1,6 @@
-import { Box, Button, CircularProgress, MenuItem, Select, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
+import { Close as CloseIcon } from '@mui/icons-material'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -7,10 +8,11 @@ import styles from '../styles/Home.module.css'
 import jobData from '../data/test'
 import { differenceInDays } from 'date-fns'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { database } from '../firebase/config'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
 
-type Job = {
+export type Job = {
   id: string
   datePosted: Date
   title: string
@@ -20,22 +22,48 @@ type Job = {
   location: string
   skills: string[]
   featured: boolean
-  link: string
+  link: string,
+  description: string
+}
+
+type Filters = {
+  type: string
+  location: string
 }
 
 const dbInstance = collection(database, 'jobs');
 
 const Home: NextPage = () => {
+  const [filters, setFilters] = useState<Filters>({
+    type: 'fulltime',
+    location: 'remote'
+  })
   const [jobs, setJobs] = useState<Job[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [filtersApplied, setFiltersApplied] = useState(false)
+
+  const handleFilterChange = (e: SelectChangeEvent<string>) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value })
+  }
 
   const fetchJobs = async () => {
+    setFiltersApplied(false)
     setLoading(true)
     const req = await getDocs(query(dbInstance, orderBy('datePosted', 'desc')))
     // TO DO: Figure out typing
     const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, datePosted: doc.data().datePosted.toDate() })) as Job[]
     setJobs(jobDocs)
     setLoading(false)
+  }
+
+  const searchJobs = async () => {
+    setLoading(true)
+    const req = await getDocs(query(dbInstance, orderBy('datePosted', 'desc'), where('type', '==', filters.type), where('location', '==', filters.location)))
+    // TO DO: Figure out typing
+    const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, datePosted: doc.data().datePosted.toDate() })) as Job[]
+    setJobs(jobDocs)
+    setLoading(false)
+    setFiltersApplied(true)
   }
 
   useEffect(() => {
@@ -50,19 +78,35 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <Box py={10} bgcolor='primary.main' color='white'>
+      <Box py={1} bgcolor='primary.main' color='white' sx={{ position: 'fixed', width: '100%', zIndex: 999 }}>
           <Grid container justifyContent='center'>
-            <Grid xs={10} display='flex' justifyContent='space-between'>
-              <Typography variant='h4'>React Jobs</Typography>
-              <Button href='/post' variant='contained' color='secondary' disableElevation>Post a Job</Button>
-            </Grid>
+              <Grid xs={10} display='flex' justifyContent='space-between'>
+                  <Typography variant='h4'>React Jobs</Typography>
+                  <Button href='/post' variant='contained' color='secondary' disableElevation>Post a Job</Button>
+              </Grid>
           </Grid>
-        </Box>
+      </Box>
+
+      <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
+        {/* <Box py={10} bgcolor='primary.main' color='white'> */}
+        <Grid container justifyContent='center'>
+          <Grid xs={10}>
+            <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'url("/hero.jpeg")', backgroundPosition: 'center', height: 'calc(50vh - 58px)'}}>
+              {/* <Grid container justifyContent='center'>
+                <Grid xs={10} display='flex' justifyContent='space-between'> */}
+                  {/* <Box /> */}
+                  {/* <Typography variant='h4'>React Jobs</Typography>
+                  <Button href='/post' variant='contained' color='primary' disableElevation>Post a Job</Button> */}
+                {/* </Grid>
+              </Grid> */}
+            </Box>
+          </Grid>
+        </Grid>
 
         <Grid container justifyContent='center'>
           <Grid xs={10}>
             <Box p={2} mt={-5} mb={2} sx={{
+              alignItems: 'center',
               backgroundColor: '#fff',
               display: 'flex',
               boxShadow: '0px 1px 5px rgba(0, 0, 0, 0.1)',
@@ -73,16 +117,16 @@ const Home: NextPage = () => {
                 margin: 1
               }
             }}>
-              <Select variant='filled' disableUnderline defaultValue='fulltime'>
+              <Select onChange={handleFilterChange} name='type' value={filters.type} variant='filled' disableUnderline defaultValue='fulltime'>
                 <MenuItem value='fulltime'>Full time</MenuItem>
                 <MenuItem value='parttime'>Part time</MenuItem>
                 <MenuItem value='contract'>Contract</MenuItem>
               </Select>
-              <Select variant='filled' disableUnderline defaultValue='remote'>
+              <Select onChange={handleFilterChange} name='location' value={filters.location} variant='filled' disableUnderline defaultValue='remote'>
                 <MenuItem value='remote'>Remote</MenuItem>
                 <MenuItem value='office'>In Office</MenuItem>
               </Select>
-              <Button variant='contained' color='secondary' disableElevation>Search</Button>
+              <Button disabled={loading} onClick={searchJobs} variant='contained' color='primary' disableElevation>Search</Button>
             </Box>
 
             {loading ? (
@@ -91,17 +135,18 @@ const Home: NextPage = () => {
               </Box>
               ) : (
               <Box mb={4}>
+                {filtersApplied && (
+                  <Box mb={1}>
+                    <Button onClick={fetchJobs}>
+                      <CloseIcon style={{ marginRight: '0.25rem' }} />
+                      Clear Filters
+                    </Button>
+                  </Box>
+                )}
                 {jobs.map((job, index) => 
                   <ListItem 
                     first={index === 0} 
                     last={index === jobs.length - 1} 
-                    key={job.id} 
-                    {...job} />
-                )}
-                {jobData.map((job, index) => 
-                  <ListItem 
-                    first={index === 0} 
-                    last={index === jobData.length - 1} 
                     key={job.id} 
                     {...job} />
                 )}
@@ -139,6 +184,7 @@ type ListItemProps = Job & {
 //  If differenceInDays === 0 job is "new", else X days ago
 //  Capitalize type & location
 const ListItem = ({
+  id,
   first,
   last,
   datePosted,
@@ -149,13 +195,17 @@ const ListItem = ({
   location,
   skills,
   featured,
-  link
+  link,
+  description
 }: ListItemProps) => {
+  const router = useRouter()
+
   const difference = differenceInDays(Date.now(), datePosted)
   const differenceText = difference === 0 ? 'new' : `${difference} days ago`
 
   return (
-    <Box p={2} sx={{ 
+    <Box onClick={() => router.push(`jobs/${id}`)} p={2} sx={{ 
+      backgroundColor: '#fff',
       border: '1px solid #e8e8e8',
       borderTopLeftRadius: first ? 4 : 0,
       borderTopRightRadius: first ? 4 : 0,
