@@ -1,75 +1,99 @@
-import { Box, Button, CircularProgress, FilledInput, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
-import { Close as CloseIcon } from '@mui/icons-material'
-import type { NextPage } from 'next'
+import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
+import type { NextPage, GetServerSideProps } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import jobData from '../data/test'
-import { differenceInDays } from 'date-fns'
+import { getTimeDifferenceString } from '../utils/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { database } from '../firebase/config'
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
 import Link from 'next/link'
+import { TYPE, TYPE_MAP, LOCATION, LOCATION_MAP } from '../const/const'
+import { formatSalaryRange } from '../utils/utils'
+import type { JobData } from './api/jobs'
+import axios from 'axios'
 
-export type Job = {
-  id: string
-  datePosted: Date
-  title: string
-  company: string
-  companyUrl: string
-  type: string
-  location: string
-  skills: string[]
-  featured: boolean
-  link: string,
-  description: string
+interface Props {
+  jobsList: JobData[]
 }
 
 type Filters = {
+  search: string,
   type: string
-  location: string
+  location: string,
+  salaryMin: number
 }
 
-const dbInstance = collection(database, 'jobs');
+const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
+  const filterDefaults = {
+    search: '',
+    type: 'any',
+    location: 'any',
+    salaryMin: 0
+  }
 
-const Home: NextPage = () => {
-  const [filters, setFilters] = useState<Filters>({
-    type: 'fulltime',
-    location: 'remote'
-  })
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filtersApplied, setFiltersApplied] = useState(false)
+  const [filters, setFilters] = useState<Filters>(filterDefaults)
+  const router = useRouter()
 
-  const handleFilterChange = (e: SelectChangeEvent<string>) => {
+  const filtersApplied = Object.keys(router.query).length > 0
+
+  const handleFilterInputChange = (e: { target: { name: any; value: any } }) => {
     setFilters({ ...filters, [e.target.name]: e.target.value })
   }
 
-  const fetchJobs = async () => {
-    setFiltersApplied(false)
-    setLoading(true)
-    const req = await getDocs(query(dbInstance, orderBy('datePosted', 'desc')))
-    // TO DO: Figure out typing
-    const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, datePosted: doc.data().datePosted.toDate() })) as Job[]
-    setJobs(jobDocs)
-    setLoading(false)
+  const handleFilterSelectChange = (e: SelectChangeEvent<string>) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value })
   }
+
+  const clearFilters = () => {
+    setFilters(filterDefaults)
+    router.push('/')
+  }
+
+  // const fetchJobs = async () => {
+  //   setFiltersApplied(false)
+  //   setLoading(true)
+  //   // const req = await getDocs(query(dbInstance, orderBy('featured', 'desc'), orderBy('createdAt', 'desc')))
+  //   // const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() })) as Job[]
+  //   // setJobs(jobDocs)
+  //   // setJobs([])
+  //   setLoading(false)
+  // }
+
+  // const searchJobs = async () => {
+  //   setLoading(true)
+
+  //   // const req = await getDocs(query(dbInstance, orderBy('featured', 'desc'), orderBy('createdAt', 'desc'), where('type', '==', filters.type), where('location', '==', filters.location), where('salaryMax', '>=', filters.salary )))
+  //   // const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() })) as Job[]
+  //   // setJobs(jobDocs)
+  //   // setJobs([])
+
+  //   setLoading(false)
+  //   setFiltersApplied(true)
+  // }
 
   const searchJobs = async () => {
-    setLoading(true)
-    const req = await getDocs(query(dbInstance, orderBy('datePosted', 'desc'), where('type', '==', filters.type), where('location', '==', filters.location)))
-    // TO DO: Figure out typing
-    const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, datePosted: doc.data().datePosted.toDate() })) as Job[]
-    setJobs(jobDocs)
-    setLoading(false)
-    setFiltersApplied(true)
+    let params: { [key: string]: string } = {}
+
+    Object.keys(filters).forEach(filter => {
+      const value = filters[filter as keyof Filters]
+      if (value && value !== 'any') {
+        params[filter] = value.toString()
+      }
+    })
+
+    const queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
+
+    router.push(`/?${queryString}`, { query: params })
   }
 
-  useEffect(() => {
-    fetchJobs()
-  }, [])
+  const spinner = (
+    <Box display='flex' justifyContent='center' alignItems='center' sx={{ minHeight: 200 }}>
+      <CircularProgress />
+    </Box>
+  )
 
   return (
     <div className={styles.container}>
@@ -91,7 +115,7 @@ const Home: NextPage = () => {
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         {/* <Box py={10} bgcolor='primary.main' color='white'> */}
         <Grid container justifyContent='center'>
-          <Grid xs={9}>
+          <Grid xs={12} sm={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/hero.jpeg")', backgroundPosition: 'center', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-end'}}>
               <Typography color='#fff' variant='h1' fontSize='48px' fontWeight='bold'>Find your dream React job</Typography>
               {/* <Grid container justifyContent='center'>
@@ -106,9 +130,8 @@ const Home: NextPage = () => {
         </Grid>
 
         <Grid container justifyContent='center'>
-          <Grid xs={9}>
-            <Box p={2} mt={-5} mb={2} sx={{
-              alignItems: 'center',
+          <Grid xs={12} sm={9}>
+            <Box p={2} pt={4} mt={-5} mb={2} sx={{
               backgroundColor: '#fff',
               display: 'flex',
               boxShadow: '0px 1px 5px rgba(0, 0, 0, 0.1)',
@@ -119,42 +142,67 @@ const Home: NextPage = () => {
                 margin: 1
               }
             }}>
-              <FilledInput disableUnderline placeholder='Position, company, etc.' />
-              <Select onChange={handleFilterChange} name='type' value={filters.type} variant='filled' disableUnderline defaultValue='fulltime'>
-                <MenuItem value='fulltime'>Full time</MenuItem>
-                <MenuItem value='parttime'>Part time</MenuItem>
-                <MenuItem value='contract'>Contract</MenuItem>
-              </Select>
-              <Select onChange={handleFilterChange} name='location' value={filters.location} variant='filled' disableUnderline defaultValue='remote'>
-                <MenuItem value='remote'>Remote</MenuItem>
-                <MenuItem value='office'>In Office</MenuItem>
-              </Select>
-              <Button disabled={loading} onClick={searchJobs} variant='contained' color='primary' disableElevation>Search</Button>
+              <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                <FormControl hiddenLabel fullWidth>
+                  <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Keyword</Typography>
+                  <FilledInput onChange={handleFilterInputChange} name='search' value={filters.search} sx={{ height: 45 }} disableUnderline placeholder='Title, company' />
+                </FormControl>
+              </Grid>
+              <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                <FormControl hiddenLabel fullWidth>
+                  <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>
+                  <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='type' value={filters.type} variant='filled' disableUnderline>
+                    <MenuItem value={'any'}>Any</MenuItem>
+                    <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
+                    <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
+                    <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                <FormControl hiddenLabel fullWidth>
+                  <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Location</Typography>
+                  <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='location' value={filters.location} variant='filled' disableUnderline>
+                    <MenuItem value={'any'}>Any</MenuItem>
+                    <MenuItem value={LOCATION.REMOTE}>{LOCATION_MAP.remote}</MenuItem>
+                    <MenuItem value={LOCATION.OFFICE}>{LOCATION_MAP.office}</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                <FormControl hiddenLabel fullWidth>
+                  <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Salary Min.</Typography>
+                  <FilledInput onChange={handleFilterInputChange} name='salaryMin' value={filters.salaryMin} type='number' sx={{ height: 45 }} disableUnderline placeholder='Salary min (USD)' inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                </FormControl>
+              </Grid>
+              <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                {/* <Link href={{ pathname: '/', query: filters }} passHref> */}
+                  <Button sx={{ height: '100%' }} fullWidth onClick={searchJobs} variant='contained' color='primary' disableElevation>Search</Button>
+                {/* </Link> */}
+              </Grid>
             </Box>
 
-            {loading ? (
-              <Box display='flex' justifyContent='center' alignItems='center' sx={{ minHeight: 200 }}>
-                <CircularProgress />
+            <Box pb={4}>
+              {filtersApplied && (
+                <Box mb={1}>
+                  <Button onClick={clearFilters}>
+                    <Close style={{ marginRight: '0.25rem' }} />
+                    Clear Filters
+                  </Button>
+                </Box>
+              )}
+              {jobsList.map((job, index) => 
+                <ListItem 
+                  key={job._id} 
+                  first={index === 0} 
+                  last={index === jobsList.length - 1} 
+                  {...job} />
+              )}
+
+              <Box mt={2} display='flex' justifyContent='center'>
+                <Pagination count={10} color='primary' />
               </Box>
-              ) : (
-              <Box pb={4}>
-                {filtersApplied && (
-                  <Box mb={1}>
-                    <Button onClick={fetchJobs}>
-                      <CloseIcon style={{ marginRight: '0.25rem' }} />
-                      Clear Filters
-                    </Button>
-                  </Box>
-                )}
-                {jobs.map((job, index) => 
-                  <ListItem 
-                    first={index === 0} 
-                    last={index === jobs.length - 1} 
-                    key={job.id} 
-                    {...job} />
-                )}
-              </Box>
-            )}
+            </Box>
           </Grid>
         </Grid>
       </main>
@@ -177,7 +225,7 @@ const Home: NextPage = () => {
 
 export default Home
 
-type ListItemProps = Job & {
+type ListItemProps = JobData & {
   first: boolean
   last: boolean
 }
@@ -186,28 +234,28 @@ type ListItemProps = Job & {
 //  Add image url
 //  Capitalize type & location
 const ListItem = ({
-  id,
+  _id,
   first,
   last,
-  datePosted,
+  createdAt,
   title,
   company,
   companyUrl,
   type,
   location,
   skills,
+  perks,
   featured,
-  link,
-  description
+  applicationLink,
+  description,
+  salaryMin,
+  salaryMax
 }: ListItemProps) => {
   const router = useRouter()
 
-  const difference = differenceInDays(Date.now(), datePosted)
-  const differenceText = difference === 0 ? 'new' : `${difference} day${difference === 1 ? '' : 's'} ago`
-
   return (
-    <Box onClick={() => router.push(`jobs/${id}`)} p={2} sx={{ 
-      backgroundColor: first ? 'lightyellow' : '#fff',
+    <Box onClick={() => router.push(`jobs/${_id}`)} p={2} sx={{ 
+      backgroundColor: featured ? 'lightyellow' : '#fff',
       border: '1px solid #e8e8e8',
       borderTopLeftRadius: first ? 4 : 0,
       borderTopRightRadius: first ? 4 : 0,
@@ -221,7 +269,7 @@ const ListItem = ({
       }
     }}>
       <Grid container alignItems='center'>
-        <Grid xs container alignItems='center'>
+        <Grid xs={5} container alignItems='center'>
           <Grid mr={2}>
             <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#fff' }}>
               <Image src="/company_logo.png" alt="Treasure Data logo" width={'40%'} height={'40%'} />
@@ -231,45 +279,69 @@ const ListItem = ({
           <Grid>
             <Typography variant='subtitle1'>{title}</Typography>
             <Typography variant='subtitle1' sx={{
-              backgroundColor: 'primary.main',
-              padding: 0.75,
-              borderRadius: 1,
-              display: 'inline-block',
+              // backgroundColor: 'primary.main',
+              // padding: 0.75,
+              // borderRadius: 1,
+              // display: 'inline-block',
               fontSize: '13.5px',
               fontWeight: 600,
-              color: '#fff'
+              // color: '#fff'
             }}
             >
               {company}
             </Typography>
           </Grid>
         </Grid>
-        <Grid xs container>
-          {skills.map(skill => <Grid key={skill} sx={{
-            backgroundColor: 'secondary.main',
-            margin: 0.5,
-            padding: 0.75,
-            borderRadius: 1,
-            transition: '0.3s',
-            cursor: 'pointer',
-            fontSize: '14.5px',
-            fontWeight: 600,
-            color: '#fff'
-          }}>
-            {skill}
-          </Grid>)}
+        <Grid xs={5} container>
+          <Box display='flex' flexDirection='column'>
+            <Grid xs container>
+              {skills.slice(0, 3).map(skill => <Grid key={skill} sx={{
+                backgroundColor: 'secondary.main',
+                margin: 0.5,
+                padding: 0.75,
+                borderRadius: 1,
+                transition: '0.3s',
+                cursor: 'pointer',
+                fontSize: '14.5px',
+                fontWeight: 600,
+                color: '#fff'
+              }}>
+                {skill}
+              </Grid>)}
+            </Grid>
+
+            <Box mt={1} display='flex' alignItems='center' color='grey'>
+                <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
+                <Typography variant='subtitle2' mr={2}>{LOCATION_MAP[location]}</Typography>
+
+                <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
+                <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type]}</Typography>
+
+                <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
+                <Typography variant='subtitle2'>{formatSalaryRange(salaryMin, salaryMax)}</Typography>
+            </Box>
+          </Box>
         </Grid>
-        <Grid xs container direction='column' alignItems='flex-end'>
+        <Grid xs={2} container direction='column' alignItems='flex-end'>
           <Grid>
-            <Typography variant='caption'>{differenceText} | {type} | {location}</Typography>
+            {/* <Typography variant='caption'>{getTimeDifferenceString(createdAt)}</Typography> */}
           </Grid>
           <Grid>
             <Box mt={2}>
-              <Button variant='outlined' href={link}>Apply</Button>
+              <Button variant='outlined' href={applicationLink}>Apply</Button>
             </Box>
           </Grid>
         </Grid>
       </Grid>
     </Box>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const res = await axios.get('http://localhost:3000/api/jobs', { params: context.query })
+  return {
+    props: {
+      jobsList: res.data 
+    }
+  }
 }

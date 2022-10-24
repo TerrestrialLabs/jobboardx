@@ -1,21 +1,24 @@
-import { Box, Button, CircularProgress, FilledInput, Grid, IconButton, Link, Typography } from '@mui/material'
-import type { NextPage } from 'next'
+import { Box, Button, CircularProgress, FilledInput, FormControl, Grid, IconButton, Link, Typography } from '@mui/material'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
-import { collection, doc, getDoc } from 'firebase/firestore'
-import { database } from '../../firebase/config'
 import { useRouter } from 'next/router'
-import type { Job } from '../index'
+import type { JobData } from '../api/jobs'
 import { format } from 'date-fns'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
+import { TYPE_MAP, LOCATION_MAP } from '../../const/const'
+import { formatSalaryRange } from '../../utils/utils'
+import axios from 'axios'
 
-const dbInstance = collection(database, 'jobs');
+interface Props {
+    data: JobData
+}
 
 // TO DO: Dynamically change head
-const JobDetail: NextPage = () => {
-    const [data, setData] = useState<Job | null>(null)
+const JobDetail: NextPage<Props> = ({ data }) => {
+    // const [data, setData] = useState<JobData | null>(null)
     const [loading, setLoading] = useState(false)
     const [alertsPopupOpen, setAlertsPopupOpen] = useState(true)
     const router = useRouter()
@@ -23,20 +26,15 @@ const JobDetail: NextPage = () => {
 
     const fetchJob = async () => {
         setLoading(true)
-        const docRef = doc(database, 'jobs', id as string);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            console.log("Document data:", docSnap.data());
-            setData({...docSnap.data(), id: docSnap.id, datePosted: docSnap.data().datePosted.toDate() } as Job)
-        } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
-        }
-        // const req = await getDocs(query(dbInstance, orderBy('datePosted', 'desc')))
-        // // TO DO: Figure out typing
-        // const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, datePosted: doc.data().datePosted.toDate() })) as Job[]
-        // setJob(jobDocs)
+        // const docRef = doc(database, 'jobs', id as string);
+        // const docSnap = await getDoc(docRef);
+        // if (docSnap.exists()) {
+        //     console.log("Document data:", docSnap.data());
+        //     setData({...docSnap.data(), id: docSnap.id, createdAt: docSnap.data().createdAt.toDate() } as Job)
+        // } else {
+        //     // doc.data() will be undefined in this case
+        //     console.log("No such document!");
+        // }
         setLoading(false)
       }
 
@@ -64,14 +62,6 @@ const JobDetail: NextPage = () => {
             </Box>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                {/* <Box py={10} bgcolor='primary.main' color='white'>
-                    <Grid container justifyContent='center'>
-                        <Grid xs={10} display='flex' justifyContent='space-between'>
-                            <Typography variant='h4'>Job Posting</Typography>
-                        </Grid>
-                    </Grid>
-                </Box> */}
-
                 {data && (
                     <Grid container justifyContent='center' pt={2} pb={4}>
                         <Grid xs={10} lg={9} p={2} container>
@@ -79,59 +69,32 @@ const JobDetail: NextPage = () => {
                                 <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                     <Box p={4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
                                         <Grid xs={12} display='flex' justifyContent='flex-end'>
-                                            <Typography variant='subtitle2' mb={2}>{format(data.datePosted, 'MMMM dd, yyyy')}</Typography>
+                                            {/* <Typography variant='subtitle2'>{format(data.createdAt, 'MMMM dd, yyyy')}</Typography> */}
                                         </Grid>
                                         <Grid xs={12}>
                                             <Typography mb={2} variant='h1' fontSize={30} fontWeight='bold'>{data.title}</Typography>
-                                            {/* <Box display='flex'>
-                                                    {data.skills.map(skill => 
-                                                        <Box key={skill} sx={{
-                                                            backgroundColor: 'primary.main',
-                                                            color: '#fff',
-                                                            border: '1px solid #fff',
-                                                            borderColor: 'primary.main',
-                                                            margin: 0.5,
-                                                            padding: 0.75,
-                                                            borderRadius: 1,
-                                                            transition: '0.3s',
-                                                            fontSize: '14.5px',
-                                                            fontWeight: 600,
-                                                        }}>
-                                                            {skill}
-                                                        </Box>
-                                                    )}
-                                                </Box> */}
-
                                                 <Box display='flex' alignItems='center' color='grey'>
                                                     <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>Remote</Typography>
+                                                    <Typography variant='subtitle2' mr={2}>{LOCATION_MAP[data.location] || 'N/A'}</Typography>
 
                                                     <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>Full-time</Typography>
+                                                    <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || 'N/A'}</Typography>
 
                                                     <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2'>$90k - $140k</Typography>
+                                                    <Typography variant='subtitle2'>{formatSalaryRange(data.salaryMin, data.salaryMax)}</Typography>
                                                 </Box>
                                         </Grid>
                                     </Box>
 
                                     <Box p={4}>
-                                        {/* <Grid xs={12} sm={6} mb={2}>
-                                            <Typography>{data.type}</Typography>
-                                        </Grid>
-
-                                        <Grid xs={12} sm={6} mb={2}>
-                                            <Typography>{data.location}</Typography>
-                                        </Grid> */}
-
                                         <Grid xs={12} mb={2}>
-                                            <Typography fontWeight='bold' mb={1}>Description</Typography>
+                                            <Typography fontSize={18} fontWeight='bold' mb={1}>Description</Typography>
                                             <Typography>{data.description}</Typography>
                                         </Grid>
 
                                         <Grid xs={12} mb={2}>
                                             <Box mt={2}>
-                                                <Typography fontWeight='bold'>Skills</Typography>
+                                                <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
                                                 <Box display='flex'>
                                                     {data.skills.map(skill => 
                                                         <Box key={skill} sx={{
@@ -155,17 +118,9 @@ const JobDetail: NextPage = () => {
 
                                         <Grid xs={12} mb={2}>
                                             <Box mt={2}>
-                                                <Typography fontWeight='bold'>Perks</Typography>
+                                                <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
                                                 <Box display='flex' flexWrap='wrap'>
-                                                    {[
-                                                        'WFH', 
-                                                        'Unlimited PTO',
-                                                        'Health insurance', 
-                                                        'Dental insurance', 
-                                                        'Vision insurance',
-                                                        'Parental leave',
-                                                        'Gym membership'
-                                                    ].map(skill => 
+                                                    {data.perks.map(skill => 
                                                         <Box key={skill} sx={{
                                                             backgroundColor: '#e74c3c',
                                                             color: '#fff',
@@ -185,10 +140,10 @@ const JobDetail: NextPage = () => {
                                             </Box>
                                         </Grid>
 
-                                        <Grid xs={12} p={0} mt={4}>
+                                        <Grid xs={12} p={0} mt={6}>
                                             <Box display='flex' justifyContent='center'>
                                                 <Grid xs={6}>
-                                                    <Button fullWidth href={data.link} variant='contained' disableElevation color='primary'>
+                                                    <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
                                                         Apply
                                                     </Button>
                                                 </Grid>
@@ -222,7 +177,7 @@ const JobDetail: NextPage = () => {
                                     <Link href={data.companyUrl} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
                                         <Typography variant='caption'>Visit company website</Typography>
                                     </Link>
-                                    <Button fullWidth href={data.link} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
+                                    <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
                                         Apply
                                     </Button>
                                 </Box>
@@ -232,11 +187,13 @@ const JobDetail: NextPage = () => {
                                         <IconButton onClick={() => setAlertsPopupOpen(false)} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
                                             <Close />
                                         </IconButton>
-                                        <Typography mb={1}>
-                                            Get weekly job alerts
-                                        </Typography>
-                                        <FilledInput fullWidth disableUnderline placeholder='Your email address' />
-                                        <Button fullWidth href={data.link} variant='contained' disableElevation color='secondary' style={{ marginTop: '1rem' }}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography mb={1.25}>
+                                                Get weekly job alerts
+                                            </Typography>
+                                            <FilledInput fullWidth disableUnderline placeholder='Your email address' />
+                                        </FormControl>
+                                        <Button fullWidth variant='contained' disableElevation color='secondary' style={{ marginTop: '1.25rem' }}>
                                             Sign up
                                         </Button>
                                     </Box>
@@ -264,3 +221,12 @@ const JobDetail: NextPage = () => {
 }
 
 export default JobDetail;
+
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+    const res = await axios.get(`http://localhost:3000/api/jobs/${params?.id}`)
+    return {
+      props: {
+        data: res.data 
+      }
+    }
+  }

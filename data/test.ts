@@ -7,7 +7,7 @@
 export default [
     {
         id: '1',
-        datePosted: new Date(),
+        createdAt: new Date(),
         title: 'Junior Frontend Developer',
         type: 'fulltime',
         location: 'remote',
@@ -19,7 +19,7 @@ export default [
     },
     {
         id: '2',
-        datePosted: new Date(),
+        createdAt: new Date(),
         title: 'Senior Frontend Developer',
         type: 'fulltime',
         location: 'remote',
@@ -31,7 +31,7 @@ export default [
     },
     {
         id: '3',
-        datePosted: new Date(),
+        createdAt: new Date(),
         title: 'Intern',
         type: 'fulltime',
         location: 'remote',
