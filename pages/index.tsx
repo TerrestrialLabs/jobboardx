@@ -31,10 +31,10 @@ const Home: NextPage = () => {
   }
 
   const [jobs, setJobs] = useState<JobData[]>([])
+  const [totalJobs, setTotalJobs] = useState(0)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const [filters, setFilters] = useState<Filters>(filterDefaults)
-  const [pageIndex, setPageIndex] = useState(0)
 
   const filtersApplied = Object.keys(router.query).length > 0
 
@@ -89,7 +89,7 @@ const Home: NextPage = () => {
 
   const fetchJobsCount = async (params: any) => {
     const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params })
-    console.log('COUNT: ', res.data)
+    setTotalJobs(res.data)
   }
 
   const getSearchParams = (searchFilters: Filters) => {
@@ -207,9 +207,7 @@ const Home: NextPage = () => {
                 </FormControl>
               </Grid>
               <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
-                {/* <Link href={{ pathname: '/', query: filters }} passHref> */}
-                  <Button sx={{ height: '100%' }} fullWidth onClick={searchJobs} variant='contained' color='primary' disableElevation>Search</Button>
-                {/* </Link> */}
+                <Button sx={{ height: '100%' }} fullWidth onClick={searchJobs} variant='contained' color='primary' disableElevation>Search</Button>
               </Grid>
             </Box>
 
@@ -231,9 +229,11 @@ const Home: NextPage = () => {
                     {...job} />
                 )}
 
-                <Box mt={2} display='flex' justifyContent='center'>
-                  <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
-                </Box>
+                {jobs.length < totalJobs && (
+                  <Box mt={4} display='flex' justifyContent='center'>
+                    <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
+                  </Box>
+                )}
               </Box>
             )}
           </Grid>
@@ -312,13 +312,8 @@ const ListItem = ({
           <Grid>
             <Typography variant='subtitle1'>{title}</Typography>
             <Typography variant='subtitle1' sx={{
-              // backgroundColor: 'primary.main',
-              // padding: 0.75,
-              // borderRadius: 1,
-              // display: 'inline-block',
               fontSize: '13.5px',
               fontWeight: 600,
-              // color: '#fff'
             }}
             >
               {company}
