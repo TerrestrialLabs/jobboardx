@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, CircularProgress, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
 import type { NextPage, GetServerSideProps } from 'next'
@@ -37,6 +37,8 @@ const Home: NextPage = () => {
   const [filters, setFilters] = useState<Filters>(filterDefaults)
 
   const filtersApplied = Object.keys(router.query).length > 0
+
+  const resultsPerPage = 2
 
   useEffect(() => {
     if (router.isReady && !jobs.length && loading) {
@@ -123,7 +125,7 @@ const Home: NextPage = () => {
   }
 
   const loadMoreJobs = async () => {
-    const res = await axios.get('http://localhost:3000/api/jobs', { params: { ...router.query, pageIndex: Math.ceil(jobs.length / 2) } })
+    const res = await axios.get('http://localhost:3000/api/jobs', { params: { ...router.query, pageIndex: Math.ceil(jobs.length / resultsPerPage) } })
     const newJobs = await res.data
     setJobs([...jobs, ...newJobs])
   }
@@ -193,11 +195,18 @@ const Home: NextPage = () => {
               <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
                 <FormControl hiddenLabel fullWidth>
                   <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Location</Typography>
-                  <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='location' value={filters.location} variant='filled' disableUnderline>
+                  {/* <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='location' value={filters.location} variant='filled' disableUnderline>
                     <MenuItem value={'any'}>Any</MenuItem>
                     <MenuItem value={LOCATION.REMOTE}>{LOCATION_MAP.remote}</MenuItem>
                     <MenuItem value={LOCATION.OFFICE}>{LOCATION_MAP.office}</MenuItem>
-                  </Select>
+                  </Select> */}
+                  <Autocomplete
+                    disablePortal
+                    id="combo-box-demo"
+                    options={[]}
+                    sx={{ width: 300 }}
+                    renderInput={(params) => <TextField {...params} label="Movie" />}
+                  />
                 </FormControl>
               </Grid>
               <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>

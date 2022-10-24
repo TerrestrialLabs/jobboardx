@@ -1,15 +1,16 @@
-import { Box, Button, CircularProgress, FilledInput, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { LOCATION, LOCATION_MAP, PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
+import { locations } from '../data/locations.json'
 
 export type PostForm = {
     title: string
@@ -62,7 +63,8 @@ const Post: NextPage = () => {
         company: '',
         companyUrl: '',
         type: TYPE.FULLTIME,
-        location: LOCATION.REMOTE,
+        // location: LOCATION.REMOTE,
+        location: '',
         description: '',
         applicationLink: '',
         skills: [],
@@ -72,7 +74,7 @@ const Post: NextPage = () => {
         // TO DO: Hardcoded
         featured: false
     })
-    const [descriptionValue, setDescriptionValue] = useState('');
+    const [locationText, setLocationText] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -115,10 +117,22 @@ const Post: NextPage = () => {
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value })
     }
 
+    const handleAutocompleteChange = (value: string) => {
+        console.log('value: ', value)
+        setJobDetails({ ...jobDetails, location: value })
+    }
+
+    const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        // e.persist()
+        console.log("handleLocationInputChange", e.target.value)
+        setLocationText(e.target.value)
+    }
+
     const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
-        console.log(e.target.value)
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
     }
+
+    console.log('jobDetails.location: ', console.log(jobDetails.location))
     
   return (
     <div className={styles.container}>
@@ -192,13 +206,24 @@ const Post: NextPage = () => {
                             </Grid>
 
                             <Grid xs={12} sm={6}>
-                                <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Location</Typography>
-                                    <Select onChange={handleSelectChange} name='location' value={jobDetails.location} variant='filled' disableUnderline fullWidth>
+                                    {/* <Select onChange={handleSelectChange} name='location' value={jobDetails.location} variant='filled' disableUnderline fullWidth>
                                         <MenuItem value={LOCATION.REMOTE}>{LOCATION_MAP.remote}</MenuItem>
                                         <MenuItem value={LOCATION.OFFICE}>{LOCATION_MAP.office}</MenuItem>
-                                    </Select>
-                                </FormControl>
+                                    </Select> */}
+
+                                    {/* TO DO: Virtualize options */}
+                                <Autocomplete
+                                    disablePortal
+                                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location *', style: { padding: '9px 12px 10px' }}} />}
+                                    options={locations}
+                                    filterOptions={createFilterOptions({
+                                        limit: 10
+                                    })}
+                                    onChange={(e, value) => handleAutocompleteChange(value || '')}
+                                    inputValue={locationText}
+                                    onInputChange={(event, newValue) => { console.log(newValue); setLocationText(newValue) }}
+                                />
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
