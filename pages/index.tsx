@@ -15,10 +15,6 @@ import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
 import axios from 'axios'
 
-interface Props {
-  jobsList: JobData[]
-}
-
 type Filters = {
   search: string,
   type: string
@@ -26,7 +22,7 @@ type Filters = {
   salaryMin: number
 }
 
-const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
+const Home: NextPage = () => {
   const filterDefaults = {
     search: '',
     type: 'any',
@@ -34,10 +30,24 @@ const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
     salaryMin: 0
   }
 
-  const [filters, setFilters] = useState<Filters>(filterDefaults)
+  const [jobs, setJobs] = useState<JobData[]>([])
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const [filters, setFilters] = useState<Filters>(filterDefaults)
+  const [pageIndex, setPageIndex] = useState(0)
 
   const filtersApplied = Object.keys(router.query).length > 0
+
+  useEffect(() => {
+    if (router.isReady && !jobs.length && loading) {
+      fetchJobs()
+      fetchJobsCount(router.query)
+      setFilters({
+        ...filterDefaults,
+        ...router.query
+      })
+    }
+  }, [router.isReady])
 
   const handleFilterInputChange = (e: { target: { name: any; value: any } }) => {
     setFilters({ ...filters, [e.target.name]: e.target.value })
@@ -49,44 +59,73 @@ const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
 
   const clearFilters = () => {
     setFilters(filterDefaults)
+    fetchJobs(true)
+    fetchJobsCount(getSearchParams(filterDefaults))
     router.push('/')
   }
 
-  // const fetchJobs = async () => {
-  //   setFiltersApplied(false)
-  //   setLoading(true)
-  //   // const req = await getDocs(query(dbInstance, orderBy('featured', 'desc'), orderBy('createdAt', 'desc')))
-  //   // const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() })) as Job[]
-  //   // setJobs(jobDocs)
-  //   // setJobs([])
-  //   setLoading(false)
-  // }
+  const fetchJobs = async (all?: boolean) => {
+    setLoading(true)
 
-  // const searchJobs = async () => {
-  //   setLoading(true)
+    if (!all) {
+      let params: { [key: string]: string } = {}
+      Object.keys(router.query).forEach(filter => {
+        const value = router.query[filter] as string
+        params[filter] = value
+      })
+  
+      const queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
+  
+      if (queryString) {
+        router.push(`/?${queryString}`, { query: params })
+      }
+    }
 
-  //   // const req = await getDocs(query(dbInstance, orderBy('featured', 'desc'), orderBy('createdAt', 'desc'), where('type', '==', filters.type), where('location', '==', filters.location), where('salaryMax', '>=', filters.salary )))
-  //   // const jobDocs = req.docs.map(doc => ({ ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() })) as Job[]
-  //   // setJobs(jobDocs)
-  //   // setJobs([])
+    const res = await axios.get(`http://localhost:3000/api/jobs`, { params: all ? {} : router.query })
 
-  //   setLoading(false)
-  //   setFiltersApplied(true)
-  // }
+    setJobs(res.data)
+    setLoading(false)
+  }
 
-  const searchJobs = async () => {
+  const fetchJobsCount = async (params: any) => {
+    const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params })
+    console.log('COUNT: ', res.data)
+  }
+
+  const getSearchParams = (searchFilters: Filters) => {
     let params: { [key: string]: string } = {}
-
-    Object.keys(filters).forEach(filter => {
-      const value = filters[filter as keyof Filters]
+    
+    Object.keys(searchFilters).forEach(filter => {
+      const value = searchFilters[filter as keyof Filters]
       if (value && value !== 'any') {
         params[filter] = value.toString()
       }
     })
 
+    return params
+  }
+
+  const searchJobs = async () => {
+    setLoading(true)
+
+    const params = getSearchParams(filters)
+
     const queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
     router.push(`/?${queryString}`, { query: params })
+
+    const res = await axios.get(`http://localhost:3000/api/jobs`, { params })
+
+    fetchJobsCount(params)
+
+    setJobs(res.data)
+    setLoading(false)
+  }
+
+  const loadMoreJobs = async () => {
+    const res = await axios.get('http://localhost:3000/api/jobs', { params: { ...router.query, pageIndex: Math.ceil(jobs.length / 2) } })
+    const newJobs = await res.data
+    setJobs([...jobs, ...newJobs])
   }
 
   const spinner = (
@@ -113,18 +152,10 @@ const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
       </Box>
 
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-        {/* <Box py={10} bgcolor='primary.main' color='white'> */}
         <Grid container justifyContent='center'>
           <Grid xs={12} sm={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/hero.jpeg")', backgroundPosition: 'center', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-end'}}>
               <Typography color='#fff' variant='h1' fontSize='48px' fontWeight='bold'>Find your dream React job</Typography>
-              {/* <Grid container justifyContent='center'>
-                <Grid xs={10} display='flex' justifyContent='space-between'> */}
-                  {/* <Box /> */}
-                  {/* <Typography variant='h4'>React Jobs</Typography>
-                  <Button href='/post' variant='contained' color='primary' disableElevation>Post a Job</Button> */}
-                {/* </Grid>
-              </Grid> */}
             </Box>
           </Grid>
         </Grid>
@@ -182,27 +213,29 @@ const Home: NextPage<Props> = ({ jobsList }: { jobsList: JobData[] }) => {
               </Grid>
             </Box>
 
-            <Box pb={4}>
-              {filtersApplied && (
-                <Box mb={1}>
-                  <Button onClick={clearFilters}>
-                    <Close style={{ marginRight: '0.25rem' }} />
-                    Clear Filters
-                  </Button>
-                </Box>
-              )}
-              {jobsList.map((job, index) => 
-                <ListItem 
-                  key={job._id} 
-                  first={index === 0} 
-                  last={index === jobsList.length - 1} 
-                  {...job} />
-              )}
+            {loading ? spinner : (
+              <Box pb={4}>
+                {filtersApplied && (
+                  <Box mb={1}>
+                    <Button onClick={clearFilters}>
+                      <Close style={{ marginRight: '0.25rem' }} />
+                      Clear Filters
+                    </Button>
+                  </Box>
+                )}
+                {jobs.map((job, index) => 
+                  <ListItem 
+                    key={job._id} 
+                    first={index === 0} 
+                    last={index === jobs.length - 1} 
+                    {...job} />
+                )}
 
-              <Box mt={2} display='flex' justifyContent='center'>
-                <Pagination count={10} color='primary' />
+                <Box mt={2} display='flex' justifyContent='center'>
+                  <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
+                </Box>
               </Box>
-            </Box>
+            )}
           </Grid>
         </Grid>
       </main>
@@ -325,6 +358,7 @@ const ListItem = ({
         <Grid xs={2} container direction='column' alignItems='flex-end'>
           <Grid>
             {/* <Typography variant='caption'>{getTimeDifferenceString(createdAt)}</Typography> */}
+            <Typography variant='caption'>{createdAt.toString()}</Typography>
           </Grid>
           <Grid>
             <Box mt={2}>
@@ -335,13 +369,4 @@ const ListItem = ({
       </Grid>
     </Box>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const res = await axios.get('http://localhost:3000/api/jobs', { params: context.query })
-  return {
-    props: {
-      jobsList: res.data 
-    }
-  }
 }

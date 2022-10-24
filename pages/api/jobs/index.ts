@@ -20,6 +20,27 @@ export type JobData = {
     salaryMax: number
 }
 
+export const getFilters = (query: NextApiRequest['query']) => {
+    delete query.pageIndex
+
+    const filters: { [key: string ]: string | number | { $gte: number } | ({ title: { $regex: RegExp } } | { company: { $regex: RegExp; }; })[] } = {
+        ...query,
+        // Make sure job's max salary is at least equal to min salary requirement
+        ...(query.salaryMin ? { salaryMax: { $gte: parseInt(query.salaryMin as string) } } : {}),
+        // Text search either title or company
+        ...(query.search ? {$or: [
+            { title: { $regex: new RegExp(query.search as string, 'i') } },
+            { company: { $regex: new RegExp(query.search as string, 'i') } }
+        ]} : {}),
+    }
+
+    // We don't want to filter on these values
+    delete filters.search
+    delete filters.salaryMin
+
+    return filters
+}
+
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
         return error.message
@@ -35,24 +56,20 @@ export default async function handler(
 
     dbConnect()
 
-    const filters: { [key: string ]: string | number | { $gte: number } | ({ title: { $regex: RegExp } } | { company: { $regex: RegExp; }; })[] } = {
-        ...req.query,
-        // Make sure job's max salary is at least equal to min salary requirement
-        ...(req.query.salaryMin ? { salaryMax: { $gte: parseInt(req.query.salaryMin as string) } } : {}),
-        // Text search either title or company
-        ...(req.query.search ? {$or: [
-            { title: { $regex: new RegExp(req.query.search as string, 'i') } },
-            { company: { $regex: new RegExp(req.query.search as string, 'i') } }
-        ]} : {}),
-    }
-
-    // We don't want to filter on these values
-    delete filters.search
-    delete filters.salaryMin
-
     if (method === 'GET') {
+        const resultsPerPage = 2
+        const pageIndex = req.query.pageIndex ? parseInt(req.query.pageIndex as string) : 0
+
+        delete req.query.pageIndex
+    
+        const filters = getFilters(req.query)
+
         try {
             const jobs = await Job.find(filters)
+                .sort({ 'featured': -1, 'createdAt': -1 })
+                .skip(pageIndex * resultsPerPage)
+                .limit(resultsPerPage)
+                .exec() 
             res.status(200).json(jobs)
         } catch (err) {
             // TO DO
