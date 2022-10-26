@@ -1,11 +1,10 @@
-import { Autocomplete, Box, Button, CircularProgress, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
 import type { NextPage, GetServerSideProps } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import jobData from '../data/test'
 import { getTimeDifferenceString } from '../utils/utils'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -14,6 +13,7 @@ import { TYPE, TYPE_MAP, LOCATION, LOCATION_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
 import axios from 'axios'
+import { locations } from '../data/locations.json'
 
 type Filters = {
   search: string,
@@ -35,10 +35,21 @@ const Home: NextPage = () => {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const [filters, setFilters] = useState<Filters>(filterDefaults)
+  const [locationText, setLocationText] = useState('')
 
   const filtersApplied = Object.keys(router.query).length > 0
 
-  const resultsPerPage = 2
+  const resultsPerPage = 10
+
+  // TO DO: Testing
+  const testingDeleteBackfilledJobs = async () => {
+    await axios.delete('http://localhost:3000/api/jobs')
+  }
+
+  // TO DO: DANGEROUS!!!
+  // useEffect(() => {
+  //   testingDeleteBackfilledJobs()
+  // }, [])
 
   useEffect(() => {
     if (router.isReady && !jobs.length && loading) {
@@ -57,6 +68,10 @@ const Home: NextPage = () => {
 
   const handleFilterSelectChange = (e: SelectChangeEvent<string>) => {
     setFilters({ ...filters, [e.target.name]: e.target.value })
+  }
+
+  const handleAutocompleteChange = (value: string) => {
+    setFilters({ ...filters, location: value })
   }
 
   const clearFilters = () => {
@@ -202,10 +217,14 @@ const Home: NextPage = () => {
                   </Select> */}
                   <Autocomplete
                     disablePortal
-                    id="combo-box-demo"
-                    options={[]}
-                    sx={{ width: 300 }}
-                    renderInput={(params) => <TextField {...params} label="Movie" />}
+                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '4px 12px 4px' }}} />}
+                    options={locations}
+                    filterOptions={createFilterOptions({
+                        limit: 10
+                    })}
+                    onChange={(e, value) => handleAutocompleteChange(value || '')}
+                    inputValue={locationText}
+                    onInputChange={(event, newValue) => { console.log(newValue); setLocationText(newValue) }}
                   />
                 </FormControl>
               </Grid>
@@ -240,7 +259,7 @@ const Home: NextPage = () => {
 
                 {jobs.length < totalJobs && (
                   <Box mt={4} display='flex' justifyContent='center'>
-                    <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
+                    <Button variant='contained' onClick={loadMoreJobs} style={{ height: 45 }}>Load More</Button>
                   </Box>
                 )}
               </Box>
@@ -283,6 +302,7 @@ const ListItem = ({
   title,
   company,
   companyUrl,
+  companyLogo,
   type,
   location,
   skills,
@@ -313,8 +333,9 @@ const ListItem = ({
       <Grid container alignItems='center'>
         <Grid xs={5} container alignItems='center'>
           <Grid mr={2}>
-            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#fff' }}>
-              <Image src="/company_logo.png" alt="Treasure Data logo" width={'40%'} height={'40%'} />
+          <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
+              {companyLogo && <img style={{ borderRadius: '50%' }} src={companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
+              {!companyLogo && <Typography fontSize={20}>{company.slice(0, 1).toUpperCase()}</Typography>}
             </Box>
           </Grid>
 
@@ -349,10 +370,11 @@ const ListItem = ({
 
             <Box mt={1} display='flex' alignItems='center' color='grey'>
                 <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
-                <Typography variant='subtitle2' mr={2}>{LOCATION_MAP[location]}</Typography>
+                <Typography variant='subtitle2' mr={2}>{location}</Typography>
 
                 <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type]}</Typography>
+                {/* <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type]}</Typography> */}
+                <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type] || type || 'N/A'}</Typography>
 
                 <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
                 <Typography variant='subtitle2'>{formatSalaryRange(salaryMin, salaryMax)}</Typography>

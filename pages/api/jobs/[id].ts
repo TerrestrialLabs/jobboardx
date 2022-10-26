@@ -54,15 +54,4 @@ export default async function handler(
             res.status(500).json(getErrorMessage(err))
         }
     }
-
-    if (method === 'DELETE') {
-        try {
-            const job = await Job.create(req.body)
-            res.status(201).json(job)
-        } catch(err) {
-            // TO DO
-            // @ts-ignore
-            res.status(500).json(getErrorMessage(err))
-        }
-    }
 }

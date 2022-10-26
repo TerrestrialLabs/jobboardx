@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, FilledInput, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -16,8 +16,10 @@ export type PostForm = {
     title: string
     company: string
     companyUrl: string
+    companyLogo: string
     type: string
     location: string
+    remote: boolean
     skills: string[]
     perks: string[]
     description: string
@@ -26,17 +28,6 @@ export type PostForm = {
     salaryMin: number
     salaryMax: number
 }
-
-const skills = ['HTML', 'CSS', 'JavaScript', 'React', 'Node']
-const perks = [
-    'WFH', 
-    'Unlimited PTO',
-    'Health insurance', 
-    'Dental insurance', 
-    'Vision insurance',
-    'Parental leave',
-    'Gym membership'
-]
 
 const includedSkillStyle = {
     backgroundColor: 'secondary.main',
@@ -62,9 +53,11 @@ const Post: NextPage = () => {
         title: '',
         company: '',
         companyUrl: '',
+        companyLogo: '',
         type: TYPE.FULLTIME,
         // location: LOCATION.REMOTE,
         location: '',
+        remote: false,
         description: '',
         applicationLink: '',
         skills: [],
@@ -118,14 +111,17 @@ const Post: NextPage = () => {
     }
 
     const handleAutocompleteChange = (value: string) => {
-        console.log('value: ', value)
         setJobDetails({ ...jobDetails, location: value })
     }
 
-    const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        // e.persist()
-        console.log("handleLocationInputChange", e.target.value)
-        setLocationText(e.target.value)
+    // const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    //     // e.persist()
+    //     console.log("handleLocationInputChange", e.target.value)
+    //     setLocationText(e.target.value)
+    // }
+
+    const handleCheckboxChange = (value: boolean) => {
+        setJobDetails({ ...jobDetails, remote: value })
     }
 
     const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
@@ -167,7 +163,7 @@ const Post: NextPage = () => {
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Title</Typography>
-                                    <FilledInput onChange={handleInputChange} name='title' value={jobDetails.title} autoComplete='off' inputProps={{ label: 'Job Title' }} required placeholder='Job Title *' disableUnderline fullWidth />
+                                    <FilledInput onChange={handleInputChange} name='title' value={jobDetails.title} autoComplete='off' inputProps={{ label: 'Job Title' }} required placeholder='Job Title' disableUnderline fullWidth />
                                 </FormControl>
                             </Grid>
                             <Grid xs={12} sm={6}>
@@ -185,9 +181,9 @@ const Post: NextPage = () => {
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Range <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                     <Box display='flex' alignItems='center'>
-                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMin' value={jobDetails.salaryMin} autoComplete='off' required placeholder='Min *' disableUnderline sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMin' value={jobDetails.salaryMin} autoComplete='off' required placeholder='Min' disableUnderline sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "10000000", step: "100" }} />
                                         <Typography sx={{ marginRight: '0.25rem' }}>{' - '}</Typography>
-                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max *' disableUnderline inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max' disableUnderline inputProps={{ min: "0", max: "10000000", step: "100" }} />
                                     </Box>
                                 </FormControl>
                             </Grid>
@@ -195,13 +191,13 @@ const Post: NextPage = () => {
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Name</Typography>
-                                    <FilledInput onChange={handleInputChange} name='company' value={jobDetails.company} autoComplete='off' placeholder='Company Name *' disableUnderline fullWidth sx={{ verticalAlign: 'center' }} />
+                                    <FilledInput onChange={handleInputChange} name='company' value={jobDetails.company} autoComplete='off' placeholder='Company Name' disableUnderline fullWidth sx={{ verticalAlign: 'center' }} />
                                 </FormControl>
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
-                                    <FilledInput onChange={handleInputChange} name='companyUrl' value={jobDetails.companyUrl} autoComplete='off' placeholder='Company Website *' disableUnderline fullWidth />
+                                    <FilledInput onChange={handleInputChange} name='companyUrl' value={jobDetails.companyUrl} autoComplete='off' placeholder='https://' disableUnderline fullWidth />
                                 </FormControl>
                             </Grid>
 
@@ -215,7 +211,7 @@ const Post: NextPage = () => {
                                     {/* TO DO: Virtualize options */}
                                 <Autocomplete
                                     disablePortal
-                                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location *', style: { padding: '9px 12px 10px' }}} />}
+                                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
                                     options={locations}
                                     filterOptions={createFilterOptions({
                                         limit: 10
@@ -227,15 +223,17 @@ const Post: NextPage = () => {
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
-                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Application Link</Typography>
-                                    <FilledInput onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or email *' disableUnderline fullWidth />
+                                    {/* <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Application Link</Typography>
+                                    <FilledInput onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or email' disableUnderline fullWidth /> */}
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Remote <span style={{ fontWeight: 'normal' }}>(2+ days per week)</span></Typography>
+                                    <Checkbox value={jobDetails.remote} onChange={(e) => handleCheckboxChange(e.target.checked)} sx={{ width: '42px', alignSelf: 'center' }} />
                                 </FormControl>
                             </Grid>
 
                             <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
-                                    <FilledInput onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description *' disableUnderline fullWidth multiline rows={8} />
+                                    <FilledInput onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description' disableUnderline fullWidth multiline rows={8} />
                                 </FormControl>
                             </Grid>
 
@@ -266,6 +264,13 @@ const Post: NextPage = () => {
                                     )}>
                                         {PERKS.map(perk => <MenuItem key={perk} value={perk}>{perk}</MenuItem>)}
                                     </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid xs={12}>
+                                <FormControl hiddenLabel fullWidth>
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Application Link</Typography>
+                                    <FilledInput onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or Email' disableUnderline fullWidth />
                                 </FormControl>
                             </Grid>
 
@@ -338,7 +343,7 @@ const Post: NextPage = () => {
                             <Grid xs={12} p={0}>
                                 <Box mt={2} display='flex' justifyContent='center'>
                                     <Grid xs={12} sm={6}>
-                                        <Button fullWidth disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary'>
+                                        <Button fullWidth disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary' style={{ height: 45 }}>
                                             {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
                                         </Button>
                                     </Grid>

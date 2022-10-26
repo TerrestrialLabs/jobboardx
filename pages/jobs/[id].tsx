@@ -18,31 +18,20 @@ interface Props {
 
 // TO DO: Dynamically change head
 const JobDetail: NextPage<Props> = ({ data }) => {
-    // const [data, setData] = useState<JobData | null>(null)
     const [loading, setLoading] = useState(false)
+    const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [alertsPopupOpen, setAlertsPopupOpen] = useState(true)
     const router = useRouter()
-    const { id } = router.query  
+    const { id } = router.query
 
-    const fetchJob = async () => {
-        setLoading(true)
-        // const docRef = doc(database, 'jobs', id as string);
-        // const docSnap = await getDoc(docRef);
-        // if (docSnap.exists()) {
-        //     console.log("Document data:", docSnap.data());
-        //     setData({...docSnap.data(), id: docSnap.id, createdAt: docSnap.data().createdAt.toDate() } as Job)
-        // } else {
-        //     // doc.data() will be undefined in this case
-        //     console.log("No such document!");
-        // }
-        setLoading(false)
+    const fetchCompanyJobsCount = async () => {
+        const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
+        setCompanyJobsCount(res.data)
       }
 
     useEffect(() => {
-        if (id && !data) {
-            fetchJob()
-        }
-      }, [id])
+        fetchCompanyJobsCount()
+    }, [])
 
     return (
         <div className={styles.container}>
@@ -75,10 +64,11 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             <Typography mb={2} variant='h1' fontSize={30} fontWeight='bold'>{data.title}</Typography>
                                                 <Box display='flex' alignItems='center' color='grey'>
                                                     <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>{LOCATION_MAP[data.location] || 'N/A'}</Typography>
+                                                    <Typography variant='subtitle2' mr={2}>{data.location || 'N/A'}</Typography>
 
                                                     <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || 'N/A'}</Typography>
+                                                    {/* <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || 'N/A'}</Typography> */}
+                                                    <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || data.type || 'N/A'}</Typography>
 
                                                     <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
                                                     <Typography variant='subtitle2'>{formatSalaryRange(data.salaryMin, data.salaryMax)}</Typography>
@@ -95,7 +85,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                         <Grid xs={12} mb={2}>
                                             <Box mt={2}>
                                                 <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
-                                                <Box display='flex'>
+                                                <Box display='flex' flexWrap='wrap'>
                                                     {data.skills.map(skill => 
                                                         <Box key={skill} sx={{
                                                             backgroundColor: 'secondary.main',
@@ -167,16 +157,20 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                             <Grid xs={4}>
                                 <Box ml={4} mb={4} p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
                                     <Box display='flex' flexDirection='column' alignItems='center'>
-                                        <Box mb={1} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#fff' }}>
-                                            <Image src="/company_logo.png" alt="Treasure Data logo" width={'40%'} height={'40%'} />
+                                        <Box mb={1} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
+                                            {data.companyLogo && <img style={{ borderRadius: '50%' }} src={data.companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
+                                            {!data.companyLogo && <Typography fontSize={20}>{data.company.slice(0, 1).toUpperCase()}</Typography>}
                                         </Box>
                                         <Typography mb={1} fontWeight='bold'>
                                             {data.company}
                                         </Typography>
                                     </Box>
-                                    <Link href={data.companyUrl} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
-                                        <Typography variant='caption'>Visit company website</Typography>
-                                    </Link>
+                                    <Typography variant='subtitle2' color='grey'>{`${companyJobsCount} job${companyJobsCount === 1 ? '' : 's'}`}</Typography>
+                                    {data.companyUrl && data.companyUrl !== 'N/A' && (
+                                        <Link href={data.companyUrl} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
+                                            <Typography variant='caption'>Visit company website</Typography>
+                                        </Link>
+                                    )}
                                     <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
                                         Apply
                                     </Button>
@@ -224,6 +218,7 @@ export default JobDetail;
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const res = await axios.get(`http://localhost:3000/api/jobs/${params?.id}`)
+
     return {
       props: {
         data: res.data 

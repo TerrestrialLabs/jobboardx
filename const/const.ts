@@ -6,7 +6,9 @@ export const TYPE = {
 
 export const TYPE_MAP = {
     [TYPE.FULLTIME]: 'Full time',
+    'Full-time': 'Full time',
     [TYPE.PARTTIME]: 'Part time',
+    'Part-time': 'Part time',
     [TYPE.CONTRACT]: 'Contract'
 }
 
@@ -28,6 +30,7 @@ export const SKILLS = [
     'JavaScript',
     'TypeScript',
     'React',
+    'Redux',
     'Angular',
     'Vue',
     'Node',

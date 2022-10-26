@@ -8,8 +8,10 @@ export type JobData = {
     title: string
     company: string
     companyUrl: string
+    companyLogo: string
     type: string
     location: string
+    remote: boolean
     skills: string[]
     perks: string[]
     featured: boolean
@@ -28,8 +30,8 @@ export const getFilters = (query: NextApiRequest['query']) => {
         ...(query.salaryMin ? { salaryMax: { $gte: parseInt(query.salaryMin as string) } } : {}),
         // Text search either title or company
         ...(query.search ? {$or: [
-            { title: { $regex: new RegExp(query.search as string, 'i') } },
-            { company: { $regex: new RegExp(query.search as string, 'i') } }
+            { title: { $regex: new RegExp((query.search as string).trim(), 'i') } },
+            { company: { $regex: new RegExp((query.search as string).trim(), 'i') } }
         ]} : {}),
     }
 
@@ -49,14 +51,14 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobData | JobData[]>
+    res: NextApiResponse<JobData | JobData[] | boolean>
 ) {
     const { method } = req
 
     dbConnect()
 
     if (method === 'GET') {
-        const resultsPerPage = 2
+        const resultsPerPage = 10
         const pageIndex = req.query.pageIndex ? parseInt(req.query.pageIndex as string) : 0
 
         delete req.query.pageIndex
@@ -79,6 +81,10 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
+            const existingJob = await Job.findOne({ applicationLink: req.body.applicationLink }).exec()
+            if (existingJob) {
+                throw Error('This job already exists')
+            }
             const job = await Job.create(req.body)
             res.status(201).json(job)
         } catch(err) {
@@ -87,4 +93,16 @@ export default async function handler(
             res.status(500).json(getErrorMessage(err))
         }
     }
+
+        // TO DO: This deletes jobs backfilled from SimplyHired
+        if (method === 'DELETE') {
+            try {
+                const job = await Job.deleteMany({ companyUrl: 'N/A' })
+                res.status(200).json(true)
+            } catch(err) {
+                // TO DO
+                // @ts-ignore
+                res.status(500).json(getErrorMessage(err))
+            }
+        }
 }
