@@ -1,16 +1,17 @@
-import { Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, FilledInput, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, createStyles, FilledInput, FormControl, Input, InputLabel, makeStyles, MenuItem, Select, SelectChangeEvent, TextField, Theme, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { LOCATION, LOCATION_MAP, PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
+import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import { locations } from '../data/locations.json'
+import TextEditor from './components/post/TextEditor'
 
 export type PostForm = {
     title: string
@@ -29,15 +30,15 @@ export type PostForm = {
     salaryMax: number
 }
 
-const includedSkillStyle = {
-    backgroundColor: 'secondary.main',
-    color: '#fff'
-}
+// const includedSkillStyle = {
+//     backgroundColor: 'secondary.main',
+//     color: '#fff'
+// }
 
-const includedPerkStyle = {
-    backgroundColor: '#e74c3c',
-    color: '#fff'
-}
+// const includedPerkStyle = {
+//     backgroundColor: '#e74c3c',
+//     color: '#fff'
+// }
 
 // TO DO:
 //  Company logo, location, level (j/m/s), benefits fields
@@ -67,6 +68,8 @@ const Post: NextPage = () => {
         // TO DO: Hardcoded
         featured: false
     })
+    const [imageFile, setImageFile] = useState()
+    const [imageFileName, setImageFileName] = useState('')
     const [locationText, setLocationText] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
@@ -77,8 +80,10 @@ const Post: NextPage = () => {
             // @ts-ignore
             if ((typeof jobDetails[field] === 'string' && !jobDetails[field]) || !jobDetails.skills.length) {
                 // TO DO: Validation
-                console.log("EMPTY VALUE")
-                return
+                if (field !== 'companyLogo') {
+                    console.log("EMPTY VALUE")
+                    return
+                }
             }
         }
         // TO DO: Make sure minSalary is not higher than maxSalary
@@ -104,6 +109,8 @@ const Post: NextPage = () => {
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value })
+
+        console.log('e.target.value: ', e.target.value)
     }
 
     const handleSelectChange = (e: SelectChangeEvent<string>) => {
@@ -114,11 +121,23 @@ const Post: NextPage = () => {
         setJobDetails({ ...jobDetails, location: value })
     }
 
-    // const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    //     // e.persist()
-    //     console.log("handleLocationInputChange", e.target.value)
-    //     setLocationText(e.target.value)
-    // }
+    // TO DO
+    // @ts-ignore
+    const handleImageUploadCapture = ({ target }) => {
+
+        console.log("TARGET: ", target)
+
+        const fileReader = new FileReader();
+        const name = target.accept.includes('image') ? 'images' : 'videos';
+
+        fileReader.readAsDataURL(target.files[0]);
+        fileReader.onload = (e) => {
+            // TO DO
+            // @ts-ignore
+            setImageFile(e.target.result);
+            setImageFileName(target.files[0].name);
+        };
+    };
 
     const handleCheckboxChange = (value: boolean) => {
         setJobDetails({ ...jobDetails, remote: value })
@@ -127,8 +146,6 @@ const Post: NextPage = () => {
     const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
     }
-
-    console.log('jobDetails.location: ', console.log(jobDetails.location))
     
   return (
     <div className={styles.container}>
@@ -149,15 +166,15 @@ const Post: NextPage = () => {
 
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center' pt={2} pb={4}>
-            <Grid xs={10} lg={9} p={2}>
+            <Grid xs={12} sm={10} lg={9} p={2}>
                 <Box p={4} sx={{ backgroundColor: 'lightyellow', borderRadius: 1 }}>
                     <Typography mb={1} variant='h1' fontWeight='bold' fontSize={30}>Post a job</Typography>
                     <Typography variant='h2' fontSize={18} color='grey'>Hire the best React developers for an affordable price.</Typography>
                 </Box>
             </Grid>
 
-            <Grid xs={10} lg={9} p={2} container>
-                <Grid xs={8} container>
+            <Grid xs sm={10} lg={9} p={2} container>
+                <Grid xs={12} sm={8} container>
                     <Box p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                         <Grid container spacing={2}>
                             <Grid xs={12} sm={6}>
@@ -201,14 +218,20 @@ const Post: NextPage = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid xs={12} sm={6}>
-                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Location</Typography>
-                                    {/* <Select onChange={handleSelectChange} name='location' value={jobDetails.location} variant='filled' disableUnderline fullWidth>
-                                        <MenuItem value={LOCATION.REMOTE}>{LOCATION_MAP.remote}</MenuItem>
-                                        <MenuItem value={LOCATION.OFFICE}>{LOCATION_MAP.office}</MenuItem>
-                                    </Select> */}
+                            <Grid xs={12}>
+                                <FormControl hiddenLabel fullWidth sx={{ position: 'relative' }}>
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Logo</Typography>
+                                    <FilledInput disableUnderline value={imageFileName} disabled sx={{ paddingLeft: 15, backgroundColor: 'rgba(0, 0, 0, 0.06) !important'}} />
+                                    <Button disableElevation variant="contained" component="label" style={{ position: 'absolute', marginTop: 38, left: '0.75rem' }}>
+                                        Choose file
+                                        <input onChange={handleImageUploadCapture} hidden accept="image/*" multiple type="file" />
+                                    </Button>
+                                </FormControl>
+                            </Grid>
 
-                                    {/* TO DO: Virtualize options */}
+                            <Grid xs={12} sm={6}>
+                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Location</Typography>
+                                {/* TO DO: Virtualize options */}
                                 <Autocomplete
                                     disablePortal
                                     renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
@@ -223,8 +246,6 @@ const Post: NextPage = () => {
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
-                                    {/* <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Application Link</Typography>
-                                    <FilledInput onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or email' disableUnderline fullWidth /> */}
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Remote <span style={{ fontWeight: 'normal' }}>(2+ days per week)</span></Typography>
                                     <Checkbox value={jobDetails.remote} onChange={(e) => handleCheckboxChange(e.target.checked)} sx={{ width: '42px', alignSelf: 'center' }} />
                                 </FormControl>
@@ -233,7 +254,8 @@ const Post: NextPage = () => {
                             <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
-                                    <FilledInput onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description' disableUnderline fullWidth multiline rows={8} />
+                                    {/* <FilledInput style={{marginBottom: '1rem'}} onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description' disableUnderline fullWidth multiline rows={8} /> */}
+                                    <TextEditor />
                                 </FormControl>
                             </Grid>
 
@@ -275,66 +297,6 @@ const Post: NextPage = () => {
                             </Grid>
 
                             {/* <Grid xs={12}>
-                                <Box>
-                                    <Typography fontWeight='bold'>Skills</Typography>
-                                    <Box display='flex' flexWrap='wrap'>
-                                        {skills.map(skill => 
-                                            <Box key={skill} onClick={() => handleSkillsChange(skill)} sx={{
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #fff',
-                                                borderColor: 'secondary.main',
-                                                cursor: 'pointer',
-                                                margin: 0.5,
-                                                padding: 0.75,
-                                                borderRadius: 1,
-                                                transition: '0.3s',
-                                                fontSize: '14.5px',
-                                                fontWeight: 600,
-                                                color: 'secondary.main',
-                                                '&:hover': {
-                                                    backgroundColor: 'secondary.main',
-                                                    color: '#fff'
-                                                },
-                                                ...(jobDetails.skills.includes(skill) ? includedSkillStyle : {})
-                                            }}>
-                                                {skill}
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </Box>
-                            </Grid>
-
-                            <Grid xs={12}>
-                                <Box>
-                                    <Typography fontWeight='bold'>Perks</Typography>
-                                    <Box display='flex' flexWrap='wrap'>
-                                        {perks.map(perk => 
-                                            <Box key={perk} onClick={() => handlePerksChange(perk)} sx={{
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #e74c3c',
-                                                borderColor: '#e74c3c',
-                                                cursor: 'pointer',
-                                                margin: 0.5,
-                                                padding: 0.75,
-                                                borderRadius: 1,
-                                                transition: '0.3s',
-                                                fontSize: '14.5px',
-                                                fontWeight: 600,
-                                                color: '#e74c3c',
-                                                '&:hover': {
-                                                    backgroundColor: '#e74c3c',
-                                                    color: '#fff'
-                                                },
-                                                ...(jobDetails.perks.includes(perk) ? includedPerkStyle : {})
-                                            }}>
-                                                {perk}
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </Box>
-                            </Grid> */}
-
-                            {/* <Grid xs={12}>
                                 <Box color='red' display='flex'>
                                     <Typography variant='caption'>*Required fields</Typography>
                                 </Box>
@@ -343,19 +305,20 @@ const Post: NextPage = () => {
                             <Grid xs={12} p={0}>
                                 <Box mt={2} display='flex' justifyContent='center'>
                                     <Grid xs={12} sm={6}>
-                                        <Button fullWidth disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary' style={{ height: 45 }}>
+                                        <Button fullWidth disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary'>
                                             {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
                                         </Button>
                                     </Grid>
                                 </Box>
                             </Grid>
                         </Grid>
-                        </Box>
+                    </Box>
                 </Grid>
 
-                <Grid xs={4}>
+                <Grid xs={12} sm={4}>
                     <Box ml={4} mb={4} p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
-                        <Typography>Your job will be seen by <strong>12,782</strong> professionals.</Typography>
+                        {/* <Typography>Your job will be seen by <strong>12,782</strong> professionals.</Typography> */}
+                        <Typography>Your job will be live for <strong>30</strong> days.</Typography>
                     </Box>
                 </Grid>
             </Grid>

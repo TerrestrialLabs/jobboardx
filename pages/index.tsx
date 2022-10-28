@@ -259,7 +259,7 @@ const Home: NextPage = () => {
 
                 {jobs.length < totalJobs && (
                   <Box mt={4} display='flex' justifyContent='center'>
-                    <Button variant='contained' onClick={loadMoreJobs} style={{ height: 45 }}>Load More</Button>
+                    <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
                   </Box>
                 )}
               </Box>

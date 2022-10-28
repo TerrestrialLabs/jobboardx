@@ -79,7 +79,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                     <Box p={4}>
                                         <Grid xs={12} mb={2}>
                                             <Typography fontSize={18} fontWeight='bold' mb={1}>Description</Typography>
-                                            <Typography>{data.description}</Typography>
+                                            <Typography>{data.description.split('\n').map(p => <p>{p}</p>)}</Typography>
                                         </Grid>
 
                                         <Grid xs={12} mb={2}>
