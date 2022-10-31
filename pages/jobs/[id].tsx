@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, FilledInput, FormControl, Grid, IconButt
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useRouter } from 'next/router'
 import type { JobData } from '../api/jobs'
@@ -11,6 +11,12 @@ import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
 import { TYPE_MAP, LOCATION_MAP } from '../../const/const'
 import { formatSalaryRange } from '../../utils/utils'
 import axios from 'axios'
+import ReactHtmlParser from 'react-html-parser'
+
+// import dynamic from 'next/dynamic'
+// const Table = dynamic(() => import("/design-systems/Molecules/Table"), {
+//     ssr: false,
+// });
 
 interface Props {
     data: JobData
@@ -23,6 +29,9 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [alertsPopupOpen, setAlertsPopupOpen] = useState(true)
     const router = useRouter()
     const { id } = router.query
+
+    // const description = data.description
+    const description = ReactHtmlParser(data.description)
 
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
@@ -43,7 +52,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     
             <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
                 <Grid container justifyContent='center'>
-                    <Grid xs={10} display='flex' justifyContent='space-between'>
+                    <Grid item xs={10} display='flex' justifyContent='space-between'>
                         <Link href='/'><Typography color='#fff' variant='h4' sx={{ cursor: 'pointer' }}>React Jobs</Typography></Link>
                         <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
                     </Grid>
@@ -53,14 +62,14 @@ const JobDetail: NextPage<Props> = ({ data }) => {
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
                 {data && (
                     <Grid container justifyContent='center' pt={2} pb={4}>
-                        <Grid xs={10} lg={9} p={2} container>
-                            <Grid xs={8}>
+                        <Grid item xs={10} lg={9} p={2} container>
+                            <Grid item xs={8}>
                                 <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                     <Box p={4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
-                                        <Grid xs={12} display='flex' justifyContent='flex-end'>
+                                        <Grid item xs={12} display='flex' justifyContent='flex-end'>
                                             {/* <Typography variant='subtitle2'>{format(data.createdAt, 'MMMM dd, yyyy')}</Typography> */}
                                         </Grid>
-                                        <Grid xs={12}>
+                                        <Grid item xs={12}>
                                             <Typography mb={2} variant='h1' fontSize={30} fontWeight='bold'>{data.title}</Typography>
                                                 <Box display='flex' alignItems='center' color='grey'>
                                                     <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
@@ -77,12 +86,14 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                     </Box>
 
                                     <Box p={4}>
-                                        <Grid xs={12} mb={2}>
+                                        <Grid item xs={12} mb={4}>
                                             <Typography fontSize={18} fontWeight='bold' mb={1}>Description</Typography>
-                                            <Typography>{data.description.split('\n').map(p => <p>{p}</p>)}</Typography>
+                                            <Box sx={{ fontFamily: 'Poppins, sans-serif', marginLeft: 0.75 }}>
+                                                {description}
+                                            </Box>
                                         </Grid>
 
-                                        <Grid xs={12} mb={2}>
+                                        <Grid item xs={12} mb={2}>
                                             <Box mt={2}>
                                                 <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
                                                 <Box display='flex' flexWrap='wrap'>
@@ -106,7 +117,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             </Box>
                                         </Grid>
 
-                                        <Grid xs={12} mb={2}>
+                                        <Grid item xs={12} mb={2}>
                                             <Box mt={2}>
                                                 <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
                                                 <Box display='flex' flexWrap='wrap'>
@@ -130,9 +141,9 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             </Box>
                                         </Grid>
 
-                                        <Grid xs={12} p={0} mt={6}>
+                                        <Grid item xs={12} p={0} mt={6}>
                                             <Box display='flex' justifyContent='center'>
-                                                <Grid xs={6}>
+                                                <Grid item xs={6}>
                                                     <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
                                                         Apply
                                                     </Button>
@@ -154,7 +165,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
 
                             </Grid>
 
-                            <Grid xs={4}>
+                            <Grid item xs={4}>
                                 <Box ml={4} mb={4} p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
                                     <Box display='flex' flexDirection='column' alignItems='center'>
                                         <Box mb={1} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
@@ -221,7 +232,9 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
     return {
       props: {
-        data: res.data 
+        data: {
+            ...res.data
+        }
       }
     }
   }

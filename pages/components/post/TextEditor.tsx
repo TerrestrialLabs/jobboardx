@@ -10,24 +10,22 @@ export const HOTKEYS: any = {
     "mod+b": "bold",
     "mod+i": "italic",
     "mod+u": "underline"
-  }
+}
 
-const TextEditor = () => {
+type SlateValue = { type: string, children: { text: string }[] }[]
+
+type TextEditorProps = {
+    slateValue: SlateValue,
+    setSlateValue: (value: SlateValue) => void
+}
+
+const TextEditor = ({ slateValue, setSlateValue }: TextEditorProps) => {
     const [showHoverState, setShowHoverState] = useState(false)
-    const initValue = [
-        {
-            type: 'paragraph',
-            children: [{ text: '' }],
-        }
-    ]
-    const [slateValue, setSlateValue] = useState<{ type: string, children: { text: string }[] }[]>(initValue)
-    // const setValue = (value: any) => {}
+    
     const editor = useMemo(
-        // () => withHistory(withEmbeds(withLinks(withReact(createEditor())))),
         () => withHistory(withReact(createEditor())),
         []
     )
-
     const showPlaceholder = slateValue.length === 1 && !slateValue[0].children[0].text.length
 
     const renderLeaf = useCallback((props: any) => {
@@ -45,11 +43,8 @@ const TextEditor = () => {
                 <Slate
                     editor={editor}
                     value={slateValue}
-                    onChange={(value: any) => {
-                        setSlateValue(value);
-                        // setValue(JSON.stringify(value));
-                    }}
-            >
+                    onChange={(value: any) => setSlateValue(value)}
+                >
                 <Toolbar />
 
                 <Editable
@@ -72,7 +67,6 @@ const TextEditor = () => {
                     }}
                 />
 
-                {/* If anything text editor, do not render */}
                 {showPlaceholder && <Typography style={{ position: 'absolute', top: '54px', left: '12px', pointerEvents: 'none' }} color='#999'>{'Job Description'}</Typography>}
             </Slate>
         </Box>
@@ -138,15 +132,16 @@ export const toggleMark = (editor: any, format: any) => {
 export const MarkButton = ({ format, icon }: any) => {
     const editor = useSlate();
     return (
-      <ToggleButton
-        value={format}
-        selected={isMarkActive(editor, format)}
-        onMouseDown={(event: any) => {
-          event.preventDefault();
-          toggleMark(editor, format);
-        }}
-      >
-        {icon}
-      </ToggleButton>
+        <ToggleButton
+            style={{ border: 0 }}
+            value={format}
+            selected={isMarkActive(editor, format)}
+            onMouseDown={(event: any) => {
+                event.preventDefault();
+                toggleMark(editor, format);
+            }}
+        >
+            {icon}
+        </ToggleButton>
     )
   }

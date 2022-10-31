@@ -224,7 +224,7 @@ const Home: NextPage = () => {
                     })}
                     onChange={(e, value) => handleAutocompleteChange(value || '')}
                     inputValue={locationText}
-                    onInputChange={(event, newValue) => { console.log(newValue); setLocationText(newValue) }}
+                    onInputChange={(event, newValue) => setLocationText(newValue)}
                   />
                 </FormControl>
               </Grid>

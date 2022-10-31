@@ -12,6 +12,7 @@ import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import { locations } from '../data/locations.json'
 import TextEditor from './components/post/TextEditor'
+import { serialize } from '../utils/serialize'
 
 export type PostForm = {
     title: string
@@ -23,7 +24,7 @@ export type PostForm = {
     remote: boolean
     skills: string[]
     perks: string[]
-    description: string
+    // description: string
     featured: boolean
     applicationLink: string
     salaryMin: number
@@ -49,6 +50,13 @@ export type PostForm = {
 //  Posting preview
 //  Stepper
 
+const initEditorValue = [
+    {
+        type: 'paragraph',
+        children: [{ text: '' }],
+    }
+]
+
 const Post: NextPage = () => {
     const [jobDetails, setJobDetails] = useState<PostForm>({
         title: '',
@@ -56,10 +64,9 @@ const Post: NextPage = () => {
         companyUrl: '',
         companyLogo: '',
         type: TYPE.FULLTIME,
-        // location: LOCATION.REMOTE,
         location: '',
         remote: false,
-        description: '',
+        // description: '',
         applicationLink: '',
         skills: [],
         perks: [],
@@ -71,14 +78,28 @@ const Post: NextPage = () => {
     const [imageFile, setImageFile] = useState()
     const [imageFileName, setImageFileName] = useState('')
     const [locationText, setLocationText] = useState('')
+    const [descriptionEditorValue, setDescriptionEditorValue] = useState([{"type":"paragraph","children":[{"text":"Requirements","bold":true}]},{"type":"paragraph","children":[{"bold":true,"text":""}]},{"type":"paragraph","children":[{"text":"The ideal candidate..."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Blah blah blah"}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Skills","bold":true,"italic":true}]},{"type":"paragraph","children":[{"bold":true,"text":""}]},{"type":"paragraph","children":[{"text":"You should know your stuff"}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Other","underline":true}]},{"type":"paragraph","children":[{"underline":true,"text":""}]},{"type":"paragraph","children":[{"text":"Nothing","bold":true,"italic":true,"underline":true},{"text":" "},{"text":"else","bold":true},{"text":" "},{"text":"really","underline":true},{"text":"."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]}])
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const createJob = async () => {
+        console.log({ 
+            ...jobDetails,
+            title: jobDetails.title.trim(),
+            company: jobDetails.company.trim(),
+            companyUrl: jobDetails.companyUrl.trim(),
+            // description: jobDetails.description.trim(),
+            description: serialize({ children: descriptionEditorValue }),
+            applicationLink: jobDetails.applicationLink.trim()
+        })
+        // return
+
+        const descriptionEmpty = descriptionEditorValue.length === 1 && !descriptionEditorValue[0].children[0].text.length
+
         for (const field in jobDetails) {
             // @ts-ignore
-            if ((typeof jobDetails[field] === 'string' && !jobDetails[field]) || !jobDetails.skills.length) {
+            if ((typeof jobDetails[field] === 'string' && !jobDetails[field]) || !jobDetails.skills.length || descriptionEmpty) {
                 // TO DO: Validation
                 if (field !== 'companyLogo') {
                     console.log("EMPTY VALUE")
@@ -95,7 +116,8 @@ const Post: NextPage = () => {
                 title: jobDetails.title.trim(),
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
-                description: jobDetails.description.trim(),
+                // description: jobDetails.description.trim(),
+                description: serialize({ children: descriptionEditorValue }),
                 applicationLink: jobDetails.applicationLink.trim()
             })
             res.status === 201 && router.push(`/jobs/${res.data._id}`)
@@ -109,8 +131,6 @@ const Post: NextPage = () => {
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value })
-
-        console.log('e.target.value: ', e.target.value)
     }
 
     const handleSelectChange = (e: SelectChangeEvent<string>) => {
@@ -124,9 +144,6 @@ const Post: NextPage = () => {
     // TO DO
     // @ts-ignore
     const handleImageUploadCapture = ({ target }) => {
-
-        console.log("TARGET: ", target)
-
         const fileReader = new FileReader();
         const name = target.accept.includes('image') ? 'images' : 'videos';
 
@@ -241,7 +258,7 @@ const Post: NextPage = () => {
                                     })}
                                     onChange={(e, value) => handleAutocompleteChange(value || '')}
                                     inputValue={locationText}
-                                    onInputChange={(event, newValue) => { console.log(newValue); setLocationText(newValue) }}
+                                    onInputChange={(event, newValue) => setLocationText(newValue)}
                                 />
                             </Grid>
                             <Grid xs={12} sm={6}>
@@ -255,7 +272,7 @@ const Post: NextPage = () => {
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
                                     {/* <FilledInput style={{marginBottom: '1rem'}} onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description' disableUnderline fullWidth multiline rows={8} /> */}
-                                    <TextEditor />
+                                    <TextEditor slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />
                                 </FormControl>
                             </Grid>
 
