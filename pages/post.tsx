@@ -78,7 +78,7 @@ const Post: NextPage = () => {
     const [imageFile, setImageFile] = useState()
     const [imageFileName, setImageFileName] = useState('')
     const [locationText, setLocationText] = useState('')
-    const [descriptionEditorValue, setDescriptionEditorValue] = useState([{"type":"paragraph","children":[{"text":"Requirements","bold":true}]},{"type":"paragraph","children":[{"bold":true,"text":""}]},{"type":"paragraph","children":[{"text":"The ideal candidate..."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Blah blah blah"}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Skills","bold":true,"italic":true}]},{"type":"paragraph","children":[{"bold":true,"text":""}]},{"type":"paragraph","children":[{"text":"You should know your stuff"}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Other","underline":true}]},{"type":"paragraph","children":[{"underline":true,"text":""}]},{"type":"paragraph","children":[{"text":"Nothing","bold":true,"italic":true,"underline":true},{"text":" "},{"text":"else","bold":true},{"text":" "},{"text":"really","underline":true},{"text":"."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":""}]}])
+    const [descriptionEditorValue, setDescriptionEditorValue] = useState(initEditorValue)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 

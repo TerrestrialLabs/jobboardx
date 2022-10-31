@@ -21,8 +21,8 @@ async function scrapeJobs() {
         for (const element of selection) {
             jobList.push({
                 // id: element.getAttribute('data-jobkey'),
-                title: element.querySelector('.jobposting-title').textContent,
-                company: element.querySelector('.jobposting-company').textContent,
+                title: element.querySelector('.jobposting-title').textContent.trim(),
+                company: element.querySelector('.jobposting-company').textContent.trim(),
                 location: element.querySelector('.jobposting-location').textContent.trim(),
                 // Placeholders
                 salaryMin: 0,
@@ -32,7 +32,8 @@ async function scrapeJobs() {
                 applicationLink: 'https://www.simplyhired.com' + element.querySelector('.SerpJob-link').getAttribute('href'),
                 description: '',
                 companyUrl: 'N/A',
-                companyLogo: '' 
+                companyLogo: '',
+                // backfilled: true
             })
         }
 
@@ -63,6 +64,7 @@ async function scrapeJobs() {
     })
 
     for (let i = 0; i < jobs.length; i++) {
+    // for (let i = 0; i < 1; i++) {
         const url = jobs[i].applicationLink;
         await page.goto(`${url}`);
         const extraDetails = await page.evaluate(() => {
@@ -77,7 +79,8 @@ async function scrapeJobs() {
 
             let details = {
                 type,
-                description: document.querySelector('.viewjob-jobDescription').textContent.replace('Full Job Description', ''),
+                description: document.querySelector('[data-testid="VJ-section-content-jobDescription"]').outerHTML,
+                // description: document.querySelector('.viewjob-jobDescription').textContent.replace('Full Job Description', ''),
                 skills: Array.from(document.querySelectorAll('.viewjob-qualification')).map(x => x.textContent),
                 perks: Array.from(document.querySelectorAll('.viewjob-benefit')).map(x => x.textContent),
                 companyLogo
@@ -88,12 +91,11 @@ async function scrapeJobs() {
         jobs[i] = { ...jobs[i], ...extraDetails }
     }
 
-    console.log('jobs: ', jobs)
-
     await browser.close()
 
     // Remove jobs that are missing important data
     const jobsToSave = jobs.filter(job => job.type)
+    console.log(jobsToSave)
     // Write to database
     for (let i = 0; i < jobsToSave.length; i++) {
         try {
@@ -107,54 +109,3 @@ async function scrapeJobs() {
 }
 
 scrapeJobs()
-
-
-
-
-
-
-
-
-
-
-
-
-
-// async function start() {
-//     const browser = await puppeteer.launch()
-//     const page = await browser.newPage()
-//     await page.goto('https://learnwebcode.github.io/practice-requests/')
-
-//     // Generic function
-//     const names = await page.evaluate(() => {
-//         return Array.from(document.querySelectorAll('.info strong')).map(x => x.textContent)
-//     })
-//     await fs.writeFile('names.txt', names.join('\r\n'))
-
-//     await page.click('#clickme')
-//     // Selecting single element (instead of documnent.querySelector)
-//     const clickedData = await page.$eval('#data', el => el.textContent)
-//     console.log('clickedData: ', clickedData)
-
-//     // Selecting multiple elements
-//     const photos = await page.$$eval('img', (imgs) => {
-//         return imgs.map(x => x.src)
-//     })
-
-//     await page.type('#ourfield', 'blue')
-//     await Promise.all([
-//         page.click('#ourform button'),
-//         page.waitForNavigation()
-//     ])
-//     const info = await page.$eval('#message', el => el.textContent)
-//     console.log('info: ', info)
-
-//     for (const photo of photos) {
-//         const imgPage = await page.goto(photo)
-//         await fs.writeFile(photo.split('/').pop(), await imgPage.buffer())
-//     }
-
-//     await browser.close()
-// }
-
-// start()

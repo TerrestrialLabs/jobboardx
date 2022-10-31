@@ -93,53 +93,57 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             </Box>
                                         </Grid>
 
-                                        <Grid item xs={12} mb={2}>
-                                            <Box mt={2}>
-                                                <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
-                                                <Box display='flex' flexWrap='wrap'>
-                                                    {data.skills.map(skill => 
-                                                        <Box key={skill} sx={{
-                                                            backgroundColor: 'secondary.main',
-                                                            color: '#fff',
-                                                            border: '1px solid #fff',
-                                                            borderColor: 'secondary.main',
-                                                            margin: 0.5,
-                                                            padding: 0.75,
-                                                            borderRadius: 1,
-                                                            transition: '0.3s',
-                                                            fontSize: '14.5px',
-                                                            fontWeight: 600,
-                                                        }}>
-                                                            {skill}
-                                                        </Box>
-                                                    )}
+                                        {data.skills.length > 0 && (
+                                            <Grid item xs={12} mb={2}>
+                                                <Box mt={2}>
+                                                    <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
+                                                    <Box display='flex' flexWrap='wrap'>
+                                                        {data.skills.map(skill => 
+                                                            <Box key={skill} sx={{
+                                                                backgroundColor: 'secondary.main',
+                                                                color: '#fff',
+                                                                border: '1px solid #fff',
+                                                                borderColor: 'secondary.main',
+                                                                margin: 0.5,
+                                                                padding: 0.75,
+                                                                borderRadius: 1,
+                                                                transition: '0.3s',
+                                                                fontSize: '14.5px',
+                                                                fontWeight: 600,
+                                                            }}>
+                                                                {skill}
+                                                            </Box>
+                                                        )}
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        </Grid>
+                                            </Grid>
+                                        )}
 
-                                        <Grid item xs={12} mb={2}>
-                                            <Box mt={2}>
-                                                <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
-                                                <Box display='flex' flexWrap='wrap'>
-                                                    {data.perks.map(skill => 
-                                                        <Box key={skill} sx={{
-                                                            backgroundColor: '#e74c3c',
-                                                            color: '#fff',
-                                                            border: '1px solid #e74c3c',
-                                                            borderColor: '#e74c3c',
-                                                            margin: 0.5,
-                                                            padding: 0.75,
-                                                            borderRadius: 1,
-                                                            transition: '0.3s',
-                                                            fontSize: '14.5px',
-                                                            fontWeight: 600,
-                                                        }}>
-                                                            {skill}
-                                                        </Box>
-                                                    )}
+                                        {data.perks.length > 0 && (
+                                            <Grid item xs={12} mb={2}>
+                                                <Box mt={2}>
+                                                    <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
+                                                    <Box display='flex' flexWrap='wrap'>
+                                                        {data.perks.map(perk => 
+                                                            <Box key={perk} sx={{
+                                                                backgroundColor: '#e74c3c',
+                                                                color: '#fff',
+                                                                border: '1px solid #e74c3c',
+                                                                borderColor: '#e74c3c',
+                                                                margin: 0.5,
+                                                                padding: 0.75,
+                                                                borderRadius: 1,
+                                                                transition: '0.3s',
+                                                                fontSize: '14.5px',
+                                                                fontWeight: 600,
+                                                            }}>
+                                                                {perk}
+                                                            </Box>
+                                                        )}
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        </Grid>
+                                            </Grid>
+                                        )}
 
                                         <Grid item xs={12} p={0} mt={6}>
                                             <Box display='flex' justifyContent='center'>
