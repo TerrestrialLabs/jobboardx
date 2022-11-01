@@ -84,18 +84,7 @@ const Post: NextPage = () => {
 
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const createJob = async () => {
-        console.log({ 
-            ...jobDetails,
-            title: jobDetails.title.trim(),
-            company: jobDetails.company.trim(),
-            companyUrl: jobDetails.companyUrl.trim(),
-            // description: jobDetails.description.trim(),
-            description: serialize({ children: descriptionEditorValue }),
-            applicationLink: jobDetails.applicationLink.trim()
-        })
-        // return
-
-        const descriptionEmpty = descriptionEditorValue.length === 1 && !descriptionEditorValue[0].children[0].text.length
+        const descriptionEmpty = descriptionEditorValue.length === 1 && descriptionEditorValue[0].children[0].text && !descriptionEditorValue[0].children[0].text.length
 
         for (const field in jobDetails) {
             // @ts-ignore
@@ -114,6 +103,7 @@ const Post: NextPage = () => {
             const res = await axios.post('http://localhost:3000/api/jobs', { 
                 ...jobDetails,
                 title: jobDetails.title.trim(),
+                backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
                 // description: jobDetails.description.trim(),

@@ -299,17 +299,15 @@ const ListItem = ({
   first,
   last,
   createdAt,
+  datePosted,
   title,
   company,
-  companyUrl,
   companyLogo,
   type,
   location,
   skills,
-  perks,
   featured,
   applicationLink,
-  description,
   salaryMin,
   salaryMax
 }: ListItemProps) => {
@@ -383,8 +381,8 @@ const ListItem = ({
         </Grid>
         <Grid xs={2} container direction='column' alignItems='flex-end'>
           <Grid>
-            {/* <Typography variant='caption'>{getTimeDifferenceString(createdAt)}</Typography> */}
-            <Typography variant='caption'>{createdAt.toString()}</Typography>
+            {/* TO DO: Phase out createdAt when all jobs have datePosted */}
+            <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
           </Grid>
           <Grid>
             <Box mt={2}>

@@ -6,17 +6,12 @@ import React, { useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useRouter } from 'next/router'
 import type { JobData } from '../api/jobs'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
-import { TYPE_MAP, LOCATION_MAP } from '../../const/const'
+import { TYPE_MAP } from '../../const/const'
 import { formatSalaryRange } from '../../utils/utils'
 import axios from 'axios'
 import ReactHtmlParser from 'react-html-parser'
-
-// import dynamic from 'next/dynamic'
-// const Table = dynamic(() => import("/design-systems/Molecules/Table"), {
-//     ssr: false,
-// });
 
 interface Props {
     data: JobData
@@ -28,9 +23,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [alertsPopupOpen, setAlertsPopupOpen] = useState(true)
     const router = useRouter()
-    const { id } = router.query
 
-    // const description = data.description
     const description = ReactHtmlParser(data.description)
 
     const fetchCompanyJobsCount = async () => {
@@ -67,7 +60,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                 <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                     <Box p={4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
                                         <Grid item xs={12} display='flex' justifyContent='flex-end'>
-                                            {/* <Typography variant='subtitle2'>{format(data.createdAt, 'MMMM dd, yyyy')}</Typography> */}
+                                            <Typography variant='subtitle2'>{format(parseISO(data.datePosted ? data.datePosted.toString() : data.createdAt.toString()), 'MMMM d, yyyy')}</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography mb={2} variant='h1' fontSize={30} fontWeight='bold'>{data.title}</Typography>
@@ -76,7 +69,6 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                                     <Typography variant='subtitle2' mr={2}>{data.location || 'N/A'}</Typography>
 
                                                     <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    {/* <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || 'N/A'}</Typography> */}
                                                     <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || data.type || 'N/A'}</Typography>
 
                                                     <Paid fontSize='small' style={{marginRight: '0.25rem'}} />

@@ -11,7 +11,7 @@ export const serialize = (node: Node & { bold?: boolean, underline?: boolean, it
             string = `<span class='underline'>${string}</span>`
         }
         if (node.italic) {
-            string = `<span class='italic>${string}</span>`
+            string = `<span class='italic'>${string}</span>`
         }
 
         return string
@@ -22,6 +22,12 @@ export const serialize = (node: Node & { bold?: boolean, underline?: boolean, it
     switch (node.type) {
         case 'paragraph':
             return `<p>${children}</p>`
+        case 'bulleted-list':
+            return `<ul>${children}</ul>`
+        case 'numbered-list':
+            return `<ol>${children}</ol>`
+        case 'list-item':
+            return `<li>${children}</li>`
         default:
             return children
     }

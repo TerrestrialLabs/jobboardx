@@ -2,9 +2,20 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job from '../../../models/Job'
 
+type Filters = { 
+    [key: string ]: 
+        string | 
+        number | 
+        { $gte: number } | 
+        ({ title: { $regex: RegExp } } | { company: { $regex: RegExp; }; })[] |
+        ({ datePosted: { $gte: Date } } | { createdAt: { $gte: Date; }; })[] 
+}
+
 export type JobData = {
     _id: string
+    backfilled: boolean
     createdAt: Date
+    datePosted: Date
     title: string
     company: string
     companyUrl: string
@@ -24,8 +35,19 @@ export type JobData = {
 export const getFilters = (query: NextApiRequest['query']) => {
     delete query.pageIndex
 
-    const filters: { [key: string ]: string | number | { $gte: number } | ({ title: { $regex: RegExp } } | { company: { $regex: RegExp; }; })[] } = {
+    const days = 5 // For last 4 days
+    const currentDate = new Date()
+    const sinceDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
+
+    const filters: Filters = {
         ...query,
+        // TO DO: Remove createdAt ASAP
+        // Only past 30 days listings
+        ...({$or: [
+            { datePosted: { $gte: sinceDate } },
+            // { createdAt: { $gte: sinceDate } }
+        ]}),
+        // ...({ datePosted: { $gte: sinceDate } }),
         // Make sure job's max salary is at least equal to min salary requirement
         ...(query.salaryMin ? { salaryMax: { $gte: parseInt(query.salaryMin as string) } } : {}),
         // Text search either title or company
@@ -67,7 +89,8 @@ export default async function handler(
 
         try {
             const jobs = await Job.find(filters)
-                .sort({ 'featured': -1, 'createdAt': -1 })
+                // TO DO: Remove createdAt
+                .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1, 'createdAt': -1 })
                 .skip(pageIndex * resultsPerPage)
                 .limit(resultsPerPage)
                 .exec() 
@@ -85,7 +108,10 @@ export default async function handler(
             if (existingJob) {
                 throw Error('This job already exists')
             }
-            const job = await Job.create(req.body)
+            const job = await Job.create({
+                ...req.body,
+                datePosted: req.body.datePosted ? req.body.datePosted : new Date()
+            })
             res.status(201).json(job)
         } catch(err) {
             // TO DO

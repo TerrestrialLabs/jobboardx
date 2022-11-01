@@ -5,7 +5,9 @@ import { withHistory } from 'slate-history'
 import { Editable, Slate, useSlate, withReact } from 'slate-react';
 import isHotkey from 'is-hotkey'
 import { FaBold, FaItalic, FaUnderline } from 'react-icons/fa'
+import { MdFormatListNumbered, MdList } from 'react-icons/md'
 import { jsx } from 'slate-hyperscript'
+import type { Node as NodeType } from 'slate'
 
 import type { Element } from 'slate'
 import { BaseEditor } from 'slate'
@@ -41,7 +43,7 @@ const TextEditor = ({ slateValue, setSlateValue }: TextEditorProps) => {
         () => withHtml(withReact(withHistory(createEditor()))),
         []
     ) as EditorType
-    const showPlaceholder = slateValue.length === 1 && !slateValue[0].children[0].text.length
+    const showPlaceholder = slateValue.length === 1 && slateValue[0].children[0].text && !slateValue[0].children[0].text.length
 
     const renderLeaf = useCallback((props: any) => <SlateLeaf {...props} />, [])
     const renderElement = useCallback((props: any) => <SlateElement {...props} />, [])
@@ -154,6 +156,15 @@ const Toolbar = () => {
                     format: "underline",
                     icon: <FaUnderline size={14} />,
                 })}
+                <Box width='1rem' />
+                {BlockButton({
+                    format: "numbered-list",
+                    icon: <MdFormatListNumbered size={24} />,
+                })}
+                {BlockButton({
+                    format: "bulleted-list",
+                    icon: <MdList size={30} />,
+                })}
             </ToggleButtonGroup>
         </Box>
     )
@@ -163,7 +174,16 @@ export const isMarkActive = (editor: any, format: any) => {
     const marks = Editor.marks(editor);
     // @ts-ignore
     return marks ? marks[format] === true : false;
-  }
+}
+
+export const isBlockActive = (editor: any, format: any) => {
+    // @ts-ignore
+    const [match] = Editor.nodes(editor, {
+    // @ts-ignore
+      match: (n) => n.type === format
+    })
+    return !!match;
+}
   
 export const toggleMark = (editor: any, format: any) => {
     const isActive = isMarkActive(editor, format);
@@ -172,6 +192,27 @@ export const toggleMark = (editor: any, format: any) => {
         Editor.removeMark(editor, format);
     } else {
         Editor.addMark(editor, format, true);
+    }
+}
+
+export const toggleBlock = (editor: any, format: any) => {
+    const LIST_TYPES = ["numbered-list", "bulleted-list"]
+    const isActive = isBlockActive(editor, format);
+    const isList = LIST_TYPES.includes(format);
+  
+    Transforms.unwrapNodes(editor, {
+        // @ts-ignore
+        match: n => LIST_TYPES.includes(n.type),
+        split: true
+    })
+  
+    Transforms.setNodes(editor, {
+      type: isActive ? "paragraph" : isList ? "list-item" : format
+    });
+  
+    if (!isActive && isList) {
+      const block = { type: format, children: [] };
+      Transforms.wrapNodes(editor, block);
     }
 }
 
@@ -190,6 +231,23 @@ export const MarkButton = ({ format, icon }: any) => {
             {icon}
         </ToggleButton>
     )
+}
+
+const BlockButton = ({ format, icon }: any) => {
+    const editor = useSlate();
+    return (
+        <ToggleButton
+            style={{ border: 0, padding: 0, height: 36, width: 36 }}
+            value={format}
+            selected={isBlockActive(editor, format)}
+            onMouseDown={(event: any) => {
+                event.preventDefault();
+                toggleBlock(editor, format);
+            }}
+        >
+            {icon}
+        </ToggleButton>
+    );
 }
 
 const ELEMENT_TAGS: { [key: string]: () => ({ type: string }) } = {
@@ -235,8 +293,6 @@ export const deserialize = (el: Node): any => {
 
     const { nodeName } = el
     let parent = el
-
-console.log("NODE NAME: ", nodeName)
 
     if (
         nodeName === 'PRE' &&
@@ -295,8 +351,6 @@ console.log('withHTML')
 
     editor.insertData = data => {
         const html = data.getData('text/html')
-
-console.log("PASTE")
 
         if (html) {
             const parsed = new DOMParser().parseFromString(html, 'text/html')

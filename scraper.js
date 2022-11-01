@@ -20,20 +20,18 @@ async function scrapeJobs() {
 
         for (const element of selection) {
             jobList.push({
-                // id: element.getAttribute('data-jobkey'),
                 title: element.querySelector('.jobposting-title').textContent.trim(),
                 company: element.querySelector('.jobposting-company').textContent.trim(),
                 location: element.querySelector('.jobposting-location').textContent.trim(),
+                applicationLink: 'https://www.simplyhired.com' + element.querySelector('.SerpJob-link').getAttribute('href'),
+                backfilled: true,
                 // Placeholders
                 salaryMin: 0,
                 salaryMax: 0,
-                // hourly: false,
-                datePosted: element.querySelector('time').textContent,
-                applicationLink: 'https://www.simplyhired.com' + element.querySelector('.SerpJob-link').getAttribute('href'),
                 description: '',
                 companyUrl: 'N/A',
                 companyLogo: '',
-                // backfilled: true
+                datePosted: element.querySelector('time').textContent
             })
         }
 
@@ -52,7 +50,6 @@ async function scrapeJobs() {
 
             jobList[index].salaryMin = hourly && salaryArr[0] ? convertHourlyToAnnualPay(salaryArr[0]) : salaryMin
             jobList[index].salaryMax = hourly && salaryArr[1] ? convertHourlyToAnnualPay(salaryArr[1]) : salaryMax
-            jobList[index].hourly = hourly
 
             index += 1
         }
@@ -64,10 +61,25 @@ async function scrapeJobs() {
     })
 
     for (let i = 0; i < jobs.length; i++) {
-    // for (let i = 0; i < 1; i++) {
+        const job = jobs[i]
         const url = jobs[i].applicationLink;
+        console.log(job.datePosted)
         await page.goto(`${url}`);
-        const extraDetails = await page.evaluate(() => {
+        const extraDetails = await page.evaluate((job) => {
+            const getPastDate = (daysAgo) => {
+                let days = 0
+                if (daysAgo === 'Today' || daysAgo.includes('h')) {
+                    return new Date()
+                }
+                if (daysAgo.includes('d')) {
+                    const arr = daysAgo.split('d')
+                    days = parseInt(arr[0])
+                    const date = new Date()
+                    return new Date(date.getTime() - (days * 24 * 60 * 60 * 1000));
+                }
+                return new Date()
+            }
+
             let type = document.querySelector('.viewjob-jobType')?.textContent
 
             if (type && type.includes('Contract')) {
@@ -77,25 +89,23 @@ async function scrapeJobs() {
             const logoEl = document.querySelector('.viewjob-company-logoImg')
             const companyLogo = logoEl ? `https://www.simplyhired.com${logoEl.getAttribute('src')}` : ''
 
-            let details = {
+            return {
                 type,
                 description: document.querySelector('[data-testid="VJ-section-content-jobDescription"]').outerHTML,
-                // description: document.querySelector('.viewjob-jobDescription').textContent.replace('Full Job Description', ''),
                 skills: Array.from(document.querySelectorAll('.viewjob-qualification')).map(x => x.textContent),
                 perks: Array.from(document.querySelectorAll('.viewjob-benefit')).map(x => x.textContent),
-                companyLogo
+                companyLogo,
+                datePosted: getPastDate(job.datePosted).toISOString()
             }
-
-            return details
-        })
+        }, job)
         jobs[i] = { ...jobs[i], ...extraDetails }
     }
 
     await browser.close()
 
     // Remove jobs that are missing important data
-    const jobsToSave = jobs.filter(job => job.type)
-    console.log(jobsToSave)
+    const jobsToSave = jobs.filter(job => job.type).map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
+    console.log("Dates posted: ", jobsToSave.map(job => job.datePosted))
     // Write to database
     for (let i = 0; i < jobsToSave.length; i++) {
         try {

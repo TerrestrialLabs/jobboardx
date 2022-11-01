@@ -2,9 +2,11 @@ import mongoose from 'mongoose'
 
 const JobSchema = new mongoose.Schema({
     title: { type: String, required: true },
+    backfilled: { type: Boolean, required: true },
     company: { type: String, required: true },
     companyUrl: { type: String, required: true },
-    companyLogo: String,
+    companyLogo: { type: String, required: false },
+    datePosted: { type: Date, required: true },
     // TO DO: Enum
     type: { type: String, required: true },
     location: { type: String, required: true },
