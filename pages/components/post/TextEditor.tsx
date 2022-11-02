@@ -32,11 +32,12 @@ type EditorType = BaseEditor & ReactEditor & HistoryEditor
 type SlateValue = { type: string, children: { text: string }[] }[]
 
 type TextEditorProps = {
+    error: boolean,
     slateValue: SlateValue,
     setSlateValue: (value: SlateValue) => void
 }
 
-const TextEditor = ({ slateValue, setSlateValue }: TextEditorProps) => {
+const TextEditor = ({ error, slateValue, setSlateValue }: TextEditorProps) => {
     const [showHoverState, setShowHoverState] = useState(false)
 
     const editor = useMemo(
@@ -54,7 +55,7 @@ const TextEditor = ({ slateValue, setSlateValue }: TextEditorProps) => {
                 onMouseEnter={() => !showHoverState && setShowHoverState(true)}
                 onMouseLeave={() => showHoverState && setShowHoverState(false)}
                 onClick={() => setShowHoverState(false)}
-                sx={{ position: 'relative', borderTopLeftRadius: '4px', borderTopRightRadius: '4px', backgroundColor: showHoverState ? 'rgba(0, 0, 0, 0.09)' : 'rgba(0, 0, 0, 0.06)' }}
+                sx={{ position: 'relative', borderBottom: error ? '2px solid #ff1644' : 'none', borderTopLeftRadius: '4px', borderTopRightRadius: '4px', backgroundColor: showHoverState ? 'rgba(0, 0, 0, 0.09)' : 'rgba(0, 0, 0, 0.06)' }}
             >
                 <Slate
                     editor={editor}
@@ -323,23 +324,11 @@ export const deserialize = (el: Node): any => {
         return children.map(child => jsx('text', attrs, child))
     }
 
-    // if (ELEMENT_TAGS[nodeName]) {
-    //     const attrs = ELEMENT_TAGS[nodeName](el)
-    //     return jsx('element', attrs, children)
-    // }
-
-    // if (TEXT_TAGS[nodeName]) {
-    //     const attrs = TEXT_TAGS[nodeName](el)
-    //     return children.map(child => jsx('text', attrs, child))
-    // }
-
     return children
 }
 
 const withHtml = (editor: EditorType) => {
     const { insertData, isInline, isVoid } = editor
-
-console.log('withHTML')
 
     editor.isInline = element => {
         return element.type === 'link' ? true : isInline(element)

@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, createStyles, FilledInput, FormControl, Input, InputLabel, makeStyles, MenuItem, Select, SelectChangeEvent, TextField, Theme, Typography } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, FilledInput, FormControl, FormHelperText, Input, InputLabel, makeStyles, MenuItem, Select, SelectChangeEvent, TextField, Theme, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -31,16 +31,6 @@ export type PostForm = {
     salaryMax: number
 }
 
-// const includedSkillStyle = {
-//     backgroundColor: 'secondary.main',
-//     color: '#fff'
-// }
-
-// const includedPerkStyle = {
-//     backgroundColor: '#e74c3c',
-//     color: '#fff'
-// }
-
 // TO DO:
 //  Company logo, location, level (j/m/s), benefits fields
 //  Text editor functions or pre-formatted sections from multiple fields
@@ -50,12 +40,33 @@ export type PostForm = {
 //  Posting preview
 //  Stepper
 
+const ERROR = {
+    EMPTY: 'Field cannot be empty',
+    EMPTY_LOCATION: 'Location cannot be empty unless remote',
+    SALARY_ORDER: 'Salary max cannot be less than salary min',
+    SALARY_NEGATIVE: 'Salary cannot be negative',
+    WEBSITE_LINK: 'Invalid link format [https://www.example.com]',
+    APPLICATION_LINK: 'Invalid link format [https://www.example.com or email@example.com]'
+}
+
 const initEditorValue = [
     {
         type: 'paragraph',
         children: [{ text: '' }],
     }
 ]
+
+const initErrorState: { [key: string]: string | null } = {
+    title: null,
+    company: null,
+    companyUrl: null,
+    description: null,
+    location: null,
+    applicationLink: null,
+    skills: null,
+    salaryMin: null,
+    salaryMax: null
+}
 
 const Post: NextPage = () => {
     const [jobDetails, setJobDetails] = useState<PostForm>({
@@ -80,24 +91,99 @@ const Post: NextPage = () => {
     const [locationText, setLocationText] = useState('')
     const [descriptionEditorValue, setDescriptionEditorValue] = useState(initEditorValue)
     const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState(initErrorState)
     const router = useRouter()
 
-    // TO DO: Validate urls - provide https if absent or add prefix before input
-    const createJob = async () => {
-        const descriptionEmpty = descriptionEditorValue.length === 1 && descriptionEditorValue[0].children[0].text && !descriptionEditorValue[0].children[0].text.length
+    const invalid = Object.keys(errors).some(field => errors[field])
 
+    const validate = () => {
+        let isValid = true
+        const newErrors = Object.assign({}, initErrorState)
+        const descriptionEmpty = descriptionEditorValue.length === 1 && !descriptionEditorValue[0].children[0]?.text.length
+
+        if (!isValidHttpUrl(jobDetails.companyUrl.trim())) {
+            newErrors['companyUrl'] = ERROR.WEBSITE_LINK
+        }
+        if (!isValidHttpUrl(jobDetails.applicationLink.trim()) && !isValidEmail(jobDetails.applicationLink.trim())) {
+            newErrors['applicationLink'] = ERROR.APPLICATION_LINK
+        }
         for (const field in jobDetails) {
             // @ts-ignore
-            if ((typeof jobDetails[field] === 'string' && !jobDetails[field]) || !jobDetails.skills.length || descriptionEmpty) {
-                // TO DO: Validation
-                if (field !== 'companyLogo') {
-                    console.log("EMPTY VALUE")
-                    return
+            if ((typeof jobDetails[field] === 'string' && !jobDetails[field].trim()) && field !== 'companyLogo') {
+                if (field !== 'companyLogo' && field !== 'location') {
+                    newErrors[field] = ERROR.EMPTY
+                    isValid = false
                 }
             }
         }
-        // TO DO: Make sure minSalary is not higher than maxSalary
-        // TO DO: Make sure minSalary and maxSalary are above $0
+        if (!jobDetails.location && !jobDetails.remote) {
+            newErrors['location'] = ERROR.EMPTY_LOCATION
+            isValid = false
+        }
+        if (jobDetails.salaryMin === 0) {
+            newErrors['salaryMin'] = ERROR.EMPTY
+            isValid = false
+        }
+        if (jobDetails.salaryMin < 0) {
+            newErrors['salaryMin'] = ERROR.SALARY_NEGATIVE
+            isValid = false
+        }
+        if (jobDetails.salaryMax === 0) {
+            newErrors['salaryMax'] = ERROR.EMPTY
+            isValid = false
+        }
+        if (jobDetails.salaryMax < 0) {
+            newErrors['salaryMax'] = ERROR.SALARY_NEGATIVE
+            isValid = false
+        }
+        if (jobDetails.salaryMax < jobDetails.salaryMin) {
+            newErrors['salaryMax'] = ERROR.SALARY_ORDER
+        }
+        if (!jobDetails.skills.length) {
+            newErrors['skills'] = ERROR.EMPTY
+            isValid = false
+        }
+        if (descriptionEmpty) {
+            newErrors['description'] = ERROR.EMPTY
+            isValid = false
+        }
+
+        setErrors(newErrors)
+        
+        if (!isValid) {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        return isValid
+    }
+
+    const isValidHttpUrl = (text: string) => {
+        let url
+        try {
+            url = new URL(text)
+        } catch (_) {
+            return false
+        }
+        return url.protocol === "http:" || url.protocol === "https:"
+    }
+
+    const isValidEmail = (email: string) => {
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            return (true)
+        } else {
+            return (false)
+        }
+    }
+
+    // TO DO: Validate urls - provide https if absent or add prefix before input
+    const createJob = async () => {
+        const isValid = validate()
+        if (!isValid) {
+            return
+        }
         setLoading(true)
         try {
             const res = await axios.post('http://localhost:3000/api/jobs', { 
@@ -106,9 +192,8 @@ const Post: NextPage = () => {
                 backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
-                // description: jobDetails.description.trim(),
                 description: serialize({ children: descriptionEditorValue }),
-                applicationLink: jobDetails.applicationLink.trim()
+                applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
             })
             res.status === 201 && router.push(`/jobs/${res.data._id}`)
         } catch (err) {
@@ -135,7 +220,7 @@ const Post: NextPage = () => {
     // @ts-ignore
     const handleImageUploadCapture = ({ target }) => {
         const fileReader = new FileReader();
-        const name = target.accept.includes('image') ? 'images' : 'videos';
+        // const name = target.accept.includes('image') ? 'images' : 'videos';
 
         fileReader.readAsDataURL(target.files[0]);
         fileReader.onload = (e) => {
@@ -153,6 +238,8 @@ const Post: NextPage = () => {
     const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
     }
+
+    console.log('Remote: ', jobDetails.remote)
     
   return (
     <div className={styles.container}>
@@ -184,16 +271,21 @@ const Post: NextPage = () => {
                 <Grid xs={12} sm={8} container>
                     <Box p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                         <Grid container spacing={2}>
+                            <Grid xs={12}>
+                                {invalid && <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>}
+                            </Grid>
+
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Title</Typography>
-                                    <FilledInput onChange={handleInputChange} name='title' value={jobDetails.title} autoComplete='off' inputProps={{ label: 'Job Title' }} required placeholder='Job Title' disableUnderline fullWidth />
+                                    <FilledInput error={!!errors['title']} disableUnderline={!errors['title']} onChange={handleInputChange} name='title' value={jobDetails.title} autoComplete='off' inputProps={{ label: 'Job Title' }} required placeholder='Job Title' fullWidth />
+                                    <FormHelperText error>{errors['title']}</FormHelperText>
                                 </FormControl>
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Type</Typography>
-                                    <Select onChange={(value) => handleSelectChange(value)} name='type' value={jobDetails.type} variant='filled' disableUnderline fullWidth>
+                                    <Select error={true} onChange={(value) => handleSelectChange(value)} name='type' value={jobDetails.type} variant='filled' disableUnderline fullWidth>
                                         <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
                                         <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
                                         <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
@@ -201,27 +293,45 @@ const Post: NextPage = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid xs={12}>
+                            {/* <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Range <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                     <Box display='flex' alignItems='center'>
                                         <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMin' value={jobDetails.salaryMin} autoComplete='off' required placeholder='Min' disableUnderline sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                                        <FormHelperText error>{errors['salaryMin']}</FormHelperText>
                                         <Typography sx={{ marginRight: '0.25rem' }}>{' - '}</Typography>
                                         <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max' disableUnderline inputProps={{ min: "0", max: "10000000", step: "100" }} />
                                     </Box>
+                                </FormControl>
+                            </Grid> */}
+
+                            <Grid xs={6}>
+                                <FormControl hiddenLabel fullWidth>
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Min. <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
+                                    <FilledInput error={!!errors['salaryMin']} disableUnderline={!errors['salaryMin']}  type='number' fullWidth onChange={handleInputChange} name='salaryMin' value={jobDetails.salaryMin} autoComplete='off' required placeholder='Min' sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                                    <FormHelperText error>{errors['salaryMin']}</FormHelperText>
+                                </FormControl>
+                            </Grid>
+                            <Grid xs={6}>
+                                <FormControl hiddenLabel fullWidth>
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Max. <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
+                                    <FilledInput error={!!errors['salaryMax']} disableUnderline={!errors['salaryMax']}  type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max' inputProps={{ min: "0", max: "10000000", step: "100" }} />
+                                    <FormHelperText error>{errors['salaryMax']}</FormHelperText>
                                 </FormControl>
                             </Grid>
 
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Name</Typography>
-                                    <FilledInput onChange={handleInputChange} name='company' value={jobDetails.company} autoComplete='off' placeholder='Company Name' disableUnderline fullWidth sx={{ verticalAlign: 'center' }} />
+                                    <FilledInput error={!!errors['company']} disableUnderline={!errors['company']}  onChange={handleInputChange} name='company' value={jobDetails.company} autoComplete='off' placeholder='Company Name' fullWidth sx={{ verticalAlign: 'center' }} />
+                                    <FormHelperText error>{errors['company']}</FormHelperText>
                                 </FormControl>
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
-                                    <FilledInput onChange={handleInputChange} name='companyUrl' value={jobDetails.companyUrl} autoComplete='off' placeholder='https://' disableUnderline fullWidth />
+                                    <FilledInput error={!!errors['companyUrl']} disableUnderline={!errors['companyUrl']}  onChange={handleInputChange} name='companyUrl' value={jobDetails.companyUrl} autoComplete='off' placeholder='https://' fullWidth />
+                                    <FormHelperText error>{errors['companyUrl']}</FormHelperText>
                                 </FormControl>
                             </Grid>
 
@@ -241,7 +351,7 @@ const Post: NextPage = () => {
                                 {/* TO DO: Virtualize options */}
                                 <Autocomplete
                                     disablePortal
-                                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
+                                    renderInput={(params) => <TextField error={!!errors['location']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['location'], placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
                                     options={locations}
                                     filterOptions={createFilterOptions({
                                         limit: 10
@@ -250,6 +360,7 @@ const Post: NextPage = () => {
                                     inputValue={locationText}
                                     onInputChange={(event, newValue) => setLocationText(newValue)}
                                 />
+                                <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['location']}</FormHelperText>
                             </Grid>
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
@@ -262,14 +373,15 @@ const Post: NextPage = () => {
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
                                     {/* <FilledInput style={{marginBottom: '1rem'}} onChange={handleInputChange} name='description' value={jobDetails.description} placeholder='Job Description' disableUnderline fullWidth multiline rows={8} /> */}
-                                    <TextEditor slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />
+                                    <TextEditor error={!!errors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />
+                                    <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['description']}</FormHelperText>
                                 </FormControl>
                             </Grid>
 
                             <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
-                                    <Select placeholder='CSS, HTML, JavaScript' multiple onChange={handleMultipleSelectChange} name='skills' value={jobDetails.skills} variant='filled' disableUnderline fullWidth renderValue={(selected) => (
+                                    <Select error={!!errors['skills']} disableUnderline={!errors['skills']} placeholder='CSS, HTML, JavaScript' multiple onChange={handleMultipleSelectChange} name='skills' value={jobDetails.skills} variant='filled' fullWidth renderValue={(selected) => (
                                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                             {selected.map((value) => (
                                                 <Chip color='secondary.main' value={value} />
@@ -278,6 +390,7 @@ const Post: NextPage = () => {
                                     )}>
                                         {SKILLS.map(skill => <MenuItem key={skill} value={skill}>{skill}</MenuItem>)}
                                     </Select>
+                                    <FormHelperText error>{errors['skills']}</FormHelperText>
                                 </FormControl>
                             </Grid>
 
@@ -293,13 +406,15 @@ const Post: NextPage = () => {
                                     )}>
                                         {PERKS.map(perk => <MenuItem key={perk} value={perk}>{perk}</MenuItem>)}
                                     </Select>
+                                    <FormHelperText>Optional</FormHelperText>
                                 </FormControl>
                             </Grid>
 
                             <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Application Link</Typography>
-                                    <FilledInput onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or Email' disableUnderline fullWidth />
+                                    <FilledInput error={!!errors['applicationLink']} disableUnderline={!errors['applicationLink']} required onChange={handleInputChange} name='applicationLink' value={jobDetails.applicationLink} autoComplete='off' placeholder='URL or Email address' fullWidth />
+                                    <FormHelperText error>{errors['applicationLink']}</FormHelperText>
                                 </FormControl>
                             </Grid>
 
