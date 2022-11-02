@@ -12,6 +12,7 @@ import { TYPE_MAP } from '../../const/const'
 import { formatSalaryRange } from '../../utils/utils'
 import axios from 'axios'
 import ReactHtmlParser from 'react-html-parser'
+import NextLink from 'next/link'
 
 interface Props {
     data: JobData
@@ -25,6 +26,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const router = useRouter()
 
     const description = ReactHtmlParser(data.description)
+    const location = getLocationString()
 
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
@@ -34,6 +36,14 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     useEffect(() => {
         fetchCompanyJobsCount()
     }, [])
+
+    function getLocationString() { 
+        if (data.location.toLowerCase() === 'remote') {
+            return 'Remote'
+        } else {
+            return data.remote ? `${data.location} | Remote` : data.location
+        }
+    }
 
     return (
         <div className={styles.container}>
@@ -66,7 +76,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             <Typography mb={2} variant='h1' fontSize={30} fontWeight='bold'>{data.title}</Typography>
                                                 <Box display='flex' alignItems='center' color='grey'>
                                                     <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>{data.location || 'N/A'}</Typography>
+                                                    <Typography variant='subtitle2' mr={2}>{location || 'N/A'}</Typography>
 
                                                     <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
                                                     <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || data.type || 'N/A'}</Typography>
@@ -168,11 +178,15 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             {data.companyLogo && <img style={{ borderRadius: '50%' }} src={data.companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
                                             {!data.companyLogo && <Typography fontSize={20}>{data.company.slice(0, 1).toUpperCase()}</Typography>}
                                         </Box>
-                                        <Typography mb={1} fontWeight='bold'>
-                                            {data.company}
-                                        </Typography>
+                                        <NextLink href={`/?search=${data.company}`}>
+                                            <Typography mb={1} fontWeight='bold' sx={{ cursor: 'pointer '}}>
+                                                {data.company}
+                                            </Typography>
+                                        </NextLink>
                                     </Box>
-                                    <Typography variant='subtitle2' color='grey'>{`${companyJobsCount} job${companyJobsCount === 1 ? '' : 's'}`}</Typography>
+                                    <NextLink href={`/?search=${data.company}`}>
+                                        <Typography sx={{ cursor: 'pointer '}} variant='subtitle2' color='grey'>{`${companyJobsCount} job${companyJobsCount === 1 ? '' : 's'}`}</Typography>
+                                    </NextLink>
                                     {data.companyUrl && data.companyUrl !== 'N/A' && (
                                         <Link href={data.companyUrl} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
                                             <Typography variant='caption'>Visit company website</Typography>

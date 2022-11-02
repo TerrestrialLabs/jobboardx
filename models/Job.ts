@@ -10,6 +10,7 @@ const JobSchema = new mongoose.Schema({
     // TO DO: Enum
     type: { type: String, required: true },
     location: { type: String, required: true },
+    remote: { type: Boolean, required: true },
     skills: { type: [String], default: [] },
     perks: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
