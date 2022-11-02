@@ -305,6 +305,7 @@ const ListItem = ({
   companyLogo,
   type,
   location,
+  remote,
   skills,
   featured,
   applicationLink,
@@ -368,10 +369,9 @@ const ListItem = ({
 
             <Box mt={1} display='flex' alignItems='center' color='grey'>
                 <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
-                <Typography variant='subtitle2' mr={2}>{location}</Typography>
+                <Typography variant='subtitle2' mr={2}>{remote ? 'Remote' : location}</Typography>
 
                 <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                {/* <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type]}</Typography> */}
                 <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type] || type || 'N/A'}</Typography>
 
                 <Paid fontSize='small' style={{marginRight: '0.25rem'}} />

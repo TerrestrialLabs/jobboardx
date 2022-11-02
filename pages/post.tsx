@@ -216,6 +216,14 @@ const Post: NextPage = () => {
         setJobDetails({ ...jobDetails, location: value })
     }
 
+    const handleSkillsChange = (value: string[]) => {
+        setJobDetails({ ...jobDetails, skills: value })
+    }
+
+    const handlePerksChange = (value: string[]) => {
+        setJobDetails({ ...jobDetails, perks: value })
+    }
+
     // TO DO
     // @ts-ignore
     const handleImageUploadCapture = ({ target }) => {
@@ -378,7 +386,7 @@ const Post: NextPage = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid xs={12}>
+                            {/* <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
                                     <Select error={!!errors['skills']} disableUnderline={!errors['skills']} placeholder='CSS, HTML, JavaScript' multiple onChange={handleMultipleSelectChange} name='skills' value={jobDetails.skills} variant='filled' fullWidth renderValue={(selected) => (
@@ -392,9 +400,23 @@ const Post: NextPage = () => {
                                     </Select>
                                     <FormHelperText error>{errors['skills']}</FormHelperText>
                                 </FormControl>
-                            </Grid>
+                            </Grid> */}
 
                             <Grid xs={12}>
+                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
+                                <Autocomplete
+                                    freeSolo
+                                    multiple
+                                    disableClearable
+                                    disablePortal
+                                    renderInput={(params) => <TextField error={!!errors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
+                                    options={SKILLS}
+                                    onChange={(e, value) => handleSkillsChange(value || '')}
+                                />
+                                <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['skills']}</FormHelperText>
+                            </Grid>
+
+                            {/* <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Perks</Typography>
                                     <Select placeholder='Unlimited vacation, 401k matching' multiple onChange={handleMultipleSelectChange} name='perks' value={jobDetails.perks} variant='filled' disableUnderline fullWidth renderValue={(selected) => (
@@ -408,6 +430,20 @@ const Post: NextPage = () => {
                                     </Select>
                                     <FormHelperText>Optional</FormHelperText>
                                 </FormControl>
+                            </Grid> */}
+
+                            <Grid xs={12}>
+                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Perks</Typography>
+                                <Autocomplete
+                                    freeSolo
+                                    multiple
+                                    disableClearable
+                                    disablePortal
+                                    renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
+                                    options={PERKS}
+                                    onChange={(e, value) => handlePerksChange(value || '')}
+                                />
+                                <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }}>Optional</FormHelperText>
                             </Grid>
 
                             <Grid xs={12}>
@@ -417,12 +453,6 @@ const Post: NextPage = () => {
                                     <FormHelperText error>{errors['applicationLink']}</FormHelperText>
                                 </FormControl>
                             </Grid>
-
-                            {/* <Grid xs={12}>
-                                <Box color='red' display='flex'>
-                                    <Typography variant='caption'>*Required fields</Typography>
-                                </Box>
-                            </Grid> */}
 
                             <Grid xs={12} p={0}>
                                 <Box mt={2} display='flex' justifyContent='center'>
