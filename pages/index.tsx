@@ -13,7 +13,7 @@ import { TYPE, TYPE_MAP, LOCATION, LOCATION_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
 import axios from 'axios'
-import { locations } from '../data/locations.json'
+import cities from '../data/world_cities.json'
 
 type Filters = {
   search: string,
@@ -193,7 +193,7 @@ const Home: NextPage = () => {
               <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
                 <FormControl hiddenLabel fullWidth>
                   <Typography variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Keyword</Typography>
-                  <FilledInput onChange={handleFilterInputChange} name='search' value={filters.search} sx={{ height: 45 }} disableUnderline placeholder='Title, company' />
+                  <FilledInput autoComplete='off' onChange={handleFilterInputChange} name='search' value={filters.search} sx={{ height: 45 }} disableUnderline placeholder='Title, company' />
                 </FormControl>
               </Grid>
               <Grid xs={6} sm={3} sx={{ display: 'flex', alignItems: 'flex-end'}}>
@@ -218,7 +218,7 @@ const Home: NextPage = () => {
                   <Autocomplete
                     disablePortal
                     renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '4px 12px 4px' }}} />}
-                    options={locations}
+                    options={cities}
                     filterOptions={createFilterOptions({
                         limit: 10
                     })}

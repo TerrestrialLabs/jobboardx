@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
-import { locations } from '../data/locations.json'
+import cities from '../data/world_cities.json'
 import TextEditor from './components/post/TextEditor'
 import { serialize } from '../utils/serialize'
 
@@ -352,7 +352,7 @@ const Post: NextPage = () => {
                                 <Autocomplete
                                     disablePortal
                                     renderInput={(params) => <TextField error={!!errors['location']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['location'], placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
-                                    options={locations}
+                                    options={cities}
                                     filterOptions={createFilterOptions({
                                         limit: 10
                                     })}

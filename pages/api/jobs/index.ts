@@ -35,7 +35,7 @@ export type JobData = {
 export const getFilters = (query: NextApiRequest['query']) => {
     delete query.pageIndex
 
-    const days = 5 // For last 4 days
+    const days = 31 // For last 4 days
     const currentDate = new Date()
     const sinceDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
 
