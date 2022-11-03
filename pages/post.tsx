@@ -188,6 +188,7 @@ const Post: NextPage = () => {
         try {
             const res = await axios.post('http://localhost:3000/api/jobs', { 
                 ...jobDetails,
+                remote: jobDetails.remote || jobDetails.location === 'Remote',
                 title: jobDetails.title.trim(),
                 backfilled: false,
                 company: jobDetails.company.trim(),
@@ -213,7 +214,7 @@ const Post: NextPage = () => {
     }
 
     const handleAutocompleteChange = (value: string) => {
-        setJobDetails({ ...jobDetails, location: value })
+        setJobDetails({ ...jobDetails, location: value, remote: value === 'Remote' })
     }
 
     const handleSkillsChange = (value: string[]) => {
@@ -243,11 +244,9 @@ const Post: NextPage = () => {
         setJobDetails({ ...jobDetails, remote: value })
     }
 
-    const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
-        setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
-    }
-
-    console.log('Remote: ', jobDetails.remote)
+    // const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
+    //     setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
+    // }
     
   return (
     <div className={styles.container}>
@@ -300,18 +299,6 @@ const Post: NextPage = () => {
                                     </Select>
                                 </FormControl>
                             </Grid>
-
-                            {/* <Grid xs={12}>
-                                <FormControl hiddenLabel fullWidth>
-                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Range <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
-                                    <Box display='flex' alignItems='center'>
-                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMin' value={jobDetails.salaryMin} autoComplete='off' required placeholder='Min' disableUnderline sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "10000000", step: "100" }} />
-                                        <FormHelperText error>{errors['salaryMin']}</FormHelperText>
-                                        <Typography sx={{ marginRight: '0.25rem' }}>{' - '}</Typography>
-                                        <FilledInput type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max' disableUnderline inputProps={{ min: "0", max: "10000000", step: "100" }} />
-                                    </Box>
-                                </FormControl>
-                            </Grid> */}
 
                             <Grid xs={6}>
                                 <FormControl hiddenLabel fullWidth>
@@ -373,7 +360,7 @@ const Post: NextPage = () => {
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Remote <span style={{ fontWeight: 'normal' }}>(2+ days per week)</span></Typography>
-                                    <Checkbox value={jobDetails.remote} onChange={(e) => handleCheckboxChange(e.target.checked)} sx={{ width: '42px', alignSelf: 'center' }} />
+                                    <Checkbox disabled={jobDetails.location === 'Remote'} checked={jobDetails.remote} onChange={(e) => handleCheckboxChange(e.target.checked)} sx={{ width: '42px', alignSelf: 'center' }} />
                                 </FormControl>
                             </Grid>
 

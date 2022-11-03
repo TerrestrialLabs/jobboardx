@@ -19,10 +19,14 @@ async function scrapeJobs() {
         const selection = document.querySelectorAll('.SerpJob-jobCard')
 
         for (const element of selection) {
+            const location = element.querySelector('.jobposting-location').textContent.trim()
+            const remote = location === 'Remote'
+
             jobList.push({
                 title: element.querySelector('.jobposting-title').textContent.trim(),
                 company: element.querySelector('.jobposting-company').textContent.trim(),
-                location: element.querySelector('.jobposting-location').textContent.trim(),
+                location,
+                remote,
                 applicationLink: 'https://www.simplyhired.com' + element.querySelector('.SerpJob-link').getAttribute('href'),
                 backfilled: true,
                 // Placeholders
@@ -82,6 +86,12 @@ async function scrapeJobs() {
 
             let type = document.querySelector('.viewjob-jobType')?.textContent
 
+            if (type && type === 'Part-time') {
+                type = 'parttime'
+            }
+            if (type && type === 'Full-time') {
+                type = 'fulltime'
+            }
             if (type && type.includes('Contract')) {
                 type = 'contract'
             }
@@ -103,8 +113,11 @@ async function scrapeJobs() {
 
     await browser.close()
 
+    const supportedJobTypes = ['fulltime', 'parttime', 'contract']
     // Remove jobs that are missing important data
-    const jobsToSave = jobs.filter(job => job.type).map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
+    const jobsToSave = jobs
+                        .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
+                        .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
     console.log("Dates posted: ", jobsToSave.map(job => job.datePosted))
     // Write to database
     for (let i = 0; i < jobsToSave.length; i++) {

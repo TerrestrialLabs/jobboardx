@@ -39,15 +39,17 @@ export const getFilters = (query: NextApiRequest['query']) => {
     const currentDate = new Date()
     const sinceDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
 
+    // TO DO: Ignore casing for filters
+
+    // TO DO
+    // @ts-ignore
     const filters: Filters = {
-        ...query,
-        // TO DO: Remove createdAt ASAP
+        ...(query.type ? { type: query.type } : {}),
+        ...(query.location 
+            ? ((query.location as string).toLowerCase() === 'remote' ? { remote: true } : { location: query.location }) 
+            : {}),
         // Only past 30 days listings
-        ...({$or: [
-            { datePosted: { $gte: sinceDate } },
-            // { createdAt: { $gte: sinceDate } }
-        ]}),
-        // ...({ datePosted: { $gte: sinceDate } }),
+        ...({ datePosted: { $gte: sinceDate } }),
         // Make sure job's max salary is at least equal to min salary requirement
         ...(query.salaryMin ? { salaryMax: { $gte: parseInt(query.salaryMin as string) } } : {}),
         // Text search either title or company
