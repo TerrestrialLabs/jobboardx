@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
-import TextEditor from './components/post/TextEditor'
+import TextEditor from '../components/post/TextEditor'
 import { serialize } from '../utils/serialize'
 
 export type PostForm = {
@@ -86,8 +86,13 @@ const Post: NextPage = () => {
         // TO DO: Hardcoded
         featured: false
     })
+
     const [imageFile, setImageFile] = useState()
     const [imageFileName, setImageFileName] = useState('')
+    const [imagePreviewSource, setImagePreviewSource] = useState<string | ArrayBuffer | null>('')
+    const [logo, setLogo] = useState<FormData>()
+    const [logoFile, setLogoFile] = useState<string | Blob>('')
+
     const [locationText, setLocationText] = useState('')
     const [descriptionEditorValue, setDescriptionEditorValue] = useState(initEditorValue)
     const [loading, setLoading] = useState(false)
@@ -186,6 +191,14 @@ const Post: NextPage = () => {
         }
         setLoading(true)
         try {
+            const data = new FormData()
+            data.set('image', logoFile)
+
+            // TO DO: Error handling
+            const imageUploadRes = await axios.post('http://localhost:3000/api/jobs/upload-image', logo, { 
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+
             const res = await axios.post('http://localhost:3000/api/jobs', { 
                 ...jobDetails,
                 remote: jobDetails.remote || jobDetails.location === 'Remote',
@@ -193,6 +206,7 @@ const Post: NextPage = () => {
                 backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
+                companyLogo: imageUploadRes.data ?? '',
                 description: serialize({ children: descriptionEditorValue }),
                 applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
             })
@@ -227,18 +241,36 @@ const Post: NextPage = () => {
 
     // TO DO
     // @ts-ignore
-    const handleImageUploadCapture = ({ target }) => {
-        const fileReader = new FileReader();
-        // const name = target.accept.includes('image') ? 'images' : 'videos';
+    // const handleImageUploadCapture = ({ target }) => {
+    //     const fileReader = new FileReader();
+    //     // const name = target.accept.includes('image') ? 'images' : 'videos';
 
-        fileReader.readAsDataURL(target.files[0]);
-        fileReader.onload = (e) => {
-            // TO DO
-            // @ts-ignore
-            setImageFile(e.target.result);
-            setImageFileName(target.files[0].name);
-        };
-    };
+    //     fileReader.readAsDataURL(target.files[0]);
+    //     fileReader.onload = (e) => {
+    //         // TO DO
+    //         // @ts-ignore
+    //         setImageFile(e.target.result);
+    //         setImageFileName(target.files[0].name);
+    //     };
+    // };
+
+    const handleFileInputChange = (e: ChangeEventHandler<HTMLInputElement>) => {
+        const file = e.target.files[0]
+
+        setLogoFile(file)
+
+        // Test
+        const formData = new FormData()
+        formData.append('image', file)
+        setLogo(formData)
+
+        const fileReader = new FileReader()
+        fileReader.readAsDataURL(file)
+        fileReader.onloadend = () => {
+            setImagePreviewSource(fileReader.result)
+            setImageFileName(file.name)
+        }
+    }
 
     const handleCheckboxChange = (value: boolean) => {
         setJobDetails({ ...jobDetails, remote: value })
@@ -248,6 +280,7 @@ const Post: NextPage = () => {
     //     setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
     // }
     
+
   return (
     <div className={styles.container}>
       <Head>
@@ -336,8 +369,13 @@ const Post: NextPage = () => {
                                     <FilledInput disableUnderline value={imageFileName} disabled sx={{ paddingLeft: 15, backgroundColor: 'rgba(0, 0, 0, 0.06) !important'}} />
                                     <Button disableElevation variant="contained" component="label" style={{ position: 'absolute', marginTop: 38, left: '0.75rem' }}>
                                         Choose file
-                                        <input onChange={handleImageUploadCapture} hidden accept="image/*" multiple type="file" />
+                                        <input onChange={handleFileInputChange} hidden accept="image/*" multiple type="file" />
                                     </Button>
+                                    {imagePreviewSource && (
+                                        <Box sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', height: '100px' }}>
+                                            <img src={imagePreviewSource as string} alt='Logo preview' style={{ height: '100%' }} />
+                                        </Box>
+                                    )}
                                 </FormControl>
                             </Grid>
 
