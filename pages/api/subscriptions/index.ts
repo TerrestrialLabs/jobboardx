@@ -4,7 +4,7 @@ import Subscription from '../../../models/Subscription'
 
 export type SubscriptionData = {
     _id: string,
-    userId: string
+    email: string
 }
 
 function getErrorMessage(error: unknown) {

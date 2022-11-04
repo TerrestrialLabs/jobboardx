@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, FilledInput, FormControl, Grid, IconButton, Link, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Typography } from '@mui/material'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -22,6 +22,10 @@ interface Props {
 const JobDetail: NextPage<Props> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
+    const [email, setEmail] = useState('')
+    const [emailError, setEmailError] = useState(false)
+    const [emailLoading, setEmailLoading] = useState(false)
+    const [emailSubmitted, setEmailSubmitted] = useState(false)
     const [alertsPopupOpen, setAlertsPopupOpen] = useState(true)
     const router = useRouter()
 
@@ -31,11 +35,35 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
         setCompanyJobsCount(res.data)
-      }
+    }
 
     useEffect(() => {
         fetchCompanyJobsCount()
     }, [])
+
+    const validate = () => {
+        return email.length > 0 && isValidEmail(email)
+    }
+
+    const isValidEmail = (email: string) => {
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            return (true)
+        } else {
+            return (false)
+        }
+    }
+
+    const createSubscription = async () => {
+        setEmailLoading(true)
+        if (!validate()) {
+            setEmailError(true)
+            return
+        }
+        setEmailError(false)
+        await axios.post(`http://localhost:3000/api/subscriptions`, { email })
+        setEmailLoading(false)
+        setEmailSubmitted(true)
+    }
 
     function getLocationString() { 
         if (data.location.toLowerCase() === 'remote') {
@@ -62,7 +90,13 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                 </Grid>
             </Box>
 
-            <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
+            {emailSubmitted && (
+                <Alert variant='filled' sx={{ position: 'fixed', width: '100%', zIndex: 998, paddingTop: '64px' }} onClose={() => setEmailSubmitted(false)}>
+                    You'll be receiving job alerts to your inbox soon!
+                </Alert>
+            )}
+
+            <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: emailSubmitted ? 106 : 58}}>
                 {data && (
                     <Grid container justifyContent='center' pt={2} pb={4}>
                         <Grid item xs={10} lg={9} p={2} container>
@@ -158,17 +192,6 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                         </Grid>
                                     </Box>
                                 </Box>
-
-                                {/* <Grid xs={12}>
-                                    <Box color='red' display='flex' justifyContent='space-between'>
-                                        <Typography variant='caption'>*Required fields</Typography>
-                                        <Button disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary'>
-                                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
-                                        </Button>
-                                    </Box>
-                                </Grid> */}
-
-
                             </Grid>
 
                             <Grid item xs={4}>
@@ -206,10 +229,11 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             <Typography mb={1.25}>
                                                 Get weekly job alerts
                                             </Typography>
-                                            <FilledInput fullWidth disableUnderline placeholder='Your email address' />
+                                            <FilledInput value={email} onChange={(e) => setEmail(e.target.value)} fullWidth error={emailError} disableUnderline={!emailError} placeholder='Your email address' />
+                                            {emailError && <FormHelperText error>Invalid email address</FormHelperText>}
                                         </FormControl>
-                                        <Button fullWidth variant='contained' disableElevation color='secondary' style={{ marginTop: '1.25rem' }}>
-                                            Sign up
+                                        <Button onClick={createSubscription} fullWidth variant='contained' disableElevation color='secondary' style={{ marginTop: '1.25rem' }}>
+                                            {emailLoading ? <CircularProgress color='secondary' size={22} /> : 'Sign up'}
                                         </Button>
                                     </Box>
                                 )}
