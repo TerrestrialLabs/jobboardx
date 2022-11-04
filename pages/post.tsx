@@ -24,7 +24,6 @@ export type PostForm = {
     remote: boolean
     skills: string[]
     perks: string[]
-    // description: string
     featured: boolean
     applicationLink: string
     salaryMin: number
@@ -32,9 +31,8 @@ export type PostForm = {
 }
 
 // TO DO:
-//  Company logo, location, level (j/m/s), benefits fields
+//  Level (j/m/s) field
 //  Text editor functions or pre-formatted sections from multiple fields
-//  Cache form progress in case user accidentally navigates away
 //  Request edit post link email
 //  Send email with link to posting and start + end dates
 //  Posting preview
@@ -87,11 +85,11 @@ const Post: NextPage = () => {
         featured: false
     })
 
-    const [imageFile, setImageFile] = useState()
     const [imageFileName, setImageFileName] = useState('')
     const [imagePreviewSource, setImagePreviewSource] = useState<string | ArrayBuffer | null>('')
     const [logo, setLogo] = useState<FormData>()
-    const [logoFile, setLogoFile] = useState<string | Blob>('')
+    const [logoError, setLogoError] = useState(false)
+    // const [logoFile, setLogoFile] = useState<string | Blob>('')
 
     const [locationText, setLocationText] = useState('')
     const [descriptionEditorValue, setDescriptionEditorValue] = useState(initEditorValue)
@@ -191,8 +189,8 @@ const Post: NextPage = () => {
         }
         setLoading(true)
         try {
-            const data = new FormData()
-            data.set('image', logoFile)
+            // const data = new FormData()
+            // data.set('image', logoFile)
 
             // TO DO: Error handling
             const imageUploadRes = await axios.post('http://localhost:3000/api/jobs/upload-image', logo, { 
@@ -241,25 +239,15 @@ const Post: NextPage = () => {
 
     // TO DO
     // @ts-ignore
-    // const handleImageUploadCapture = ({ target }) => {
-    //     const fileReader = new FileReader();
-    //     // const name = target.accept.includes('image') ? 'images' : 'videos';
-
-    //     fileReader.readAsDataURL(target.files[0]);
-    //     fileReader.onload = (e) => {
-    //         // TO DO
-    //         // @ts-ignore
-    //         setImageFile(e.target.result);
-    //         setImageFileName(target.files[0].name);
-    //     };
-    // };
-
     const handleFileInputChange = (e: ChangeEventHandler<HTMLInputElement>) => {
         const file = e.target.files[0]
-
-        setLogoFile(file)
-
-        // Test
+        const fileSize = Math.round(file.size / 1024)
+        if (fileSize > 10000) {
+            setLogoError(true)
+            return
+        }
+        
+        setLogoError(false)
         const formData = new FormData()
         formData.append('image', file)
         setLogo(formData)
@@ -275,11 +263,6 @@ const Post: NextPage = () => {
     const handleCheckboxChange = (value: boolean) => {
         setJobDetails({ ...jobDetails, remote: value })
     }
-
-    // const handleMultipleSelectChange = (e: SelectChangeEvent<string[]>) => {
-    //     setJobDetails({ ...jobDetails, [e.target.name]: e.target.value as string[] })
-    // }
-    
 
   return (
     <div className={styles.container}>
@@ -372,10 +355,11 @@ const Post: NextPage = () => {
                                         <input onChange={handleFileInputChange} hidden accept="image/*" multiple type="file" />
                                     </Button>
                                     {imagePreviewSource && (
-                                        <Box sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', height: '100px' }}>
+                                        <Box sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', height: '100px' }}>
                                             <img src={imagePreviewSource as string} alt='Logo preview' style={{ height: '100%' }} />
                                         </Box>
                                     )}
+                                    {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
                                 </FormControl>
                             </Grid>
 

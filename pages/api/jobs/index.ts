@@ -107,8 +107,13 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const existingJob = await Job.findOne({ applicationLink: req.body.applicationLink }).exec()
+            const clientCompany = await Job.findOne({ company: req.body.company, backfilled: false })
             if (existingJob) {
                 throw Error('This job already exists')
+            }
+            // Silently fail if scraped job company has a real job posting
+            if (clientCompany) {
+                throw Error('This company already exists')
             }
             const job = await Job.create({
                 ...req.body,
