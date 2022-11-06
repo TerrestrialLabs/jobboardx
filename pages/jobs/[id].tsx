@@ -57,6 +57,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
         setEmailLoading(true)
         if (!validate()) {
             setEmailError(true)
+            setEmailLoading(false)
             return
         }
         setEmailError(false)
@@ -233,7 +234,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             {emailError && <FormHelperText error>Invalid email address</FormHelperText>}
                                         </FormControl>
                                         <Button onClick={createSubscription} fullWidth variant='contained' disableElevation color='secondary' style={{ marginTop: '1.25rem' }}>
-                                            {emailLoading ? <CircularProgress color='secondary' size={22} /> : 'Sign up'}
+                                            {emailLoading ? <CircularProgress color='secondary' size={22} /> : 'Subscribe'}
                                         </Button>
                                     </Box>
                                 )}

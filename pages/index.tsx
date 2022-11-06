@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, MenuItem, Pagination, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, ButtonBase, CircularProgress, createFilterOptions, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Pagination, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
 import type { NextPage, GetServerSideProps } from 'next'
@@ -36,6 +36,10 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [filters, setFilters] = useState<Filters>(filterDefaults)
   const [locationText, setLocationText] = useState('')
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
 
   const filtersApplied = Object.keys(router.query).length > 0
 
@@ -61,6 +65,31 @@ const Home: NextPage = () => {
       })
     }
   }, [router.isReady])
+
+  const validate = () => {
+    return email.length > 0 && isValidEmail(email)
+}
+
+  const isValidEmail = (email: string) => {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+        return (true)
+    } else {
+        return (false)
+    }
+  }
+
+  const createSubscription = async () => {
+      setEmailLoading(true)
+      if (!validate()) {
+          setEmailError(true)
+          setEmailLoading(false)
+          return
+      }
+      setEmailError(false)
+      await axios.post(`http://localhost:3000/api/subscriptions`, { email })
+      setEmailLoading(false)
+      setEmailSubmitted(true)
+  }
 
   const handleFilterInputChange = (e: { target: { name: any; value: any } }) => {
     setFilters({ ...filters, [e.target.name]: e.target.value })
@@ -268,7 +297,31 @@ const Home: NextPage = () => {
         </Grid>
       </main>
 
-      <footer className={styles.footer}>
+      <Box color='primary.main' sx={{ backgroundColor: '#fff', borderTop: '1px solid #e8e8e8', zIndex: 999 }} padding='1rem' width='100%' height='78px' display='flex' alignItems='center' justifyContent='center' position='fixed' bottom={0}>
+        <IconButton onClick={() => 'setAlertsPopupOpen(false)'} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
+          <Close />
+        </IconButton>
+        {emailSubmitted ? (
+          <>
+            <Typography color='success.main'>
+              Success! You'll be receiving job alerts to your inbox soon.
+            </Typography>
+          </>
+          ) : (
+          <>
+            <Typography mr={'1rem'}>Get the best jobs right in your inbox</Typography>
+            <FormControl hiddenLabel>
+              <FilledInput placeholder='Your email address' error={emailError} disableUnderline={!emailError} sx={{ marginRight: '1rem', height: '45px', width: '225px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+              {emailError && <FormHelperText error>Invalid email address</FormHelperText>}
+            </FormControl>
+            <Button onClick={createSubscription} variant='contained' disableElevation sx={{ height: '45px' }}>
+              {emailLoading ? <CircularProgress color='secondary' size={22} /> : 'Subscribe'}
+            </Button>
+          </>
+        )}
+      </Box>
+
+      <footer className={styles.footer} style={{ paddingBottom: '110px' }}>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
           target="_blank"

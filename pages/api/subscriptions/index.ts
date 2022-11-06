@@ -24,7 +24,7 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
-            const existingSubscription = await Subscription.findOne({ applicationLink: req.body.applicationLink }).exec()
+            const existingSubscription = await Subscription.findOne({ email: req.body.email }).exec()
             if (existingSubscription) {
                 throw Error('This subscription already exists')
             }
