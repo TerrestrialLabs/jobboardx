@@ -13,6 +13,7 @@ import axios from 'axios'
 import cities from '../data/world_cities.json'
 import TextEditor from '../components/post/TextEditor'
 import { serialize } from '../utils/serialize'
+import { useWindowSize } from '../hooks/hooks'
 
 export type PostForm = {
     title: string
@@ -96,6 +97,9 @@ const Post: NextPage = () => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrorState)
     const router = useRouter()
+
+    const windowSize = useWindowSize()
+    const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     const invalid = Object.keys(errors).some(field => errors[field])
 
@@ -282,21 +286,29 @@ const Post: NextPage = () => {
       </Box>
 
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-        <Grid container justifyContent='center' pt={2} pb={4}>
-            <Grid xs={12} sm={10} lg={9} p={2}>
-                <Box p={4} sx={{ backgroundColor: 'lightyellow', borderRadius: 1 }}>
-                    <Typography mb={1} variant='h1' fontWeight='bold' fontSize={30}>Post a job</Typography>
-                    <Typography variant='h2' fontSize={18} color='grey'>Hire the best React developers for an affordable price.</Typography>
+        <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 2 : 4}>
+            <Grid xs={12} sm={10} lg={9} p={2} pb={mobile ? 0 : 2}>
+                <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: 'lightyellow', borderRadius: 1 }}>
+                    <Typography mb={2} variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Post a job</Typography>
+                    <Typography variant='h2' fontSize={16} color='grey'>Hire the best React developers for an affordable price.</Typography>
                 </Box>
             </Grid>
 
-            <Grid xs sm={10} lg={9} p={2} container>
+            {mobile && (
+                <Grid xs={12} p={2} pb={0}>
+                    <PostingInfoBox mobile={mobile} />
+                </Grid>
+            )}
+
+            <Grid xs={12} sm={10} lg={9} p={2} container>
                 <Grid xs={12} sm={8} container>
-                    <Box p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                         <Grid container spacing={2}>
-                            <Grid xs={12}>
-                                {invalid && <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>}
-                            </Grid>
+                            {invalid && (
+                                <Grid xs={12}>
+                                    <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                </Grid>
+                            )}
 
                             <Grid xs={12} sm={6}>
                                 <FormControl hiddenLabel fullWidth>
@@ -476,12 +488,11 @@ const Post: NextPage = () => {
                     </Box>
                 </Grid>
 
-                <Grid xs={12} sm={4}>
-                    <Box ml={4} mb={4} p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
-                        {/* <Typography>Your job will be seen by <strong>12,782</strong> professionals.</Typography> */}
-                        <Typography>Your job will be live for <strong>30</strong> days.</Typography>
-                    </Box>
-                </Grid>
+                {!mobile && (
+                    <Grid sm={4}>
+                        <PostingInfoBox mobile={mobile} />
+                    </Grid>
+                )}
             </Grid>
         </Grid>
       </main>
@@ -519,6 +530,18 @@ const Chip = ({ color, value }: { color: string, value: string }) => {
             color: '#fff'
         }}>
             {value}
+        </Box>
+    )
+}
+
+type PostingInfoBoxProps = {
+    mobile: boolean
+}
+const PostingInfoBox = ({ mobile }: PostingInfoBoxProps) => {
+    return (
+        <Box ml={mobile ? 0 : 4} mb={mobile ? 0 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
+            {/* <Typography>Your job will be seen by <strong>12,782</strong> professionals.</Typography> */}
+            <Typography textAlign='center'>Your job will be live for <strong>30</strong> days.</Typography>
         </Box>
     )
 }
