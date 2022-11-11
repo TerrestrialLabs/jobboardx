@@ -18,6 +18,7 @@ import { Close, Lock, Looks3, Looks4, LooksOne, LooksTwo } from '@mui/icons-mate
 import { loadStripe } from '@stripe/stripe-js'
 import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
 import countryCodes from '../data/country_codes.json'
+import Footer from '../components/Footer'
 
 export type PostForm = {
     title: string
@@ -123,7 +124,10 @@ const Post: NextPage = () => {
     )
 }
 
-const PostForm = () => {    
+type PostFormProps = {
+    edit?: boolean
+}
+export const PostForm = ({ edit }: PostFormProps) => {    
     const [postType, setPostType] = useState('featured')
 
     const [jobDetails, setJobDetails] = useState<PostForm>({
@@ -894,18 +898,7 @@ const PostForm = () => {
         </Grid>
       </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+      <Footer />
     </div>
   )
 }
