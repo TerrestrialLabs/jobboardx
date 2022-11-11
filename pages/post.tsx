@@ -3,7 +3,7 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import React, { useImperativeHandle, useRef, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
@@ -17,6 +17,7 @@ import { useWindowSize } from '../hooks/hooks'
 import { Close, Lock, Looks3, Looks4, LooksOne, LooksTwo } from '@mui/icons-material'
 import { loadStripe } from '@stripe/stripe-js'
 import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
+import countryCodes from '../data/country_codes.json'
 
 export type PostForm = {
     title: string
@@ -47,7 +48,9 @@ const ERROR = {
     SALARY_ORDER: 'Salary max cannot be less than salary min',
     SALARY_NEGATIVE: 'Salary cannot be negative',
     WEBSITE_LINK: 'Invalid link format [https://www.example.com]',
-    APPLICATION_LINK: 'Invalid link format [https://www.example.com or email@example.com]'
+    APPLICATION_LINK: 'Invalid link format [https://www.example.com or email@example.com]',
+    EMAIL: 'Invalid email format',
+    EMAIL_CONFIRMATION: 'Email confirmation does not match email'
 }
 
 const SUPPORTED_CARDS = [
@@ -150,7 +153,7 @@ const PostForm = () => {
         city: '',
         state: '',
         postalCode: '',
-        country: ''
+        country: 'US'
     })
 
     const [imageFileName, setImageFileName] = useState('')
@@ -166,6 +169,11 @@ const PostForm = () => {
 
     const router = useRouter()
 
+    const stripe = useStripe()
+    const elements = useElements()
+    const [clientSecret, setClientSecret] = useState('')
+    const [paymentError, setPaymentError] = useState('')
+
     const jobDetailsErrorAlertRef = useRef<null | HTMLDivElement>(null)
     const billingAddressErrorAlertRef = useRef<null | HTMLDivElement>(null)
 
@@ -175,12 +183,29 @@ const PostForm = () => {
     const invalidJobDetails = Object.keys(jobDetailsErrors).some(field => jobDetailsErrors[field])
     const invalidBillingAddress = Object.keys(billingAddressErrors).some(field => billingAddressErrors[field])
 
+    useEffect(() => {
+        const paymentIntentParams = {
+            amount: PRICE[postType] * 100,
+            currency: 'USD',
+            ...(billingAddress.email ? { receipt_email: billingAddress.email } : {})
+        }
+
+        const getClientSecret = async () => {
+            const clientSecret = await axios.post('http://localhost:3000/api/stripe/create-payment-intent', paymentIntentParams)
+            setClientSecret(clientSecret.data)
+        }
+
+        getClientSecret()
+    }, [postType])
+
     const validate = () => {
         let isJobDetailsValid = true
         let isBillingAddressValid = true
         const newJobDetailsErrors = Object.assign({}, initJobDetailsErrors)
         const newBillingAddressErrors = Object.assign({}, initBillingAddressErrors)
         const descriptionEmpty = descriptionEditorValue.length === 1 && !descriptionEditorValue[0].children[0]?.text.length
+
+        // JOB DETAILS VALIDATION
 
         if (!isValidHttpUrl(jobDetails.companyUrl.trim())) {
             newJobDetailsErrors['companyUrl'] = ERROR.WEBSITE_LINK
@@ -229,9 +254,22 @@ const PostForm = () => {
             isJobDetailsValid = false
         }
 
+        // BILLING ADDRESS VALIDATION
+
+        if (billingAddress.email !== billingAddress.emailConfirmation) {
+            newBillingAddressErrors['emailConfirmation'] = ERROR.EMAIL_CONFIRMATION
+            isBillingAddressValid = false
+        }
+
+        if (!isValidEmail(billingAddress.email)) {
+            newBillingAddressErrors['email'] = ERROR.EMAIL
+            isBillingAddressValid = false
+        }
+
         for (const field in billingAddress) {
+            // TO DO: Arr of optional fields to ignore
             // @ts-ignore
-            if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim())) {
+            if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim() && field !== 'addressLine2')) {
                 newBillingAddressErrors[field] = ERROR.EMPTY
                 isBillingAddressValid = false
             }
@@ -282,6 +320,12 @@ const PostForm = () => {
 
         setLoading(true)
         try {
+            const paymentResult = await makePayment()
+
+            if (!paymentResult) {
+                throw Error('Payment failed.')
+            }
+
             // const data = new FormData()
             // data.set('image', logoFile)
 
@@ -301,6 +345,7 @@ const PostForm = () => {
                 description: serialize({ children: descriptionEditorValue }),
                 applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
             })
+
             res.status === 201 && router.push(`/jobs/${res.data._id}`)
         } catch (err) {
             console.log(err)
@@ -337,6 +382,15 @@ const PostForm = () => {
         setJobDetails({ ...jobDetails, perks: value })
     }
 
+    const handleBillingAddressChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
+        e.persist()
+        setBillingAddress({ ...billingAddress, [e.target.name]: e.target.value })
+    }
+
+    const handleBillingAddressSelectChange = (e: SelectChangeEvent<string>) => {
+        setBillingAddress({ ...billingAddress, [e.target.name]: e.target.value })
+    }
+
     // TO DO
     // @ts-ignore
     const handleFileInputChange = (e: ChangeEventHandler<HTMLInputElement>) => {
@@ -364,50 +418,45 @@ const PostForm = () => {
         setJobDetails({ ...jobDetails, remote: value })
     }
 
-    const clientSecretPull = (data) => {
-        // const url = window.location.hostname + "capture.php"
-        // return new Promise(async resolve => {
-        //     const { data: { clientSecret } } = await axios.post(url, data);
-        //     resolve(clientSecret)
-        // })
-    }
+    const makePayment = async () => {
+        if (stripe && elements) {
+            const cardElement = elements.getElement(CardNumberElement)
+            const stripeData = {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        address: {
+                            city: billingAddress.city,
+                            country: billingAddress.country,
+                            line1: billingAddress.addressLine1,
+                            line2: billingAddress.addressLine2,
+                            postal_code: billingAddress.postalCode,
+                            state: billingAddress.state
+                        },
+                        email: billingAddress.email,
+                        name: `${billingAddress.firstName} ${billingAddress.lastName}`
+                   }
+                }
+            }
 
-    const getPaymentFormValues = () => {
-        const elements = useElements()
-        const cardElement = elements?.getElement(CardNumberElement)
-        const stripeDataObject = {
-            payment_method: {
-                card: cardElement,
-                billing_details: {
-                    address: {
-                        city: billingAddress.city,
-                        country: billingAddress.country,
-                        line1: billingAddress.addressLine1,
-                        line2: billingAddress.addressLine2,
-                        postal_code: billingAddress.postalCode,
-                        state: billingAddress.state ?? null
-                    },
-                    email: billingAddress.email,
-                    name: `${billingAddress.firstName} ${billingAddress.lastName}`
-               },
-            },
+            // @ts-ignore
+            const paymentResult = await stripe.confirmCardPayment(clientSecret, stripeData)
+
+            if (paymentResult.error) {
+                setPaymentError(paymentResult.error.message || '')
+                billingAddressErrorAlertRef.current && billingAddressErrorAlertRef.current.scrollIntoView()
+            } else {
+                if (paymentResult.paymentIntent.status === "succeeded") {
+                    setPaymentError('')
+                    sendConfirmationEmail()
+                    return paymentResult
+                }
+            }
         }
-        return stripeDataObject
     }
 
-    const captureCard = async () => {
-        const clientSecret = await clientSecretPull({
-            // amount: PRICE[postType] * 100,
-            // currency: 'USD',
-            // cardType: 'card',
-            // receipt_email: formValues.email,
-            // metadata: {
-            //    date: formValues.date,
-            //    service: formValues.service,
-            //    facebook: formValues.facebook,
-            //    twitter: formValues.twitter,
-            // }
-        })
+    const sendConfirmationEmail = async () => {
+        await axios.post('http://localhost:3000/api/stripe/send-confirmation-email', { email: billingAddress.email, featured: jobDetails.featured })
     }
 
   return (
@@ -436,11 +485,10 @@ const PostForm = () => {
                 </Box>
             </Grid>
 
-            {/* {mobile && (
-                <Grid xs={12} p={2} pb={0}>
-                    <PostingInfoBox mobile={mobile} />
-                </Grid>
-            )} */}
+            {/* Test email */}
+            {/* <Box>
+                <Button onClick={sendConfirmationEmail}>Send email</Button>
+            </Box> */}
 
             <Grid xs={12} sm={10} lg={8} p={2} container>
                 <Grid xs={12} sm={12} pb={mobile ? 2 : 4} container>
@@ -500,7 +548,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Type</Typography>
-                                        <Select error={true} onChange={(value) => handleSelectChange(value)} name='type' value={jobDetails.type} variant='filled' disableUnderline fullWidth>
+                                        <Select onChange={(value) => handleSelectChange(value)} name='type' value={jobDetails.type} variant='filled' disableUnderline fullWidth>
                                             <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
                                             <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
                                             <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
@@ -640,9 +688,11 @@ const PostForm = () => {
                         </Box>
                         <Box>
                             <Grid container spacing={2}>
-                                {invalidBillingAddress && (
+                                {(invalidBillingAddress || paymentError) && (
                                     <Grid xs={12}>
-                                        <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                        <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">
+                                            {paymentError ?? 'Please fix the following errors and resubmit.'}
+                                        </Alert>
                                     </Grid>
                                 )}
 
@@ -653,7 +703,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>First Name</Typography>
-                                        <FilledInput error={!!billingAddressErrors['firstName']} disableUnderline={!billingAddressErrors['firstName']} onChange={handleInputChange} name='firstName' value={billingAddress.firstName} autoComplete='off' placeholder='First Name' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['firstName']} disableUnderline={!billingAddressErrors['firstName']} onChange={handleBillingAddressChange} name='firstName' value={billingAddress.firstName} autoComplete='off' placeholder='First Name' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['firstName']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -661,7 +711,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Last Name</Typography>
-                                        <FilledInput error={!!billingAddressErrors['lastName']} disableUnderline={!billingAddressErrors['lastName']} onChange={handleInputChange} name='lastName' value={billingAddress.lastName} autoComplete='off' placeholder='Last Name' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['lastName']} disableUnderline={!billingAddressErrors['lastName']} onChange={handleBillingAddressChange} name='lastName' value={billingAddress.lastName} autoComplete='off' placeholder='Last Name' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['lastName']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -669,7 +719,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
-                                        <FilledInput error={!!billingAddressErrors['email']} disableUnderline={!billingAddressErrors['email']} onChange={handleInputChange} name='email' value={billingAddress.email} autoComplete='off' placeholder='Email Address' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['email']} disableUnderline={!billingAddressErrors['email']} onChange={handleBillingAddressChange} name='email' value={billingAddress.email} autoComplete='off' placeholder='Email Address' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['email']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -677,7 +727,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
-                                        <FilledInput error={!!billingAddressErrors['emailConfirmation']} disableUnderline={!billingAddressErrors['emailConfirmation']} onChange={handleInputChange} name='emailConfirmation' value={billingAddress.emailConfirmation} autoComplete='off' placeholder='Email Address' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['emailConfirmation']} disableUnderline={!billingAddressErrors['emailConfirmation']} onChange={handleBillingAddressChange} name='emailConfirmation' value={billingAddress.emailConfirmation} autoComplete='off' placeholder='Email Address' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['emailConfirmation']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -685,7 +735,7 @@ const PostForm = () => {
                                 <Grid xs={12}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 1</Typography>
-                                        <FilledInput error={!!billingAddressErrors['addressLine1']} disableUnderline={!billingAddressErrors['addressLine1']} onChange={handleInputChange} name='addressLine1' value={billingAddress.addressLine1} autoComplete='off' placeholder='Address 1' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['addressLine1']} disableUnderline={!billingAddressErrors['addressLine1']} onChange={handleBillingAddressChange} name='addressLine1' value={billingAddress.addressLine1} autoComplete='off' placeholder='Address 1' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['addressLine1']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -693,7 +743,7 @@ const PostForm = () => {
                                 <Grid xs={12}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 2</Typography>
-                                        <FilledInput disableUnderline onChange={handleInputChange} name='addressLine2' value={billingAddress.addressLine2} autoComplete='off' placeholder='Address 2' fullWidth />
+                                        <FilledInput disableUnderline onChange={handleBillingAddressChange} name='addressLine2' value={billingAddress.addressLine2} autoComplete='off' placeholder='Address 2' fullWidth />
                                         <FormHelperText>Optional</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -701,7 +751,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>City</Typography>
-                                        <FilledInput error={!!billingAddressErrors['city']} disableUnderline={!billingAddressErrors['city']} onChange={handleInputChange} name='city' value={billingAddress.city} autoComplete='off' placeholder='City' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['city']} disableUnderline={!billingAddressErrors['city']} onChange={handleBillingAddressChange} name='city' value={billingAddress.city} autoComplete='off' placeholder='City' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['city']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -709,7 +759,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>State</Typography>
-                                        <FilledInput error={!!billingAddressErrors['state']} disableUnderline={!billingAddressErrors['state']} onChange={handleInputChange} name='state' value={billingAddress.state} autoComplete='off' placeholder='State' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['state']} disableUnderline={!billingAddressErrors['state']} onChange={handleBillingAddressChange} name='state' value={billingAddress.state} autoComplete='off' placeholder='State' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['state']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -717,7 +767,7 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Postal Code</Typography>
-                                        <FilledInput error={!!billingAddressErrors['postalCode']} disableUnderline={!billingAddressErrors['postalCode']} onChange={handleInputChange} name='postalCode' value={billingAddress.postalCode} autoComplete='off' placeholder='Postal Code' fullWidth />
+                                        <FilledInput error={!!billingAddressErrors['postalCode']} disableUnderline={!billingAddressErrors['postalCode']} onChange={handleBillingAddressChange} name='postalCode' value={billingAddress.postalCode} autoComplete='off' placeholder='Postal Code' fullWidth />
                                         <FormHelperText error>{billingAddressErrors['postalCode']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -725,7 +775,10 @@ const PostForm = () => {
                                 <Grid xs={12} sm={6}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Country</Typography>
-                                        <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleInputChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth />
+                                        {/* <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleBillingAddressChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth /> */}
+                                        <Select onChange={(value) => handleBillingAddressSelectChange(value)} name='country' value={billingAddress.country} variant='filled' disableUnderline fullWidth>
+                                            {countryCodes.map(country => <MenuItem value={country.code}>{country.name}</MenuItem>)}
+                                        </Select>
                                         <FormHelperText error>{billingAddressErrors['country']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
