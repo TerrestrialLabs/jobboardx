@@ -1,4 +1,4 @@
-import { Box, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, FilledInput, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { useCallback, useMemo, useState } from 'react'
 import { createEditor, Editor, Text, Transforms } from 'slate';
 import { withHistory } from 'slate-history'
@@ -32,18 +32,19 @@ type EditorType = BaseEditor & ReactEditor & HistoryEditor
 type SlateValue = { type: string, children: { text: string }[] }[]
 
 type TextEditorProps = {
+    editor: EditorType,
     error: boolean,
     slateValue: SlateValue,
     setSlateValue: (value: SlateValue) => void
 }
 
-const TextEditor = ({ error, slateValue, setSlateValue }: TextEditorProps) => {
+const TextEditor = ({ editor, error, slateValue, setSlateValue }: TextEditorProps) => {
     const [showHoverState, setShowHoverState] = useState(false)
 
-    const editor = useMemo(
-        () => withHtml(withReact(withHistory(createEditor()))),
-        []
-    ) as EditorType
+    // const editor = useMemo(
+    //     () => withHtml(withReact(withHistory(createEditor()))),
+    //     []
+    // ) as EditorType
     const showPlaceholder = slateValue.length === 1 && slateValue[0].children[0].text && !slateValue[0].children[0].text.length
 
     const renderLeaf = useCallback((props: any) => <SlateLeaf {...props} />, [])
@@ -251,105 +252,53 @@ const BlockButton = ({ format, icon }: any) => {
     );
 }
 
-const ELEMENT_TAGS: { [key: string]: () => ({ type: string }) } = {
-    // A: el => ({ type: 'link', url: el.getAttribute('href') }),
-    A: () => ({ type: 'paragraph' }),
-    BLOCKQUOTE: () => ({ type: 'quote' }),
-    H1: () => ({ type: 'heading-one' }),
-    H2: () => ({ type: 'heading-two' }),
-    H3: () => ({ type: 'heading-three' }),
-    H4: () => ({ type: 'heading-four' }),
-    H5: () => ({ type: 'heading-five' }),
-    H6: () => ({ type: 'heading-six' }),
-    // IMG: el => ({ type: 'image', url: el.getAttribute('src') }),
-    LI: () => ({ type: 'list-item' }),
-    OL: () => ({ type: 'numbered-list' }),
-    P: () => ({ type: 'paragraph' }),
-    PRE: () => ({ type: 'code' }),
-    UL: () => ({ type: 'bulleted-list' }),
-}
-  
-// COMPAT: `B` is omitted here because Google Docs uses `<b>` in weird ways.
-const TEXT_TAGS: { [key: string]: () => ({ [key: string]: boolean }) } = {
-    CODE: () => ({ code: true }),
-    DEL: () => ({ strikethrough: true }),
-    EM: () => ({ italic: true }),
-    I: () => ({ italic: true }),
-    S: () => ({ strikethrough: true }),
-    STRONG: () => ({ bold: true }),
-    // TO DO: Apparently this has problems when pasting from Google Docs
-    B: () => ({ bold: true }),
-    U: () => ({ underline: true }),
-}
-
-export const deserialize = (el: Node): any => {
-    if (el.nodeType === 3) {
-        return el.textContent
-    } else if (el.nodeType !== 1) {
-        return null
-    } 
-    // else if (el.nodeName === 'BR') {
-    //     return '\n'
-    // }
-
-    const { nodeName } = el
-    let parent = el
-
-    if (
-        nodeName === 'PRE' &&
-        el.childNodes[0] &&
-        el.childNodes[0].nodeName === 'CODE'
-    ) {
-        parent = el.childNodes[0]
-    }
-    let children = Array.from(parent.childNodes)
-        .map(deserialize)
-        .flat()
-
-    if (children.length === 0) {
-        children = [{ text: '' }]
-    }
-
-    if (el.nodeName === 'BODY') {
-        return jsx('fragment', {}, children)
-    }
-
-    if (ELEMENT_TAGS[nodeName]) {
-        const attrs = ELEMENT_TAGS[nodeName]()
-        return jsx('element', attrs, children)
-    }
-
-    if (TEXT_TAGS[nodeName]) {
-        const attrs = TEXT_TAGS[nodeName]()
-        return children.map(child => jsx('text', attrs, child))
-    }
-
-    return children
-}
-
-const withHtml = (editor: EditorType) => {
-    const { insertData, isInline, isVoid } = editor
-
-    editor.isInline = element => {
-        return element.type === 'link' ? true : isInline(element)
-    }
-
-    editor.isVoid = element => {
-        return element.type === 'image' ? true : isVoid(element)
-    }
-
-    editor.insertData = data => {
-        const html = data.getData('text/html')
-
-        if (html) {
-            const parsed = new DOMParser().parseFromString(html, 'text/html')
-            const fragment = deserialize(parsed.body)
-            Transforms.insertFragment(editor, fragment)
-            return
-        }
-
-        insertData(data)
-    }
-
-    return editor
+export const TextEditorPlaceholder = () => {
+    return (
+        <Box>
+            <Box sx={{ backgroundColor: 'lightgrey', display: 'flex', borderTopLeftRadius: '4px', borderTopRightRadius: '4px' }}>
+                <ToggleButton
+                    disabled={true}
+                    style={{ border: 0 }}
+                    value={'bold'}
+                    selected={false}
+                >
+                    <FaBold size={14} />
+                </ToggleButton>
+                <ToggleButton
+                    disabled={true}
+                    style={{ border: 0 }}
+                    value={'italic'}
+                    selected={false}
+                >
+                    <FaItalic size={14} />
+                </ToggleButton>
+                <ToggleButton
+                    disabled={true}
+                    style={{ border: 0 }}
+                    value={'underline'}
+                    selected={false}
+                >
+                    <FaUnderline size={14} />
+                </ToggleButton>
+                <Box width='1rem' />
+                <ToggleButton
+                    disabled={true}
+                    style={{ border: 0, padding: 0, height: 36, width: 36 }}
+                    value={'numbered-list'}
+                    selected={false}
+                >
+                    <MdFormatListNumbered size={24} />
+                </ToggleButton>
+                <ToggleButton
+                    disabled={true}
+                    style={{ border: 0, padding: 0, height: 36, width: 36 }}
+                    value={'bulleted-list'}
+                    selected={false}
+                >
+                    <MdList size={30} />
+                </ToggleButton>
+            </Box>
+            <FilledInput sx={{ borderRadius: 0 }} disabled disableUnderline fullWidth multiline rows={10} />
+        </Box>
+    )
 }

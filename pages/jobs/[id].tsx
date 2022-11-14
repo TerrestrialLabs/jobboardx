@@ -33,6 +33,14 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
 
+    // TO DO: TESTING
+    const createJobUpdateRequest = () => {
+        axios.post('http://localhost:3000/api/job-update-requests', {
+            email: 'hgagdere@gmail.com',
+            jobId: router.query.id
+        })
+    }
+
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
         setCompanyJobsCount(res.data)
@@ -74,6 +82,10 @@ const JobDetail: NextPage<Props> = ({ data }) => {
             )} */}
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
+
+                {/* TO DO: TESTING */}
+                <Button onClick={createJobUpdateRequest}>EDIT</Button>
+
                 {data && (
                     <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
                         <Grid item xs={12} sm={10} lg={9} p={2} container>

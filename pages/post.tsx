@@ -11,14 +11,17 @@ import Link from 'next/link'
 import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
-import TextEditor from '../components/post/TextEditor'
-import { serialize } from '../utils/serialize'
+import TextEditor, { TextEditorPlaceholder } from '../components/post/TextEditor'
+import { deserialize, serialize } from '../utils/serialize'
 import { useWindowSize } from '../hooks/hooks'
 import { Close, Lock, Looks3, Looks4, LooksOne, LooksTwo } from '@mui/icons-material'
 import { loadStripe } from '@stripe/stripe-js'
 import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
 import countryCodes from '../data/country_codes.json'
 import Footer from '../components/Footer'
+import { useEditor } from '../hooks/editor'
+import { Transforms } from 'slate'
+import type { Node } from 'slate'
 
 export type PostForm = {
     title: string
@@ -76,6 +79,23 @@ const initEditorValue = [
     }
 ]
 
+const initJobDetails = {
+    title: '',
+    company: '',
+    companyUrl: '',
+    type: TYPE.FULLTIME,
+    location: '',
+    remote: false,
+    // description: '',
+    applicationLink: '',
+    skills: [],
+    perks: [],
+    salaryMin: 0,
+    salaryMax: 0,
+    // TO DO: Hardcoded
+    featured: true
+}
+
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
     company: null,
@@ -128,24 +148,8 @@ type PostFormProps = {
     edit?: boolean
 }
 export const PostForm = ({ edit }: PostFormProps) => {    
-    const [postType, setPostType] = useState('featured')
-
-    const [jobDetails, setJobDetails] = useState<PostForm>({
-        title: '',
-        company: '',
-        companyUrl: '',
-        type: TYPE.FULLTIME,
-        location: '',
-        remote: false,
-        // description: '',
-        applicationLink: '',
-        skills: [],
-        perks: [],
-        salaryMin: 0,
-        salaryMax: 0,
-        // TO DO: Hardcoded
-        featured: false
-    })
+    const [job, setJob] = useState<JobData | null>(null)
+    const [jobDetails, setJobDetails] = useState<PostForm>(initJobDetails)
 
     const [billingAddress, setBillingAddress] = useState({
         firstName: '',
@@ -164,17 +168,22 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [imagePreviewSource, setImagePreviewSource] = useState<string | ArrayBuffer | null>('')
     const [logo, setLogo] = useState<FormData>()
     const [logoError, setLogoError] = useState(false)
+    const [logoUrl, setLogoUrl] = useState('')
 
     const [locationText, setLocationText] = useState('')
     const [descriptionEditorValue, setDescriptionEditorValue] = useState(initEditorValue)
+
     const [loading, setLoading] = useState(false)
     const [jobDetailsErrors, setJobDetailsErrors] = useState(initJobDetailsErrors)
     const [billingAddressErrors, setBillingAddressErrors] = useState(initBillingAddressErrors)
+
+    const editor = useEditor()
 
     const router = useRouter()
 
     const stripe = useStripe()
     const elements = useElements()
+
     const [clientSecret, setClientSecret] = useState('')
     const [paymentError, setPaymentError] = useState('')
 
@@ -187,20 +196,80 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const invalidJobDetails = Object.keys(jobDetailsErrors).some(field => jobDetailsErrors[field])
     const invalidBillingAddress = Object.keys(billingAddressErrors).some(field => billingAddressErrors[field])
 
+    const loadJob = async () => {
+        // TO DO: set job loading true
+        try {
+            const tokenRes = await axios.get(`http://localhost:3000/api/job-update-requests/${router.query.token}`)
+            if (tokenRes) {
+                const validDuration = 1 * 24 * 60 * 60 * 1000
+                const currentDate = new Date()
+                const expiration = new Date(currentDate.getTime() - validDuration)
+                const expired = currentDate <= expiration
+                if (expired) {
+                    // TO DO: Set error - "This link has expired --> request new link form"
+                    throw Error('Expired edit link.')
+                } else {
+                    const jobRes = await axios.get(`http://localhost:3000/api/jobs/${tokenRes.data.jobId}`)
+                    if (jobRes) {
+                        const { data } = jobRes
+                        // TO DO: Set state
+                        const updatedJobDetails = {
+                            ...initJobDetails,
+                            title: data.title,
+                            company: data.company,
+                            companyUrl: data.companyUrl,
+                            type: data.type,
+                            location: data.location,
+                            remote: data.remote,
+                            applicationLink: data.applicationLink,
+                            skills: data.skills,
+                            perks: data.perks,
+                            featured: data.featured,
+                            // TO DO: Check if saved as number or string
+                            salaryMin: data.salaryMin,
+                            salaryMax: data.salaryMax
+                        }
+                        // TO DO: Featured, description, logo
+                        setJob(data)
+                        setJobDetails(updatedJobDetails)
+                        const descriptionDocument = new DOMParser().parseFromString(`<body>${data.description}</body>`, 'text/html')
+                        const descriptionSlateNodes = deserialize(descriptionDocument.body)
+                        console.log('descriptionSlateNodes: ', descriptionSlateNodes)
+                        setEditorValueFromExistingJob(descriptionSlateNodes)
+                        setLogoUrl(data.companyLogo)
+                        handleLocationTextChange(data.location)
+                    }
+                }
+            }
+        } catch (err) {
+            // TO DO: Set error - check if expired - "You do not have permission to edit this job, or your link has expired."
+        } finally {
+            // TO DO: Set job loading false
+        }
+    }
+
     useEffect(() => {
-        const paymentIntentParams = {
-            amount: PRICE[postType] * 100,
-            currency: 'USD',
-            ...(billingAddress.email ? { receipt_email: billingAddress.email } : {})
+        if (edit && router.query.token) {
+            loadJob()
         }
+    }, [router.query])
 
-        const getClientSecret = async () => {
-            const clientSecret = await axios.post('http://localhost:3000/api/stripe/create-payment-intent', paymentIntentParams)
-            setClientSecret(clientSecret.data)
+    useEffect(() => {
+        if (!edit) {
+            const paymentIntentParams = {
+                amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
+                currency: 'USD',
+                ...(billingAddress.email ? { receipt_email: billingAddress.email } : {})
+            }
+    
+            const getClientSecret = async () => {
+                const clientSecret = await axios.post('http://localhost:3000/api/stripe/create-payment-intent', paymentIntentParams)
+                setClientSecret(clientSecret.data)
+            }
+    
+            getClientSecret()
         }
-
-        getClientSecret()
-    }, [postType])
+    }, [jobDetails.featured])
 
     const validate = () => {
         let isJobDetailsValid = true
@@ -258,29 +327,32 @@ export const PostForm = ({ edit }: PostFormProps) => {
             isJobDetailsValid = false
         }
 
+        setJobDetailsErrors(newJobDetailsErrors)
+
         // BILLING ADDRESS VALIDATION
 
-        if (billingAddress.email !== billingAddress.emailConfirmation) {
-            newBillingAddressErrors['emailConfirmation'] = ERROR.EMAIL_CONFIRMATION
-            isBillingAddressValid = false
-        }
-
-        if (!isValidEmail(billingAddress.email)) {
-            newBillingAddressErrors['email'] = ERROR.EMAIL
-            isBillingAddressValid = false
-        }
-
-        for (const field in billingAddress) {
-            // TO DO: Arr of optional fields to ignore
-            // @ts-ignore
-            if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim() && field !== 'addressLine2')) {
-                newBillingAddressErrors[field] = ERROR.EMPTY
+        if (!edit) {
+            if (billingAddress.email !== billingAddress.emailConfirmation) {
+                newBillingAddressErrors['emailConfirmation'] = ERROR.EMAIL_CONFIRMATION
                 isBillingAddressValid = false
             }
+    
+            if (!isValidEmail(billingAddress.email)) {
+                newBillingAddressErrors['email'] = ERROR.EMAIL
+                isBillingAddressValid = false
+            }
+    
+            for (const field in billingAddress) {
+                // TO DO: Arr of optional fields to ignore
+                // @ts-ignore
+                if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim() && field !== 'addressLine2')) {
+                    newBillingAddressErrors[field] = ERROR.EMPTY
+                    isBillingAddressValid = false
+                }
+            }
+    
+            setBillingAddressErrors(newBillingAddressErrors)
         }
-
-        setJobDetailsErrors(newJobDetailsErrors)
-        setBillingAddressErrors(newBillingAddressErrors)
         
         if (!isJobDetailsValid) {
             // window.scrollTo({
@@ -314,43 +386,52 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     // TO DO: Validate urls - provide https if absent or add prefix before input
-    const createJob = async () => {
+    const createOrUpdateJob = async () => {
         const isValid = validate()
         if (!isValid) {
             return
         }
-
-        console.log('isValid')
-
         setLoading(true)
         try {
-            const paymentResult = await makePayment()
+            if (!edit) {
+                const paymentResult = await makePayment()
 
-            if (!paymentResult) {
-                throw Error('Payment failed.')
+                if (!paymentResult) {
+                    throw Error('Payment failed.')
+                }
             }
 
             // const data = new FormData()
             // data.set('image', logoFile)
 
             // TO DO: Error handling
-            const imageUploadRes = await axios.post('http://localhost:3000/api/jobs/upload-image', logo, { 
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-
-            const res = await axios.post('http://localhost:3000/api/jobs', { 
+            let imageUploadRes
+            if (logo) {
+                imageUploadRes = await axios.post('http://localhost:3000/api/jobs/upload-image', logo, { 
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+            }
+            
+            const body = { 
+                ...(edit ? job : {}),
                 ...jobDetails,
                 remote: jobDetails.remote || jobDetails.location === 'Remote',
                 title: jobDetails.title.trim(),
                 backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
-                companyLogo: imageUploadRes.data ?? '',
+                companyLogo: logoUrl ?? imageUploadRes?.data ?? '',
                 description: serialize({ children: descriptionEditorValue }),
                 applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
-            })
-
-            res.status === 201 && router.push(`/jobs/${res.data._id}`)
+            }
+            let res
+            if (edit) {
+                res = await axios.put(`http://localhost:3000/api/jobs/${job?._id}`, body)
+            } else {
+                res = await axios.post('http://localhost:3000/api/jobs', body)
+            }
+            
+            res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
         } catch (err) {
             console.log(err)
         } finally {
@@ -363,6 +444,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
         setImagePreviewSource('')
         setLogo(undefined)
         setLogoError(false)
+        setLogoUrl('')
     }
 
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
@@ -376,6 +458,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     const handleAutocompleteChange = (value: string) => {
         setJobDetails({ ...jobDetails, location: value, remote: value === 'Remote' })
+    }
+
+    const handleLocationTextChange = (text: string) => {
+        setLocationText(text)
     }
 
     const handleSkillsChange = (value: string[]) => {
@@ -395,6 +481,16 @@ export const PostForm = ({ edit }: PostFormProps) => {
         setBillingAddress({ ...billingAddress, [e.target.name]: e.target.value })
     }
 
+    const setEditorValueFromExistingJob = (nodes: Node | Node[]) => {
+        console.log("JOB: ", job)
+        // @ts-ignore
+        // editor.insertNode(nodes, { at: [0, 0] })
+        setDescriptionEditorValue(nodes)
+        // Transforms.removeNodes(editor, { at: [0, 0] })
+    }
+
+    console.log('description: ', descriptionEditorValue)
+
     // TO DO
     // @ts-ignore
     const handleFileInputChange = (e: ChangeEventHandler<HTMLInputElement>) => {
@@ -406,6 +502,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
         
         setLogoError(false)
+        setLogoUrl('')
         const formData = new FormData()
         formData.append('image', file)
         setLogo(formData)
@@ -423,7 +520,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     const makePayment = async () => {
-        if (stripe && elements) {
+        if (stripe && elements && !edit) {
             const cardElement = elements.getElement(CardNumberElement)
             const stripeData = {
                 payment_method: {
@@ -505,7 +602,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         </Box>
                         <Box display='flex' flexDirection={mobile ? 'column' : 'row'}>
                             <Grid xs={12} sm={6} mb={mobile ? 2 : 0}>
-                                <Box onClick={() => setPostType('featured')} mr={mobile ? 0 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(postType === 'featured' ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                <Box onClick={() => setJobDetails({ ...jobDetails, featured: true })} mr={mobile ? 0 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
                                     <Typography fontWeight='bold' mb={1}>FEATURED</Typography>
                                     <Typography fontWeight='bold' mb={2} color='grey'>$99</Typography>
                                     <Typography>
@@ -514,7 +611,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                 </Box>
                             </Grid>
                             <Grid xs={12} sm={6}>
-                                <Box onClick={() => setPostType('regular')} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(postType === 'regular' ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                <Box onClick={() => setJobDetails({ ...jobDetails, featured: false })} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(!jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
                                     <Typography fontWeight='bold' mb={1}>REGULAR</Typography>
                                     <Typography fontWeight='bold' mb={2} color='grey'>$49</Typography>
                                     <Typography>
@@ -606,6 +703,14 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                 </IconButton>
                                             </Box>
                                         )}
+                                        {edit && logoUrl && (
+                                            <Box display='flex' alignItems='center' sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', paddingBottom: mobile ? '8px' : '17px', height: '100px' }}>
+                                                <img src={logoUrl} alt='Logo preview' style={{ height: '100%' }} />
+                                                <IconButton onClick={removeLogo} sx={{ marginLeft: 1 }}>
+                                                    <Close fontSize='small' />
+                                                </IconButton>
+                                            </Box>
+                                        )}
                                         {imagePreviewSource && mobile && <Typography sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
                                         {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
                                     </FormControl>
@@ -622,8 +727,9 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             limit: 10
                                         })}
                                         onChange={(e, value) => handleAutocompleteChange(value || '')}
+                                        value={jobDetails.location}
                                         inputValue={locationText}
-                                        onInputChange={(event, newValue) => setLocationText(newValue)}
+                                        onInputChange={(event, newValue) => handleLocationTextChange(newValue)}
                                     />
                                     <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['location']}</FormHelperText>
                                 </Grid>
@@ -637,7 +743,8 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                 <Grid xs={12}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
-                                        <TextEditor error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />
+                                        {(!edit || job) && <TextEditor editor={editor} error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />}
+                                        {edit && !job && <TextEditorPlaceholder />}
                                         <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['description']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
@@ -652,6 +759,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
                                         options={SKILLS}
                                         onChange={(e, value) => handleSkillsChange(value || '')}
+                                        value={jobDetails.skills}
                                     />
                                     <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['skills']}</FormHelperText>
                                 </Grid>
@@ -666,6 +774,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
                                         options={PERKS}
                                         onChange={(e, value) => handlePerksChange(value || '')}
+                                        value={jobDetails.perks}
                                     />
                                     <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }}>Optional</FormHelperText>
                                 </Grid>
@@ -677,223 +786,231 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         <FormHelperText error>{jobDetailsErrors['applicationLink']}</FormHelperText>
                                     </FormControl>
                                 </Grid>
-                            </Grid>
-                        </Box>
-                    </Box>
-                </Grid>
 
-                <Grid xs={12} pb={mobile ? 2 : 4}>
-                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                        <Box>
-                            <Grid xs={12} display='flex' alignItems='center' justifyContent='center' pb={4} ref={billingAddressErrorAlertRef}>
-                                <Looks3 color='primary' fontSize='medium' />
-                                <Typography fontSize={18} ml={1} fontWeight='bold'>Enter billing info</Typography>
-                            </Grid>
-                        </Box>
-                        <Box>
-                            <Grid container spacing={2}>
-                                {(invalidBillingAddress || paymentError) && (
-                                    <Grid xs={12}>
-                                        <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">
-                                            {paymentError ?? 'Please fix the following errors and resubmit.'}
-                                        </Alert>
+                                {edit && (
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Update job'}
+                                        </Button>
                                     </Grid>
                                 )}
-
-                                <Grid xs={12} pb={2} pt={0} display='flex' justifyContent='center'>
-                                    <Typography fontWeight='bold' color='grey'>BILLING ADDRESS</Typography>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>First Name</Typography>
-                                        <FilledInput error={!!billingAddressErrors['firstName']} disableUnderline={!billingAddressErrors['firstName']} onChange={handleBillingAddressChange} name='firstName' value={billingAddress.firstName} autoComplete='off' placeholder='First Name' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['firstName']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Last Name</Typography>
-                                        <FilledInput error={!!billingAddressErrors['lastName']} disableUnderline={!billingAddressErrors['lastName']} onChange={handleBillingAddressChange} name='lastName' value={billingAddress.lastName} autoComplete='off' placeholder='Last Name' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['lastName']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
-                                        <FilledInput error={!!billingAddressErrors['email']} disableUnderline={!billingAddressErrors['email']} onChange={handleBillingAddressChange} name='email' value={billingAddress.email} autoComplete='off' placeholder='Email Address' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['email']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
-                                        <FilledInput error={!!billingAddressErrors['emailConfirmation']} disableUnderline={!billingAddressErrors['emailConfirmation']} onChange={handleBillingAddressChange} name='emailConfirmation' value={billingAddress.emailConfirmation} autoComplete='off' placeholder='Email Address' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['emailConfirmation']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 1</Typography>
-                                        <FilledInput error={!!billingAddressErrors['addressLine1']} disableUnderline={!billingAddressErrors['addressLine1']} onChange={handleBillingAddressChange} name='addressLine1' value={billingAddress.addressLine1} autoComplete='off' placeholder='Address 1' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['addressLine1']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 2</Typography>
-                                        <FilledInput disableUnderline onChange={handleBillingAddressChange} name='addressLine2' value={billingAddress.addressLine2} autoComplete='off' placeholder='Address 2' fullWidth />
-                                        <FormHelperText>Optional</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>City</Typography>
-                                        <FilledInput error={!!billingAddressErrors['city']} disableUnderline={!billingAddressErrors['city']} onChange={handleBillingAddressChange} name='city' value={billingAddress.city} autoComplete='off' placeholder='City' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['city']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>State</Typography>
-                                        <FilledInput error={!!billingAddressErrors['state']} disableUnderline={!billingAddressErrors['state']} onChange={handleBillingAddressChange} name='state' value={billingAddress.state} autoComplete='off' placeholder='State' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['state']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Postal Code</Typography>
-                                        <FilledInput error={!!billingAddressErrors['postalCode']} disableUnderline={!billingAddressErrors['postalCode']} onChange={handleBillingAddressChange} name='postalCode' value={billingAddress.postalCode} autoComplete='off' placeholder='Postal Code' fullWidth />
-                                        <FormHelperText error>{billingAddressErrors['postalCode']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Country</Typography>
-                                        {/* <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleBillingAddressChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth /> */}
-                                        <Select onChange={(value) => handleBillingAddressSelectChange(value)} name='country' value={billingAddress.country} variant='filled' disableUnderline fullWidth>
-                                            {countryCodes.map(country => <MenuItem value={country.code}>{country.name}</MenuItem>)}
-                                        </Select>
-                                        <FormHelperText error>{billingAddressErrors['country']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} pt={2}>
-                                    <Divider />
-                                </Grid>
-
-                                <Grid xs={12} p={2} display='flex' justifyContent='center'>
-                                    <Typography fontWeight='bold' color='grey'>PAYMENT DETAILS</Typography>
-                                </Grid>
-
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Credit Card Number</Typography>
-                                        <TextField
-                                            onChange={(e) => console.log(e.target.value)}
-                                            name='creditCardNumber'
-                                            variant='filled'
-                                            hiddenLabel
-                                            error={!!jobDetailsErrors['applicationLink']} 
-                                            fullWidth
-                                            InputLabelProps={{ shrink: true }}
-                                            InputProps={{
-                                                disableUnderline: !jobDetailsErrors['applicationLink'],
-                                                // @ts-ignore
-                                                inputComponent: StripeInput,
-                                                inputProps: {
-                                                    component: CardNumberElement
-                                                }
-                                            }}
-                                        />
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={6} sm={3}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Expiration Date</Typography>
-                                        <TextField
-                                            name='creditCardExpiration'
-                                            variant='filled'
-                                            hiddenLabel
-                                            error={!!jobDetailsErrors['applicationLink']} 
-                                            fullWidth
-                                            InputLabelProps={{ shrink: true }}
-                                            InputProps={{
-                                                disableUnderline: !jobDetailsErrors['applicationLink'],
-                                                // @ts-ignore
-                                                inputComponent: StripeInput,
-                                                inputProps: {
-                                                    component: CardExpiryElement
-                                                }
-                                            }}
-                                        />
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={6} sm={3}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>CVC</Typography>
-                                        <TextField 
-                                            name='cvc'
-                                            variant='filled'
-                                            hiddenLabel
-                                            error={!!jobDetailsErrors['applicationLink']} 
-                                            fullWidth
-                                            InputLabelProps={{ shrink: true }}
-                                            InputProps={{
-                                                disableUnderline: !jobDetailsErrors['applicationLink'],
-                                                // @ts-ignore
-                                                inputComponent: StripeInput,
-                                                inputProps: {
-                                                    component: CardCvcElement
-                                                }
-                                            }}
-                                        />
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid xs={12} container >
-                                    <Grid xs={12}>
-                                        <Box display='flex' flexWrap='wrap' ml={0.34} mb={1}>
-                                            {SUPPORTED_CARDS.map(card => <img key={card} src={`/images/cards/${card}.png`} alt={card} width='50px' style={{ padding: `8px 5px 0` }} />)}
-                                        </Box>
-
-                                        <Typography ml={1} variant='caption'>
-                                            <strong>Note:</strong> All transactions are made in USD.
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-
-                                <Grid xs={12} mt={1}>
-                                    <Box display='flex' alignItems='center'>
-                                        <img src='/images/stripe.svg' width='140px' style={{ marginRight: '1rem' }} />
-                                        <Box display='flex' alignItems='center'>
-                                            <Lock />
-                                            <Typography ml={1} variant='subtitle2'>Guaranteed safe & secure checkout</Typography>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                                
-                                <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                    <Button fullWidth={mobile} disabled={loading} onClick={createJob} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
-                                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
-                                    </Button>
-                                </Grid>
                             </Grid>
                         </Box>
                     </Box>
                 </Grid>
 
+                {!edit && (
+                    <Grid xs={12} pb={mobile ? 2 : 4}>
+                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                            <Box>
+                                <Grid xs={12} display='flex' alignItems='center' justifyContent='center' pb={4} ref={billingAddressErrorAlertRef}>
+                                    <Looks3 color='primary' fontSize='medium' />
+                                    <Typography fontSize={18} ml={1} fontWeight='bold'>Enter billing info</Typography>
+                                </Grid>
+                            </Box>
+                            <Box>
+                                <Grid container spacing={2}>
+                                    {(invalidBillingAddress || paymentError) && (
+                                        <Grid xs={12}>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">
+                                                {paymentError ?? 'Please fix the following errors and resubmit.'}
+                                            </Alert>
+                                        </Grid>
+                                    )}
+
+                                    <Grid xs={12} pb={2} pt={0} display='flex' justifyContent='center'>
+                                        <Typography fontWeight='bold' color='grey'>BILLING ADDRESS</Typography>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>First Name</Typography>
+                                            <FilledInput error={!!billingAddressErrors['firstName']} disableUnderline={!billingAddressErrors['firstName']} onChange={handleBillingAddressChange} name='firstName' value={billingAddress.firstName} autoComplete='off' placeholder='First Name' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['firstName']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Last Name</Typography>
+                                            <FilledInput error={!!billingAddressErrors['lastName']} disableUnderline={!billingAddressErrors['lastName']} onChange={handleBillingAddressChange} name='lastName' value={billingAddress.lastName} autoComplete='off' placeholder='Last Name' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['lastName']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
+                                            <FilledInput error={!!billingAddressErrors['email']} disableUnderline={!billingAddressErrors['email']} onChange={handleBillingAddressChange} name='email' value={billingAddress.email} autoComplete='off' placeholder='Email Address' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['email']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
+                                            <FilledInput error={!!billingAddressErrors['emailConfirmation']} disableUnderline={!billingAddressErrors['emailConfirmation']} onChange={handleBillingAddressChange} name='emailConfirmation' value={billingAddress.emailConfirmation} autoComplete='off' placeholder='Email Address' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['emailConfirmation']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 1</Typography>
+                                            <FilledInput error={!!billingAddressErrors['addressLine1']} disableUnderline={!billingAddressErrors['addressLine1']} onChange={handleBillingAddressChange} name='addressLine1' value={billingAddress.addressLine1} autoComplete='off' placeholder='Address 1' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['addressLine1']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Address 2</Typography>
+                                            <FilledInput disableUnderline onChange={handleBillingAddressChange} name='addressLine2' value={billingAddress.addressLine2} autoComplete='off' placeholder='Address 2' fullWidth />
+                                            <FormHelperText>Optional</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>City</Typography>
+                                            <FilledInput error={!!billingAddressErrors['city']} disableUnderline={!billingAddressErrors['city']} onChange={handleBillingAddressChange} name='city' value={billingAddress.city} autoComplete='off' placeholder='City' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['city']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>State</Typography>
+                                            <FilledInput error={!!billingAddressErrors['state']} disableUnderline={!billingAddressErrors['state']} onChange={handleBillingAddressChange} name='state' value={billingAddress.state} autoComplete='off' placeholder='State' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['state']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Postal Code</Typography>
+                                            <FilledInput error={!!billingAddressErrors['postalCode']} disableUnderline={!billingAddressErrors['postalCode']} onChange={handleBillingAddressChange} name='postalCode' value={billingAddress.postalCode} autoComplete='off' placeholder='Postal Code' fullWidth />
+                                            <FormHelperText error>{billingAddressErrors['postalCode']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Country</Typography>
+                                            {/* <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleBillingAddressChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth /> */}
+                                            <Select onChange={(value) => handleBillingAddressSelectChange(value)} name='country' value={billingAddress.country} variant='filled' disableUnderline fullWidth>
+                                                {countryCodes.map(country => <MenuItem value={country.code}>{country.name}</MenuItem>)}
+                                            </Select>
+                                            <FormHelperText error>{billingAddressErrors['country']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} pt={2}>
+                                        <Divider />
+                                    </Grid>
+
+                                    <Grid xs={12} p={2} display='flex' justifyContent='center'>
+                                        <Typography fontWeight='bold' color='grey'>PAYMENT DETAILS</Typography>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Credit Card Number</Typography>
+                                            <TextField
+                                                name='creditCardNumber'
+                                                variant='filled'
+                                                hiddenLabel
+                                                error={!!jobDetailsErrors['applicationLink']} 
+                                                fullWidth
+                                                InputLabelProps={{ shrink: true }}
+                                                InputProps={{
+                                                    disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                    // @ts-ignore
+                                                    inputComponent: StripeInput,
+                                                    inputProps: {
+                                                        component: CardNumberElement
+                                                    }
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={6} sm={3}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Expiration Date</Typography>
+                                            <TextField
+                                                name='creditCardExpiration'
+                                                variant='filled'
+                                                hiddenLabel
+                                                error={!!jobDetailsErrors['applicationLink']} 
+                                                fullWidth
+                                                InputLabelProps={{ shrink: true }}
+                                                InputProps={{
+                                                    disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                    // @ts-ignore
+                                                    inputComponent: StripeInput,
+                                                    inputProps: {
+                                                        component: CardExpiryElement
+                                                    }
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={6} sm={3}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>CVC</Typography>
+                                            <TextField 
+                                                name='cvc'
+                                                variant='filled'
+                                                hiddenLabel
+                                                error={!!jobDetailsErrors['applicationLink']} 
+                                                fullWidth
+                                                InputLabelProps={{ shrink: true }}
+                                                InputProps={{
+                                                    disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                    // @ts-ignore
+                                                    inputComponent: StripeInput,
+                                                    inputProps: {
+                                                        component: CardCvcElement
+                                                    }
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} container >
+                                        <Grid xs={12}>
+                                            <Box display='flex' flexWrap='wrap' ml={0.34} mb={1}>
+                                                {SUPPORTED_CARDS.map(card => <img key={card} src={`/images/cards/${card}.png`} alt={card} width='50px' style={{ padding: `8px 5px 0` }} />)}
+                                            </Box>
+
+                                            <Typography ml={1} variant='caption'>
+                                                <strong>Note:</strong> All transactions are made in USD.
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid xs={12} mt={1}>
+                                        <Box display='flex' alignItems='center'>
+                                            <img src='/images/stripe.svg' width='140px' style={{ marginRight: '1rem' }} />
+                                            <Box display='flex' alignItems='center'>
+                                                <Lock />
+                                                <Typography ml={1} variant='subtitle2'>Guaranteed safe & secure checkout</Typography>
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                    
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Box>
+                    </Grid>
+                )}
             </Grid>
         </Grid>
       </main>

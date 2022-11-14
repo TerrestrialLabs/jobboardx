@@ -50,8 +50,8 @@ export default async function handler(
 
     if (method === 'PUT') {
         try {
-            const job = await Job.create(req.body)
-            res.status(201).json(job)
+            const job = await Job.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true })
+            res.status(200).json(job)
         } catch(err) {
             // TO DO
             // @ts-ignore
