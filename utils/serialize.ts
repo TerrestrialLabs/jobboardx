@@ -55,6 +55,9 @@ export const serialize = (node: NodeType & { bold?: boolean, underline?: boolean
     switch (node.type) {
         case 'paragraph':
             return `<p>${children}</p>`
+        case 'heading-one':
+        case 'heading-two':
+            return `<p><strong>${children}</strong></p>`
         case 'bulleted-list':
             return `<ul>${children}</ul>`
         case 'numbered-list':
@@ -68,8 +71,6 @@ export const serialize = (node: NodeType & { bold?: boolean, underline?: boolean
 
 // @ts-ignore
 export const deserialize = el => {
-    console.log("ELEMENT: ", el)
-
     if (el.nodeType === 3) {
       return el.textContent
     } else if (el.nodeType !== 1) {

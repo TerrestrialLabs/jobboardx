@@ -1,16 +1,11 @@
 import { Box, FilledInput, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import React, { useCallback, useMemo, useState } from 'react'
-import { createEditor, Editor, Text, Transforms } from 'slate';
-import { withHistory } from 'slate-history'
-import { Editable, Slate, useSlate, withReact } from 'slate-react';
+import React, { useCallback, useState } from 'react'
+import { Editor, Transforms } from 'slate';
+import { Editable, Slate, useSlate } from 'slate-react';
 import isHotkey from 'is-hotkey'
 import { FaBold, FaItalic, FaUnderline } from 'react-icons/fa'
 import { MdFormatListNumbered, MdList } from 'react-icons/md'
-import { jsx } from 'slate-hyperscript'
-import type { Node as NodeType } from 'slate'
-
-import type { Element } from 'slate'
-import { BaseEditor } from 'slate'
+import { BaseEditor, Range } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 
@@ -41,14 +36,24 @@ type TextEditorProps = {
 const TextEditor = ({ editor, error, slateValue, setSlateValue }: TextEditorProps) => {
     const [showHoverState, setShowHoverState] = useState(false)
 
-    // const editor = useMemo(
-    //     () => withHtml(withReact(withHistory(createEditor()))),
-    //     []
-    // ) as EditorType
     const showPlaceholder = slateValue.length === 1 && slateValue[0].children[0].text && !slateValue[0].children[0].text.length
 
     const renderLeaf = useCallback((props: any) => <SlateLeaf {...props} />, [])
     const renderElement = useCallback((props: any) => <SlateElement {...props} />, [])
+    const handleBackspace: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
+        if (event.key === 'Backspace') {
+          const {selection} = editor;
+          if (selection && selection.focus.offset === 0 && selection.anchor.offset === 0 && Range.isCollapsed(selection)) {
+            const node = editor.children[selection.anchor.path[0]];
+            if ((node as any)?.type === 'numbered-list') {
+              toggleBlock(editor, 'numbered-list');
+            }
+            if ((node as any)?.type === 'list-item') {
+                toggleBlock(editor, 'list-item');
+            }
+          }
+        }
+      }
 
     return (
         <Box>
@@ -77,6 +82,7 @@ const TextEditor = ({ editor, error, slateValue, setSlateValue }: TextEditorProp
                                 toggleMark(editor, mark);
                             }
                         }
+                        handleBackspace(event)
                     }}
                     style={{ 
                         height: 259,
@@ -117,6 +123,10 @@ const SlateElement = ({ attributes, children, element }: any) => {
         return <p {...attributes}>{children}</p>
       case 'bulleted-list':
         return <ul {...attributes}>{children}</ul>
+      case 'heading-one':
+        return <p {...attributes}><strong>{children}</strong></p>
+      case 'heading-two':
+        return <p {...attributes}><strong>{children}</strong></p>
     //   case 'heading-one':
     //     return <h1 {...attributes}>{children}</h1>
     //   case 'heading-two':
@@ -215,6 +225,32 @@ export const toggleBlock = (editor: any, format: any) => {
     if (!isActive && isList) {
       const block = { type: format, children: [] };
       Transforms.wrapNodes(editor, block);
+    }
+
+    const {selection} = editor;
+    if (selection && selection.focus.offset === 0 && selection.anchor.offset === 0 && Range.isCollapsed(selection)) {
+        if (format === 'list-item') {
+            const listItems = Editor.nodes(editor, {
+                // @ts-ignore
+                match: n => n.type === "list-item",
+            })
+            // @ts-ignore
+            for (const listItem of listItems) {
+                const parent = Editor.parent(editor, listItem[1])
+                // @ts-ignore
+                if (parent && !["ordered-list", "unordered-list"].includes(parent[0].type)) {
+                  Transforms.setNodes(
+                    editor,
+                    { type: "paragraph" },
+                    {
+                      at: listItem[1],
+                      // @ts-ignore
+                      match: n => n.type === "list-item",
+                    }
+                  )
+                }
+            }
+        }
     }
 }
 

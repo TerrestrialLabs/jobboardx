@@ -270,6 +270,15 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }, [jobDetails.featured])
 
+    const setDescriptionValue = (value: { type: string, children: { text: string; }[] }[]) => {
+        // Hack to fix bug of remaining node being ul or nl when deleting all text
+        if (value.length === 1 && value[0]?.type === 'list-item') {
+            setDescriptionEditorValue(initEditorValue)
+        } else {
+            setDescriptionEditorValue(value)
+        }
+    }
+
     const validate = () => {
         let isJobDetailsValid = true
         let isBillingAddressValid = true
@@ -481,6 +490,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     const setEditorValueFromExistingJob = (nodes: Node | Node[]) => {
+        // @ts-ignore
         setDescriptionEditorValue(nodes)
     }
 
@@ -749,7 +759,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                 <Grid xs={12}>
                                     <FormControl hiddenLabel fullWidth>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
-                                        {(!edit || job) && <TextEditor editor={editor} error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionEditorValue} />}
+                                        {(!edit || job) && <TextEditor editor={editor} error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionValue} />}
                                         {edit && !job && <TextEditorPlaceholder />}
                                         <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['description']}</FormHelperText>
                                     </FormControl>

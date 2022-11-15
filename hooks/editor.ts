@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { BaseEditor, BaseElement, Descendant, Element, Editor, Node as SlateNode, Text } from 'slate'
+import { BaseEditor, BaseElement, Descendant, Element, Editor, Node as SlateNode, Range, Text } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import { createEditor, Transforms } from 'slate'
@@ -23,8 +23,8 @@ const ELEMENT_TAGS: { [key: string]: () => ({ type: string }) } = {
     A: (el: Node) => ({ type: 'link', url: el.getAttribute('href') }),
     // A: () => ({ type: 'paragraph' }),
     BLOCKQUOTE: () => ({ type: 'quote' }),
-    // H1: () => ({ type: 'heading-one' }),
-    // H2: () => ({ type: 'heading-two' }),
+    H1: () => ({ type: 'heading-one' }),
+    H2: () => ({ type: 'heading-two' }),
     // H3: () => ({ type: 'heading-three' }),
     // H4: () => ({ type: 'heading-four' }),
     // H5: () => ({ type: 'heading-five' }),
@@ -49,8 +49,8 @@ const TEXT_TAGS: { [key: string]: () => ({ [key: string]: boolean }) } = {
     B: () => ({ bold: true }),
     U: () => ({ underline: true }),
     // Just show these as bold instead of <h1>, <h2>
-    H1: () => ({ bold: true }),
-    H2: () => ({ bold: true }),
+    // H1: () => ({ bold: true }),
+    // H2: () => ({ bold: true }),
 }
 
 // Passing isGoogleDocs to disallow <b> tag since Google Docs uses it in a way that breaks copy/paste
@@ -127,13 +127,17 @@ const withHtml = (editor: EditorType) => {
 
         if (html) {
             const parsed = new DOMParser().parseFromString(html, 'text/html')
-            const fragment = deserialize(parsed.body, 0, [], !!googleDocs)
+            let fragment = deserialize(parsed.body, 0, [], !!googleDocs)
+            // Remove trailing lines after pasting
+            fragment = fragment.filter((node: any) => node?.text !== '\n')
             Transforms.insertFragment(editor, fragment)
             return
         }
 
         insertData(data)
     }
+
+
 
     return editor
 }
