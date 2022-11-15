@@ -147,7 +147,7 @@ const Post: NextPage = () => {
 type PostFormProps = {
     edit?: boolean
 }
-export const PostForm = ({ edit }: PostFormProps) => {    
+export const PostForm = ({ edit }: PostFormProps) => {  
     const [job, setJob] = useState<JobData | null>(null)
     const [jobDetails, setJobDetails] = useState<PostForm>(initJobDetails)
 
@@ -234,7 +234,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         setJobDetails(updatedJobDetails)
                         const descriptionDocument = new DOMParser().parseFromString(`<body>${data.description}</body>`, 'text/html')
                         const descriptionSlateNodes = deserialize(descriptionDocument.body)
-                        console.log('descriptionSlateNodes: ', descriptionSlateNodes)
                         setEditorValueFromExistingJob(descriptionSlateNodes)
                         setLogoUrl(data.companyLogo)
                         handleLocationTextChange(data.location)
@@ -482,14 +481,8 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     const setEditorValueFromExistingJob = (nodes: Node | Node[]) => {
-        console.log("JOB: ", job)
-        // @ts-ignore
-        // editor.insertNode(nodes, { at: [0, 0] })
         setDescriptionEditorValue(nodes)
-        // Transforms.removeNodes(editor, { at: [0, 0] })
     }
-
-    console.log('description: ', descriptionEditorValue)
 
     // TO DO
     // @ts-ignore
@@ -593,32 +586,41 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
             <Grid xs={12} sm={10} lg={8} p={2} container>
                 <Grid xs={12} sm={12} pb={mobile ? 2 : 4} container>
-                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderRadius: 1, backgroundColor: '#fff' }}>
+                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderRadius: 1, backgroundColor: '#fff', width: '100%' }}>
                         <Box>
                             <Grid xs={12} display='flex' alignItems='center' justifyContent='center' pb={mobile ? 2 : 4}>
-                                <LooksOne fontSize='medium' color='primary' />
-                                <Typography ml={1} fontSize={18} fontWeight='bold'>Select listing type</Typography>
+                                {edit ? <Typography ml={1} fontSize={18} fontWeight='bold'>Listing Type</Typography> : 
+                                (
+                                    <>
+                                        <LooksOne fontSize='medium' color='primary' />
+                                        <Typography ml={1} fontSize={18} fontWeight='bold'>Select listing type</Typography>
+                                    </>
+                                )}
                             </Grid>
                         </Box>
-                        <Box display='flex' flexDirection={mobile ? 'column' : 'row'}>
-                            <Grid xs={12} sm={6} mb={mobile ? 2 : 0}>
-                                <Box onClick={() => setJobDetails({ ...jobDetails, featured: true })} mr={mobile ? 0 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
-                                    <Typography fontWeight='bold' mb={1}>FEATURED</Typography>
-                                    <Typography fontWeight='bold' mb={2} color='grey'>$99</Typography>
-                                    <Typography>
-                                        One featured listing. Featured listings are highlighted in bright yellow and receive more attention for 30 days.
-                                    </Typography>
-                                </Box>
-                            </Grid>
-                            <Grid xs={12} sm={6}>
-                                <Box onClick={() => setJobDetails({ ...jobDetails, featured: false })} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: 'pointer', ...(!jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
-                                    <Typography fontWeight='bold' mb={1}>REGULAR</Typography>
-                                    <Typography fontWeight='bold' mb={2} color='grey'>$49</Typography>
-                                    <Typography>
-                                        One regular listing. Jobs are posted immediately and last 30 days.
-                                    </Typography>
-                                </Box>
-                            </Grid>
+                        <Box display='flex' flexDirection={mobile ? 'column' : 'row'} justifyContent='center'>
+                            {(!edit || (edit && jobDetails.featured)) && (
+                                <Grid xs={12} sm={6} mb={mobile ? 2 : 0}>
+                                    <Box onClick={() => !edit && setJobDetails({ ...jobDetails, featured: true })} mr={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                        <Typography fontWeight='bold' mb={1}>FEATURED</Typography>
+                                        <Typography fontWeight='bold' mb={2} color='grey'>$99</Typography>
+                                        <Typography>
+                                            One featured listing. Featured listings are highlighted in bright yellow and receive more attention for 30 days.
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            )}
+                            {(!edit || (edit && !jobDetails.featured)) && (
+                                <Grid xs={12} sm={6}>
+                                    <Box onClick={() => !edit && setJobDetails({ ...jobDetails, featured: false })} ml={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(!jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                        <Typography fontWeight='bold' mb={1}>REGULAR</Typography>
+                                        <Typography fontWeight='bold' mb={2} color='grey'>$49</Typography>
+                                        <Typography>
+                                            One regular listing. Jobs are posted immediately and last 30 days.
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            )}
                         </Box>
                     </Box>
                 </Grid>
@@ -627,8 +629,12 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                         <Box>
                             <Grid xs={12} display='flex' alignItems='center' justifyContent='center' pb={mobile ? 2 : 4} ref={jobDetailsErrorAlertRef}>
-                                <LooksTwo fontSize='medium' color='primary' />
-                                <Typography ml={1} fontSize={18} fontWeight='bold'>Enter job details</Typography>
+                            {edit ? <Typography ml={1} fontSize={18} fontWeight='bold'>Job Details</Typography> : (
+                                <>
+                                    <LooksTwo fontSize='medium' color='primary' />
+                                    <Typography ml={1} fontSize={18} fontWeight='bold'>Enter job details</Typography>
+                                </>
+                            )}
                             </Grid>
                         </Box>
                         <Box>

@@ -133,12 +133,12 @@ const SlateElement = ({ attributes, children, element }: any) => {
         return <li {...attributes}>{children}</li>
       case 'numbered-list':
         return <ol {...attributes}>{children}</ol>
-    //   case 'link':
-    //     return (
-    //       <a href={element.url} {...attributes}>
-    //         {children}
-    //       </a>
-    //     )
+      case 'link':
+        return (
+          <a href={element.url} {...attributes}>
+            {children}
+          </a>
+        )
     }
 }
 

@@ -31,7 +31,7 @@ const TEXT_TAGS: { [key: string]: () => ({ [key: string]: boolean }) } = {
     STRONG: () => ({ bold: true }),
     // TO DO: Apparently this has problems when pasting from Google Docs
     B: () => ({ bold: true }),
-    U: () => ({ underline: true }),
+    U: () => ({ underline: true })
 }
 
 export const serialize = (node: NodeType & { bold?: boolean, underline?: boolean, italic?: boolean, type?: string }): string => {
@@ -66,54 +66,10 @@ export const serialize = (node: NodeType & { bold?: boolean, underline?: boolean
     }
 }
 
-// const deserialize = (el: Element, markAttributes = {}) => {
-//     console.log('el.nodeType: ', el.nodeType)
-//     // if (el.nodeType === Node.TEXT_NODE) {
-//     if (el.nodeType === 'text') {
-//         return jsx('text', markAttributes, el.textContent)
-//     // } else if (el.nodeType !== Node.ELEMENT_NODE) {
-//     } else if (el.nodeType !== 'element') {
-//         return null
-//     }
-  
-//     const nodeAttributes = { ...markAttributes }
-  
-//     // define attributes for text nodes
-//     switch (el.nodeName) {
-//         case 'strong':
-//             nodeAttributes.bold = true
-//     }
-  
-//     const children = Array.from(el.childNodes)
-//         .map(node => deserialize(node, nodeAttributes))
-//         .flat()
-  
-//     if (children.length === 0) {
-//       children.push(jsx('text', nodeAttributes, ''))
-//     }
-  
-//     switch (el.nodeName) {
-//         case 'BODY':
-//             return jsx('fragment', {}, children)
-//         case 'BR':
-//             return '\n'
-//         case 'BLOCKQUOTE':
-//             return jsx('element', { type: 'quote' }, children)
-//         case 'P':
-//             return jsx('element', { type: 'paragraph' }, children)
-//         case 'A':
-//             return jsx(
-//                 'element',
-//                 { type: 'link', url: el.getAttribute('href') },
-//                 children
-//             )
-//       default:
-//             return children
-//     }
-// }
-
 // @ts-ignore
 export const deserialize = el => {
+    console.log("ELEMENT: ", el)
+
     if (el.nodeType === 3) {
       return el.textContent
     } else if (el.nodeType !== 1) {
@@ -132,6 +88,7 @@ export const deserialize = el => {
     ) {
       parent = el.childNodes[0]
     }
+
     // @ts-ignore
     let children = Array.from(parent.childNodes)
       .map(deserialize)

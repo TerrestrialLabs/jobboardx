@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { BaseEditor } from 'slate'
+import { BaseEditor, BaseElement, Descendant, Element, Editor, Node as SlateNode, Text } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import { createEditor, Transforms } from 'slate'
@@ -19,15 +19,16 @@ export function useEditor() {
 }
 
 const ELEMENT_TAGS: { [key: string]: () => ({ type: string }) } = {
-    // A: el => ({ type: 'link', url: el.getAttribute('href') }),
-    A: () => ({ type: 'paragraph' }),
+    // @ts-ignore
+    A: (el: Node) => ({ type: 'link', url: el.getAttribute('href') }),
+    // A: () => ({ type: 'paragraph' }),
     BLOCKQUOTE: () => ({ type: 'quote' }),
-    H1: () => ({ type: 'heading-one' }),
-    H2: () => ({ type: 'heading-two' }),
-    H3: () => ({ type: 'heading-three' }),
-    H4: () => ({ type: 'heading-four' }),
-    H5: () => ({ type: 'heading-five' }),
-    H6: () => ({ type: 'heading-six' }),
+    // H1: () => ({ type: 'heading-one' }),
+    // H2: () => ({ type: 'heading-two' }),
+    // H3: () => ({ type: 'heading-three' }),
+    // H4: () => ({ type: 'heading-four' }),
+    // H5: () => ({ type: 'heading-five' }),
+    // H6: () => ({ type: 'heading-six' }),
     // IMG: el => ({ type: 'image', url: el.getAttribute('src') }),
     LI: () => ({ type: 'list-item' }),
     OL: () => ({ type: 'numbered-list' }),
@@ -47,10 +48,14 @@ const TEXT_TAGS: { [key: string]: () => ({ [key: string]: boolean }) } = {
     // TO DO: Apparently this has problems when pasting from Google Docs
     B: () => ({ bold: true }),
     U: () => ({ underline: true }),
+    // Just show these as bold instead of <h1>, <h2>
+    H1: () => ({ bold: true }),
+    H2: () => ({ bold: true }),
 }
 
+// Passing isGoogleDocs to disallow <b> tag since Google Docs uses it in a way that breaks copy/paste
 // @ts-ignore
-export const deserialize = el => {
+export const deserialize = (el: any, index: number, array: unknown[], isGoogleDocs?: boolean) => {
     if (el.nodeType === 3) {
       return el.textContent
     } else if (el.nodeType !== 1) {
@@ -61,7 +66,7 @@ export const deserialize = el => {
   
     const { nodeName } = el
     let parent = el
-  
+
     if (
       nodeName === 'PRE' &&
       el.childNodes[0] &&
@@ -69,11 +74,10 @@ export const deserialize = el => {
     ) {
       parent = el.childNodes[0]
     }
-    // @ts-ignore
-    let children = Array.from(parent.childNodes)
-      .map(deserialize)
+    let children: any = Array.from(parent.childNodes)
+      .map((el, index, array) => deserialize(el, index, array, isGoogleDocs))
       .flat()
-  
+    
     if (children.length === 0) {
       children = [{ text: '' }]
     }
@@ -85,64 +89,26 @@ export const deserialize = el => {
     if (ELEMENT_TAGS[nodeName]) {
         // @ts-ignore
       const attrs = ELEMENT_TAGS[nodeName](el)
+    // const attrs = ELEMENT_TAGS[nodeName]()
       return jsx('element', attrs, children)
     }
-  
+
     if (TEXT_TAGS[nodeName]) {
-        debugger
-        // @ts-ignore
-      const attrs = TEXT_TAGS[nodeName](el)
-      // @ts-ignore
-      return children.map(child => jsx('text', attrs, child))
+        if (nodeName !== 'B' || (nodeName === 'B' && !isGoogleDocs)) {
+            //   const attrs = TEXT_TAGS[nodeName](el)
+            const attrs = TEXT_TAGS[nodeName]()
+            // return children.map((child: Node) => jsx('text', attrs, child))
+            return children.map((child: Node) => {
+                if (Element.isElement(child)) {
+                return jsx('element', child)
+                }
+                return jsx('text', attrs, child)
+            })
+        }
     }
   
     return children
 }
-
-// export const deserialize = (el: Node): any => {
-//     if (el.nodeType === 3) {
-//         return el.textContent
-//     } else if (el.nodeType !== 1) {
-//         return null
-//     } 
-//     // else if (el.nodeName === 'BR') {
-//     //     return '\n'
-//     // }
-
-//     const { nodeName } = el
-//     let parent = el
-
-//     if (
-//         nodeName === 'PRE' &&
-//         el.childNodes[0] &&
-//         el.childNodes[0].nodeName === 'CODE'
-//     ) {
-//         parent = el.childNodes[0]
-//     }
-//     let children = Array.from(parent.childNodes)
-//         .map(deserialize)
-//         .flat()
-
-//     if (children.length === 0) {
-//         children = [{ text: '' }]
-//     }
-
-//     if (el.nodeName === 'BODY') {
-//         return jsx('fragment', {}, children)
-//     }
-
-//     if (ELEMENT_TAGS[nodeName]) {
-//         const attrs = ELEMENT_TAGS[nodeName]()
-//         return jsx('element', attrs, children)
-//     }
-
-//     if (TEXT_TAGS[nodeName]) {
-//         const attrs = TEXT_TAGS[nodeName]()
-//         return children.map(child => jsx('text', attrs, child))
-//     }
-
-//     return children
-// }
 
 const withHtml = (editor: EditorType) => {
     const { insertData, isInline, isVoid } = editor
@@ -157,10 +123,11 @@ const withHtml = (editor: EditorType) => {
 
     editor.insertData = data => {
         const html = data.getData('text/html')
+        const googleDocs = data.getData('application/x-vnd.google-docs-document-slice-clip+wrapped')
 
         if (html) {
             const parsed = new DOMParser().parseFromString(html, 'text/html')
-            const fragment = deserialize(parsed.body)
+            const fragment = deserialize(parsed.body, 0, [], !!googleDocs)
             Transforms.insertFragment(editor, fragment)
             return
         }
