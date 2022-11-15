@@ -284,7 +284,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
         let isBillingAddressValid = true
         const newJobDetailsErrors = Object.assign({}, initJobDetailsErrors)
         const newBillingAddressErrors = Object.assign({}, initBillingAddressErrors)
-        const descriptionEmpty = descriptionEditorValue.length === 1 && !descriptionEditorValue[0].children[0]?.text.length
+        const descriptionEmpty = descriptionEditorValue.length === 1 && descriptionEditorValue[0].type === 'paragraph' && !descriptionEditorValue[0].children[0]?.text.length
 
         // JOB DETAILS VALIDATION
 

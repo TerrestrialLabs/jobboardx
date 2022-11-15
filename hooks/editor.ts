@@ -137,7 +137,5 @@ const withHtml = (editor: EditorType) => {
         insertData(data)
     }
 
-
-
     return editor
 }
