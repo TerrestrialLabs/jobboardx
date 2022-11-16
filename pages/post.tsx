@@ -425,6 +425,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             
             const body = { 
                 ...(edit ? job : {}),
+                ...(!edit ? { email: billingAddress.email } : {}),
                 ...jobDetails,
                 remote: jobDetails.remote || jobDetails.location === 'Remote',
                 title: jobDetails.title.trim(),
@@ -600,11 +601,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         <Typography variant='h2' fontSize={16} color='grey'>Hire the best React developers for an affordable price.</Typography>
                     </Box>
                 </Grid>
-
-                {/* Test email */}
-                {/* <Box>
-                    <Button onClick={sendConfirmationEmail}>Send email</Button>
-                </Box> */}
 
                 <Grid xs={12} sm={10} lg={8} p={2} container>
                     <Grid xs={12} sm={12} pb={mobile ? 2 : 4} container>

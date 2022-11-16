@@ -574,7 +574,11 @@ const FiltersPanel = ({ filters, handleFilterInputChange, handleFilterSelectChan
       </IconButton>
 
       <Grid container justifyContent='center' paddingTop='1.5rem' paddingBottom='1rem'>
-        <Grid xs={11} container justifyContent='center'>
+        <Grid xs={11} container>
+          <Typography fontWeight='bold' fontSize={20} mb={2}>
+            Search filters
+          </Typography>
+
           <Grid mb={2} xs={12} sx={{ display: 'flex' }}>
             <FormControl hiddenLabel fullWidth>
               <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>

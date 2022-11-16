@@ -3,6 +3,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import * as nodemailer from 'nodemailer'
 import type { SentMessageInfo } from 'nodemailer'
+import Job from '../../../models/Job'
 
 export type JobUpdateRequestData = {
     _id: string,
@@ -28,36 +29,39 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const jobUpdateRequest = await JobUpdateRequest.create(req.body)
+            const job = await Job.findOne({ _id: jobUpdateRequest.jobId })
 
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                  user: 'support@reactdevjobs.io',
-                  pass: process.env.GOOGLE_APP_PASSWORD
+            if (job.email === req.body.email) {
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                      user: 'support@reactdevjobs.io',
+                      pass: process.env.GOOGLE_APP_PASSWORD
+                    }
+                })
+    
+                const link = `http://localhost:3000/jobs/edit/${jobUpdateRequest._id}`
+                const mailOptions = {
+                    from: 'React Jobs <support@reactdevjobs.io>',
+                    to: req.body.email,
+                    subject: 'Your job update request',
+                    html: 
+                        `<html>
+                            <body>
+                                <p>Please use this link to update your job posting: <a href="${link}">${link}</a>.</p>
+                                <p>This link will only be valid for 24 hours. If it expires, request another one from the job posting page.</p>
+                            </body>
+                        </html>`
                 }
-            })
-
-            const link = `http://localhost:3000/jobs/edit/${jobUpdateRequest._id}`
-            const mailOptions = {
-                from: 'React Jobs <support@reactdevjobs.io>',
-                to: req.body.email,
-                subject: 'Your job update request',
-                html: 
-                    `<html>
-                        <body>
-                            <p>Please use this link to update your job posting: <a href="${link}">${link}</a>.</p>
-                            <p>This link will only be valid for 24 hours. If it expires, request another one from the job posting page.</p>
-                        </body>
-                    </html>`
+    
+                transporter.sendMail(mailOptions, (err: Error | null, res: SentMessageInfo) => {
+                    if (err) {
+                        console.log('There was an error sending the email: ', err)
+                    } else {
+                        console.log('Job update request email sent.')
+                    }
+                })
             }
-
-            transporter.sendMail(mailOptions, (err: Error | null, res: SentMessageInfo) => {
-                if (err) {
-                    console.log('There was an error sending the email: ', err)
-                } else {
-                    console.log('Job update request email sent.')
-                }
-            })
 
             res.status(201).json(jobUpdateRequest)
         } catch(err) {

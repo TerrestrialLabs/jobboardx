@@ -17,7 +17,8 @@ const JobSchema = new mongoose.Schema({
     applicationLink: { type: String, required: true },
     description: { type: String, required: true },
     salaryMin: { type: Number, required: true, default: 0 },
-    salaryMax: { type: Number, required: true, default: 0 }
+    salaryMax: { type: Number, required: true, default: 0 },
+    email: { type: String, required: true }
 }, { timestamps: true })
 
 export default mongoose.models.Job || mongoose.model('Job', JobSchema)

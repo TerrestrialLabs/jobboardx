@@ -81,6 +81,7 @@ export default async function handler(
 
     dbConnect()
 
+    // TO DO: We don't want description or email fields
     if (method === 'GET') {
         const resultsPerPage = 10
         const pageIndex = req.query.pageIndex ? parseInt(req.query.pageIndex as string) : 0
@@ -90,7 +91,7 @@ export default async function handler(
         const filters = getFilters(req.query)
 
         try {
-            const jobs = await Job.find(filters)
+            const jobs = await Job.find(filters).select('-email')
                 // TO DO: Remove createdAt
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1, 'createdAt': -1 })
                 .skip(pageIndex * resultsPerPage)
@@ -116,6 +117,7 @@ export default async function handler(
             if (clientCompany && req.body.backfilled) {
                 throw Error('This company already exists')
             }
+            // TO DO: Any point in removing email from response? 
             const job = await Job.create({
                 ...req.body,
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date()

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Modal, Typography } from '@mui/material'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -26,20 +26,13 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const router = useRouter()
+    const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
-
-    // TO DO: TESTING
-    const createJobUpdateRequest = () => {
-        axios.post('http://localhost:3000/api/job-update-requests', {
-            email: 'hgagdere@gmail.com',
-            jobId: router.query.id
-        })
-    }
 
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
@@ -75,166 +68,150 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                 </Grid>
             </Box>
 
-            {/* {emailSubmitted && (
-                <Alert variant='filled' sx={{ position: 'fixed', width: '100%', zIndex: 998, paddingTop: '64px' }} onClose={() => setEmailSubmitted(false)}>
-                    You'll be receiving job alerts to your inbox soon!
-                </Alert>
-            )} */}
+            {mobile && requestUpdateModalOpen ? (
+                <JobUpdateRequestModal mobile open={requestUpdateModalOpen} closeModal={() => setRequestUpdateModalOpen(false)} />
+            ) : (
+                <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
+                    {data && (
+                        <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
+                            <Grid item xs={12} sm={10} lg={9} p={2} container>
+                                <Grid item xs={12} sm={8}>
+                                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1, position: 'relative' }}>
+                                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
+                                        {/* <IconButton onClick={() => 'setOpen(false)'} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
+                                            <Close />
+                                        </IconButton> */}
 
-            <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-
-                {/* TO DO: TESTING */}
-                <Button onClick={createJobUpdateRequest}>EDIT</Button>
-
-                {data && (
-                    <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
-                        <Grid item xs={12} sm={10} lg={9} p={2} container>
-                            <Grid item xs={12} sm={8}>
-                                <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
-                                        {/* {!mobile && (
-                                            <Grid item xs={12} display='flex' justifyContent={'flex-end'}>
-                                                <Typography color='grey' variant='subtitle2'>{format(parseISO(data.datePosted ? data.datePosted.toString() : data.createdAt.toString()), 'MMMM d, yyyy')}</Typography>
-                                            </Grid>
-                                        )} */}
-
-                                        <Grid item xs={12}>
-                                            <Typography mb={mobile ? 1.5 : 2} variant='h1' fontSize={mobile ? 22 : 30} fontWeight='bold'>{data.title}</Typography>
-
-                                            <Box mb={1.5}>
-                                                <Typography color='grey' variant='subtitle2'>{format(parseISO(data.datePosted ? data.datePosted.toString() : data.createdAt.toString()), 'MMM. d, yyyy')}</Typography>
-                                            </Box>
-
-                                            <Box display='flex' flexDirection={mobile ? 'column' : 'row'} alignItems={mobile ? 'flex-start' : 'center'}>
-                                                <Box display='flex' alignItems='center'>
-                                                    <LocationOn fontSize='small' style={{marginRight: '0.25rem', marginLeft: mobile ? 0 : '-3px'}} />
-                                                    <Typography variant='subtitle2' mr={2}>{location || 'N/A'}</Typography>
-                                                </Box>
-
-                                                <Box display='flex' alignItems='center' mt={mobile ? 0.5 : 0}>
-                                                    <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || data.type || 'N/A'}</Typography>
-                                                </Box>
-
-                                                <Box display='flex' alignItems='center' mt={mobile ? 0.5 : 0}>
-                                                    <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
-                                                    <Typography variant='subtitle2'>{formatSalaryRange(data.salaryMin, data.salaryMax)}</Typography>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                        {mobile && (
-                                           <Box display='flex' justifyContent='center' mt={2}>
                                             <Grid item xs={12}>
-                                                <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
-                                                    Apply
-                                                </Button>
-                                            </Grid>
-                                            </Box>
-                                        )}
-                                    </Box>
+                                                <Typography mb={mobile ? 1.5 : 2} variant='h1' fontSize={mobile ? 22 : 30} fontWeight='bold'>{data.title}</Typography>
 
-                                    <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4}>
-                                        <Grid item xs={12} mb={4}>
-                                            <Typography fontSize={18} fontWeight='bold' mb={1}>Description</Typography>
-                                            <Box sx={{ fontFamily: 'Poppins, sans-serif', marginLeft: 0.75 }}>
-                                                {description}
-                                            </Box>
-                                        </Grid>
+                                                <Box mb={1.5}>
+                                                    <Typography color='grey' variant='subtitle2'>{format(parseISO(data.datePosted ? data.datePosted.toString() : data.createdAt.toString()), 'MMM. d, yyyy')}</Typography>
+                                                </Box>
 
-                                        {data.skills.length > 0 && (
-                                            <Grid item xs={12} mb={2}>
-                                                <Box mt={2}>
-                                                    <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
-                                                    <Box display='flex' flexWrap='wrap'>
-                                                        {data.skills.map(skill => 
-                                                            <Box key={skill} sx={{
-                                                                backgroundColor: 'secondary.main',
-                                                                color: '#fff',
-                                                                border: '1px solid #fff',
-                                                                borderColor: 'secondary.main',
-                                                                margin: 0.5,
-                                                                padding: 0.75,
-                                                                borderRadius: 1,
-                                                                transition: '0.3s',
-                                                                fontSize: '14.5px',
-                                                                fontWeight: 600,
-                                                            }}>
-                                                                {skill}
-                                                            </Box>
-                                                        )}
+                                                <Box display='flex' flexDirection={mobile ? 'column' : 'row'} alignItems={mobile ? 'flex-start' : 'center'}>
+                                                    <Box display='flex' alignItems='center'>
+                                                        <LocationOn fontSize='small' style={{marginRight: '0.25rem', marginLeft: mobile ? 0 : '-3px'}} />
+                                                        <Typography variant='subtitle2' mr={2}>{location || 'N/A'}</Typography>
+                                                    </Box>
+
+                                                    <Box display='flex' alignItems='center' mt={mobile ? 0.5 : 0}>
+                                                        <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
+                                                        <Typography variant='subtitle2' mr={2}>{TYPE_MAP[data.type] || data.type || 'N/A'}</Typography>
+                                                    </Box>
+
+                                                    <Box display='flex' alignItems='center' mt={mobile ? 0.5 : 0}>
+                                                        <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
+                                                        <Typography variant='subtitle2'>{formatSalaryRange(data.salaryMin, data.salaryMax)}</Typography>
                                                     </Box>
                                                 </Box>
                                             </Grid>
-                                        )}
-
-                                        {data.perks.length > 0 && (
-                                            <Grid item xs={12} mb={2}>
-                                                <Box mt={2}>
-                                                    <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
-                                                    <Box display='flex' flexWrap='wrap'>
-                                                        {data.perks.map(perk => 
-                                                            <Box key={perk} sx={{
-                                                                backgroundColor: '#e74c3c',
-                                                                color: '#fff',
-                                                                border: '1px solid #e74c3c',
-                                                                borderColor: '#e74c3c',
-                                                                margin: 0.5,
-                                                                padding: 0.75,
-                                                                borderRadius: 1,
-                                                                transition: '0.3s',
-                                                                fontSize: '14.5px',
-                                                                fontWeight: 600,
-                                                            }}>
-                                                                {perk}
-                                                            </Box>
-                                                        )}
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                        )}
-
-                                        <Grid item xs={12} p={0} mt={6}>
-                                            <Box display='flex' justifyContent='center'>
-                                                <Grid item xs={12} sm={6}>
+                                            {mobile && (
+                                            <Box display='flex' justifyContent='center' mt={2}>
+                                                <Grid item xs={12}>
                                                     <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
                                                         Apply
                                                     </Button>
                                                 </Grid>
-                                            </Box>
-                                        </Grid>
+                                                </Box>
+                                            )}
+                                        </Box>
+
+                                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4}>
+                                            <Grid item xs={12} mb={4}>
+                                                <Typography fontSize={18} fontWeight='bold' mb={1}>Description</Typography>
+                                                <Box sx={{ fontFamily: 'Poppins, sans-serif', marginLeft: 0.75 }}>
+                                                    {description}
+                                                </Box>
+                                            </Grid>
+
+                                            {data.skills.length > 0 && (
+                                                <Grid item xs={12} mb={2}>
+                                                    <Box mt={2}>
+                                                        <Typography mb={1} fontSize={18} fontWeight='bold'>Skills</Typography>
+                                                        <Box display='flex' flexWrap='wrap'>
+                                                            {data.skills.map(skill => 
+                                                                <Box key={skill} sx={{
+                                                                    backgroundColor: 'secondary.main',
+                                                                    color: '#fff',
+                                                                    border: '1px solid #fff',
+                                                                    borderColor: 'secondary.main',
+                                                                    margin: 0.5,
+                                                                    padding: 0.75,
+                                                                    borderRadius: 1,
+                                                                    transition: '0.3s',
+                                                                    fontSize: '14.5px',
+                                                                    fontWeight: 600,
+                                                                }}>
+                                                                    {skill}
+                                                                </Box>
+                                                            )}
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+                                            )}
+
+                                            {data.perks.length > 0 && (
+                                                <Grid item xs={12} mb={2}>
+                                                    <Box mt={2}>
+                                                        <Typography mb={1} fontSize={18} fontWeight='bold'>Perks</Typography>
+                                                        <Box display='flex' flexWrap='wrap'>
+                                                            {data.perks.map(perk => 
+                                                                <Box key={perk} sx={{
+                                                                    backgroundColor: '#e74c3c',
+                                                                    color: '#fff',
+                                                                    border: '1px solid #e74c3c',
+                                                                    borderColor: '#e74c3c',
+                                                                    margin: 0.5,
+                                                                    padding: 0.75,
+                                                                    borderRadius: 1,
+                                                                    transition: '0.3s',
+                                                                    fontSize: '14.5px',
+                                                                    fontWeight: 600,
+                                                                }}>
+                                                                    {perk}
+                                                                </Box>
+                                                            )}
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+                                            )}
+
+                                            <Grid item xs={12} p={0} mt={6}>
+                                                <Box display='flex' justifyContent='center'>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
+                                                            Apply
+                                                        </Button>
+                                                    </Grid>
+                                                </Box>
+                                            </Grid>
+                                        </Box>
                                     </Box>
-                                </Box>
-                            </Grid>
+                                </Grid>
 
-                            <Grid item xs={12} sm={4}>
-                                <CompanyBox companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
+                                <Grid item xs={12} sm={4}>
+                                    <CompanyBox companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
 
-                                {/* {alertsPopupOpen && (
-                                    <Box ml={4} p={4} sx={{ backgroundColor: '#fff', borderRadius: 1, position: 'fixed', bottom: 0 }}>
-                                        <IconButton onClick={() => setAlertsPopupOpen(false)} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
-                                            <Close />
-                                        </IconButton>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography mb={1.25}>
-                                                Get weekly job alerts
-                                            </Typography>
-                                            <FilledInput value={email} onChange={(e) => setEmail(e.target.value)} fullWidth error={emailError} disableUnderline={!emailError} placeholder='Your email address' />
-                                            {emailError && <FormHelperText error>Invalid email address</FormHelperText>}
-                                        </FormControl>
-                                        <Button onClick={createSubscription} fullWidth variant='contained' disableElevation color='secondary' style={{ marginTop: '1.25rem' }}>
-                                            {emailLoading ? <CircularProgress color='secondary' size={22} /> : 'Subscribe'}
+                                    <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
+                                        <Typography mb={2}>Is this your job?</Typography> 
+                                        <Typography mb={2}>Click here to request a secure link to edit your posting.</Typography>
+                                        <Button onClick={() => setRequestUpdateModalOpen(true)} fullWidth variant='contained' disableElevation color='secondary'>
+                                            Request Update Link
                                         </Button>
                                     </Box>
-                                )} */}
+                                </Grid>
                             </Grid>
                         </Grid>
-                    </Grid>
-                )}
-            </main>
+                    )}
+                </main>
+            )}
+
+            {!mobile && <JobUpdateRequestModal mobile={mobile} open={requestUpdateModalOpen} closeModal={() => setRequestUpdateModalOpen(false)} />}
 
             <EmailFooter />
 
-            <Footer />
+            {!(mobile && requestUpdateModalOpen) && <Footer />}
         </div>
     )
 }
@@ -287,4 +264,111 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
             }
         }
     }
+}
+
+type JobUpdateRequestModalProps = { 
+    closeModal: () => void,
+    mobile: boolean,
+    open: boolean
+}
+const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestModalProps) => {
+    const [email, setEmail] = useState('')
+    const [error, setError] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [submitted, setSubmitted] = useState(false)
+    const router = useRouter()
+
+    const modalStyle = {
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        borderRadius: 1,
+        boxShadow: 24,
+        p: 4
+    }
+
+    const createJobUpdateRequest = async () => {
+        setLoading(true)
+        if (!validate()) {
+            setError(true)
+            setLoading(false)
+            return
+        }
+        setError(false)
+        axios.post('http://localhost:3000/api/job-update-requests', {
+            email,
+            jobId: router.query.id
+        })
+        setLoading(false)
+        setSubmitted(true)
+    }
+
+    const validate = () => {
+        return email.length > 0 && isValidEmail(email)
+    }
+    
+    const isValidEmail = (email: string) => {
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            return (true)
+        } else {
+            return (false)
+        }
+    }
+
+    if (mobile) {
+        return (
+            <Box p={2} pt={'58px'} pb={3} position='relative'>
+                <IconButton onClick={closeModal} style={{ position: 'absolute', top: '62px', right: '0.25rem' }}>
+                    <Close />
+                </IconButton>
+
+                <Box pt={3}>
+                    <Typography fontWeight='bold' fontSize={20} mb={2}>
+                        Request update link
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        You will receive a secure link to update your job posting at the email which you used to create it.
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2, mb: 2 }}>
+                        The link will be valid for 24 hours.
+                    </Typography>
+                    <FormControl hiddenLabel fullWidth>
+                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                        {error && <FormHelperText error>Invalid email address</FormHelperText>}
+                    </FormControl>
+                    <Button fullWidth onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px', marginTop: 4 }}>
+                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
+                    </Button>
+                </Box>
+            </Box>
+        )
+    }
+
+    return (
+        <Modal open={open} onClose={closeModal}>
+            <Box p={mobile ? 2 : 4} sx={modalStyle}>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                    Request update link
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    You will receive a secure link to update your job posting at the email which you used to create it.
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    The link will be valid for 24 hours.
+                </Typography>
+                <Box display='flex' mt={2}>
+                    <FormControl hiddenLabel fullWidth>
+                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                        {error && <FormHelperText error>Invalid email address</FormHelperText>}
+                    </FormControl>
+                    <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
+                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
 }

@@ -41,8 +41,9 @@ export default async function handler(
 
     dbConnect()
 
+    // TO DO: We don't want email field
     if (method === 'GET') {
-        const job = await Job.findById(id)
+        const job = await Job.findById(id).select('-email')
         // TO DO
         // @ts-ignore
         res.status(200).json(job)
@@ -50,7 +51,7 @@ export default async function handler(
 
     if (method === 'PUT') {
         try {
-            const job = await Job.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true })
+            const job = await Job.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }).select('-email')
             res.status(200).json(job)
         } catch(err) {
             // TO DO
