@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Modal, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Divider, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Modal, Typography } from '@mui/material'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -23,9 +23,7 @@ interface Props {
 
 // TO DO: Dynamically change head
 const JobDetail: NextPage<Props> = ({ data }) => {
-    const [loading, setLoading] = useState(false)
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
-    const router = useRouter()
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const windowSize = useWindowSize()
@@ -78,10 +76,6 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                 <Grid item xs={12} sm={8}>
                                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1, position: 'relative' }}>
                                         <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
-                                        {/* <IconButton onClick={() => 'setOpen(false)'} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
-                                            <Close />
-                                        </IconButton> */}
-
                                             <Grid item xs={12}>
                                                 <Typography mb={mobile ? 1.5 : 2} variant='h1' fontSize={mobile ? 22 : 30} fontWeight='bold'>{data.title}</Typography>
 
@@ -207,7 +201,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                 </main>
             )}
 
-            {!mobile && <JobUpdateRequestModal mobile={mobile} open={requestUpdateModalOpen} closeModal={() => setRequestUpdateModalOpen(false)} />}
+            {!mobile && requestUpdateModalOpen && <JobUpdateRequestModal mobile={mobile} open={requestUpdateModalOpen} closeModal={() => setRequestUpdateModalOpen(false)} />}
 
             <EmailFooter />
 
@@ -318,6 +312,43 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
         }
     }
 
+    const content = (
+        <>
+            {mobile ? (
+                <Typography fontWeight='bold' fontSize={20} mb={2}>
+                    Request update link
+                </Typography>
+            ) : (
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                    Request update link
+                </Typography>
+            )}
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                You will receive a secure link to update your job posting at the email which you used to create it.
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                The link will be valid for 24 hours.
+            </Typography>
+            {submitted ? (
+                <>
+                    <Typography mt={3} color='success.main'>
+                        An email with a job update link has been sent to your inbox.
+                    </Typography>
+                </>
+            ) : (
+                <Box display='flex' mt={2}>
+                    <FormControl hiddenLabel fullWidth>
+                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                        {error && <FormHelperText error>Invalid email address</FormHelperText>}
+                    </FormControl>
+                    <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
+                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
+                    </Button>
+                </Box>
+            )}
+        </>
+    )
+
     if (mobile) {
         return (
             <Box p={2} pt={'58px'} pb={3} position='relative'>
@@ -326,7 +357,7 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                 </IconButton>
 
                 <Box pt={3}>
-                    <Typography fontWeight='bold' fontSize={20} mb={2}>
+                    {/* <Typography fontWeight='bold' fontSize={20} mb={2}>
                         Request update link
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -341,16 +372,22 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                     </FormControl>
                     <Button fullWidth onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px', marginTop: 4 }}>
                         {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
-                    </Button>
+                    </Button> */}
+
+                    {content}
                 </Box>
             </Box>
         )
     }
 
     return (
-        <Modal open={open} onClose={closeModal}>
-            <Box p={mobile ? 2 : 4} sx={modalStyle}>
-                <Typography id="modal-modal-title" variant="h6" component="h2">
+        <Modal open onClose={closeModal}>
+            <Box p={mobile ? 2 : 4} sx={modalStyle} position='relative'>
+                <IconButton onClick={closeModal} style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
+                    <Close />
+                </IconButton>
+
+                {/* <Typography id="modal-modal-title" variant="h6" component="h2">
                     Request update link
                 </Typography>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -359,15 +396,26 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                     The link will be valid for 24 hours.
                 </Typography>
-                <Box display='flex' mt={2}>
-                    <FormControl hiddenLabel fullWidth>
-                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
-                        {error && <FormHelperText error>Invalid email address</FormHelperText>}
-                    </FormControl>
-                    <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
-                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
-                    </Button>
-                </Box>
+                {submitted ? (
+                    <>
+                        <Divider sx={{ marginTop: 2 }} />
+                        <Typography mt={2} color='success.main'>
+                            An email with a job update link has been sent to your inbox.
+                        </Typography>
+                    </>
+                ) : (
+                    <Box display='flex' mt={2}>
+                        <FormControl hiddenLabel fullWidth>
+                            <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                            {error && <FormHelperText error>Invalid email address</FormHelperText>}
+                        </FormControl>
+                        <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
+                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
+                        </Button>
+                    </Box>
+                )} */}
+
+                {content}
             </Box>
         </Modal>
     )

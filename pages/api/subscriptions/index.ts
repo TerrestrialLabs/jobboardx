@@ -25,11 +25,10 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const existingSubscription = await Subscription.findOne({ email: req.body.email }).exec()
-            if (existingSubscription) {
-                throw Error('This subscription already exists')
+            if (!existingSubscription) {
+                await Subscription.create(req.body)
             }
-            const subscription = await Subscription.create(req.body)
-            res.status(201).json(subscription)
+            res.status(201).json(true)
         } catch(err) {
             // TO DO
             // @ts-ignore

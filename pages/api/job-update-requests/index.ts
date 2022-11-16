@@ -28,10 +28,11 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
-            const jobUpdateRequest = await JobUpdateRequest.create(req.body)
-            const job = await Job.findOne({ _id: jobUpdateRequest.jobId })
+            const job = await Job.findOne({ _id: req.body.jobId })
 
             if (job.email === req.body.email) {
+                const jobUpdateRequest = await JobUpdateRequest.create(req.body)
+
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -63,7 +64,7 @@ export default async function handler(
                 })
             }
 
-            res.status(201).json(jobUpdateRequest)
+            res.status(201).json(true)
         } catch(err) {
             // TO DO
             // @ts-ignore
