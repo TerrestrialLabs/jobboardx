@@ -27,7 +27,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const windowSize = useWindowSize()
-    const mobile = !!(windowSize.width && windowSize.width < 500 )
+    const mobile = !!(windowSize.width && windowSize.width < 500)
 
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
@@ -357,23 +357,6 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                 </IconButton>
 
                 <Box pt={3}>
-                    {/* <Typography fontWeight='bold' fontSize={20} mb={2}>
-                        Request update link
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        You will receive a secure link to update your job posting at the email which you used to create it.
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2, mb: 2 }}>
-                        The link will be valid for 24 hours.
-                    </Typography>
-                    <FormControl hiddenLabel fullWidth>
-                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
-                        {error && <FormHelperText error>Invalid email address</FormHelperText>}
-                    </FormControl>
-                    <Button fullWidth onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px', marginTop: 4 }}>
-                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
-                    </Button> */}
-
                     {content}
                 </Box>
             </Box>
@@ -386,34 +369,6 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                 <IconButton onClick={closeModal} style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
                     <Close />
                 </IconButton>
-
-                {/* <Typography id="modal-modal-title" variant="h6" component="h2">
-                    Request update link
-                </Typography>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    You will receive a secure link to update your job posting at the email which you used to create it.
-                </Typography>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    The link will be valid for 24 hours.
-                </Typography>
-                {submitted ? (
-                    <>
-                        <Divider sx={{ marginTop: 2 }} />
-                        <Typography mt={2} color='success.main'>
-                            An email with a job update link has been sent to your inbox.
-                        </Typography>
-                    </>
-                ) : (
-                    <Box display='flex' mt={2}>
-                        <FormControl hiddenLabel fullWidth>
-                            <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
-                            {error && <FormHelperText error>Invalid email address</FormHelperText>}
-                        </FormControl>
-                        <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
-                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
-                        </Button>
-                    </Box>
-                )} */}
 
                 {content}
             </Box>

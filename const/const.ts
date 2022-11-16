@@ -67,3 +67,10 @@ export const PERKS = [
     'Parental leave',
     'Gym stipend'
 ]
+
+export const CONTACT_MESSAGE_TYPE = {
+    CUSTOMER_SUPPORT: 'Customer Support',
+    FEEDBACK: 'Feedback',
+    FEATURE_REQUEST: 'Feature Request',
+    OTHER: 'Other'
+}

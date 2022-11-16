@@ -570,7 +570,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>React Jobs | Post a job</title>
+        <title>{`React Jobs | ${edit ? 'Update job post' : 'Post a job'}`}</title>
         <meta name="description" content="Post a job" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
