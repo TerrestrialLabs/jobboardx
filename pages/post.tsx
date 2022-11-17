@@ -432,7 +432,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
-                companyLogo: logoUrl ?? imageUploadRes?.data ?? '',
+                companyLogo: logoUrl ? logoUrl : (imageUploadRes?.data ? imageUploadRes.data : ''),
                 description: serialize({ children: descriptionEditorValue }),
                 applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
             }
@@ -837,7 +837,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         {(invalidBillingAddress || paymentError) && (
                                             <Grid xs={12}>
                                                 <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">
-                                                    {paymentError ?? 'Please fix the following errors and resubmit.'}
+                                                    {paymentError ? paymentError : 'Please fix the following errors and resubmit.'}
                                                 </Alert>
                                             </Grid>
                                         )}

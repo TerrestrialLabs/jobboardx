@@ -4,7 +4,7 @@ import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import * as nodemailer from 'nodemailer'
 import type { SentMessageInfo } from 'nodemailer'
 import Job from '../../../models/Job'
-import { BASE_URL_API } from '../../../const/const'
+import { BASE_URL } from '../../../const/const'
 
 export type JobUpdateRequestData = {
     _id: string,
@@ -42,7 +42,7 @@ export default async function handler(
                     }
                 })
     
-                const link = `${BASE_URL_API}jobs/edit/${jobUpdateRequest._id}`
+                const link = `${BASE_URL}jobs/edit/${jobUpdateRequest._id}`
                 const mailOptions = {
                     from: 'React Jobs <support@reactdevjobs.io>',
                     to: req.body.email,

@@ -292,7 +292,7 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
             return
         }
         setError(false)
-        axios.post(`${BASE_URL_API}api/job-update-requests`, {
+        axios.post(`${BASE_URL_API}job-update-requests`, {
             email,
             jobId: router.query.id
         })
