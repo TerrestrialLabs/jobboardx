@@ -923,7 +923,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                 <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Country</Typography>
                                                 {/* <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleBillingAddressChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth /> */}
                                                 <Select onChange={(value) => handleBillingAddressSelectChange(value)} name='country' value={billingAddress.country} variant='filled' disableUnderline fullWidth>
-                                                    {countryCodes.map(country => <MenuItem value={country.code}>{country.name}</MenuItem>)}
+                                                    {countryCodes.map(country => <MenuItem key={country.code} value={country.code}>{country.name}</MenuItem>)}
                                                 </Select>
                                                 <FormHelperText error>{billingAddressErrors['country']}</FormHelperText>
                                             </FormControl>
