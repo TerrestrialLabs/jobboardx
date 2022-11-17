@@ -76,7 +76,7 @@ const Terms: NextPage = () => {
                             <p><strong>Third-party Social Media Service</strong> means any services or content (including data, information, products or services) provided by a third-party that may be displayed, included or made available by the Service.</p>
                             </li>
                             <li>
-                            <p><strong>Website</strong> refers to React Jobs, accessible from <a href="https://www.reactdevjobs.io" rel="external nofollow noopener" target="_blank">https://www.reactdevjobs.io</a></p>
+                            <p><strong>Website</strong> refers to React Jobs, accessible from <a href="https://www.reactdevjobs.io" rel="external noreferrer nofollow noopener" target="_blank">https://www.reactdevjobs.io</a></p>
                             </li>
                             <li>
                             <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</p>
@@ -217,7 +217,7 @@ const Terms: NextPage = () => {
                             <h1 className={styles.headerone}>Contact Us</h1>
                             <p>If you have any questions about these Terms and Conditions, You can contact us:</p>
                             <ul>
-                            <li>By visiting this page on our website: <a href="https://www.reactdevjobs.io/contact" rel="external nofollow noopener" target="_blank">https://www.reactdevjobs.io/contact</a></li>
+                            <li>By visiting this page on our website: <a href="https://www.reactdevjobs.io/contact" rel="external noreferrer nofollow noopener" target="_blank">https://www.reactdevjobs.io/contact</a></li>
                             </ul>
                         </Box>
                     </Grid>
