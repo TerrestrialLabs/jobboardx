@@ -9,7 +9,7 @@ import { getTimeDifferenceString } from '../utils/utils'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { TYPE, TYPE_MAP } from '../const/const'
+import { BASE_URL_API, TYPE, TYPE_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
 import axios from 'axios'
@@ -53,7 +53,7 @@ const Home: NextPage = () => {
 
   // TO DO: Testing
   const testingDeleteBackfilledJobs = async () => {
-    await axios.delete('http://localhost:3000/api/jobs')
+    await axios.delete(`${BASE_URL_API}jobs`)
   }
 
   // TO DO: DANGEROUS!!!
@@ -115,14 +115,14 @@ const Home: NextPage = () => {
       router.push(`/?${queryString}`, { query: params })
     }
 
-    const res = await axios.get(`http://localhost:3000/api/jobs`, { params: router.query })
+    const res = await axios.get(`${BASE_URL_API}jobs`, { params: router.query })
 
     setJobs(res.data)
     setLoading(false)
   }
 
   const fetchJobsCount = async (params: any) => {
-    const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params })
+    const res = await axios.get(`${BASE_URL_API}jobs/count`, { params })
     setTotalJobs(res.data)
   }
 
@@ -148,7 +148,7 @@ const Home: NextPage = () => {
 
     router.push(`/?${queryString}`, { query: params })
 
-    const res = await axios.get(`http://localhost:3000/api/jobs`, { params })
+    const res = await axios.get(`${BASE_URL_API}jobs`, { params })
 
     setFiltersOpen(false)
     fetchJobsCount(params)
@@ -157,7 +157,7 @@ const Home: NextPage = () => {
   }
 
   const loadMoreJobs = async () => {
-    const res = await axios.get('http://localhost:3000/api/jobs', { params: { ...router.query, pageIndex: Math.ceil(jobs.length / resultsPerPage) } })
+    const res = await axios.get(`${BASE_URL_API}jobs`, { params: { ...router.query, pageIndex: Math.ceil(jobs.length / resultsPerPage) } })
     const newJobs = await res.data
     setJobs([...jobs, ...newJobs])
   }

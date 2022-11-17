@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import type { JobData } from '../api/jobs'
 import { format, parseISO } from 'date-fns'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
-import { TYPE_MAP } from '../../const/const'
+import { BASE_URL_API, TYPE_MAP } from '../../const/const'
 import { formatSalaryRange } from '../../utils/utils'
 import axios from 'axios'
 import ReactHtmlParser from 'react-html-parser'
@@ -33,7 +33,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const location = getLocationString()
 
     const fetchCompanyJobsCount = async () => {
-        const res = await axios.get(`http://localhost:3000/api/jobs/count`, { params: { search: data.company } })
+        const res = await axios.get(`${BASE_URL_API}jobs/count`, { params: { search: data.company } })
         setCompanyJobsCount(res.data)
     }
 
@@ -292,7 +292,7 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
             return
         }
         setError(false)
-        axios.post('http://localhost:3000/api/job-update-requests', {
+        axios.post(`${BASE_URL_API}api/job-update-requests`, {
             email,
             jobId: router.query.id
         })

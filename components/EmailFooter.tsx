@@ -3,6 +3,7 @@ import { useWindowSize } from "../hooks/hooks"
 import axios from 'axios'
 import { Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
+import { BASE_URL_API } from '../const/const'
 
 const EmailFooter = () => {
     const [open, setOpen] = useState(true)
@@ -34,7 +35,7 @@ const EmailFooter = () => {
             return
         }
         setError(false)
-        await axios.post(`http://localhost:3000/api/subscriptions`, { email })
+        await axios.post(`${BASE_URL_API}subscriptions`, { email })
         setLoading(false)
         setSubmitted(true)
     }

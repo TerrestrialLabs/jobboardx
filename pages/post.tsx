@@ -8,7 +8,7 @@ import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
+import { BASE_URL_API, PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import TextEditor, { TextEditorPlaceholder } from '../components/post/TextEditor'
@@ -201,7 +201,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const loadJob = async () => {
         setJobLoading(true)
         try {
-            const tokenRes = await axios.get(`http://localhost:3000/api/job-update-requests/${router.query.token}`)
+            const tokenRes = await axios.get(`${BASE_URL_API}job-update-requests/${router.query.token}`)
             if (tokenRes) {
                 const hours = 24
                 const validDuration = hours * 60 * 60 * 1000
@@ -213,7 +213,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     setJobError(true)
                     throw Error('Expired edit link.')
                 } else {
-                    const jobRes = await axios.get(`http://localhost:3000/api/jobs/${tokenRes.data.jobId}`)
+                    const jobRes = await axios.get(`${BASE_URL_API}jobs/${tokenRes.data.jobId}`)
                     if (jobRes) {
                         const { data } = jobRes
                         // TO DO: Set state
@@ -265,7 +265,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
     
             const getClientSecret = async () => {
-                const clientSecret = await axios.post('http://localhost:3000/api/stripe/create-payment-intent', paymentIntentParams)
+                const clientSecret = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
                 setClientSecret(clientSecret.data)
             }
     
@@ -418,7 +418,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             // TO DO: Error handling
             let imageUploadRes
             if (logo) {
-                imageUploadRes = await axios.post('http://localhost:3000/api/jobs/upload-image', logo, { 
+                imageUploadRes = await axios.post(`${BASE_URL_API}jobs/upload-image`, logo, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
             }
@@ -438,9 +438,9 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
             let res
             if (edit) {
-                res = await axios.put(`http://localhost:3000/api/jobs/${job?._id}`, body)
+                res = await axios.put(`${BASE_URL_API}jobs/${job?._id}`, body)
             } else {
-                res = await axios.post('http://localhost:3000/api/jobs', body)
+                res = await axios.post(`${BASE_URL_API}jobs`, body)
             }
             
             res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
@@ -564,7 +564,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     const sendConfirmationEmail = async () => {
-        await axios.post('http://localhost:3000/api/stripe/send-confirmation-email', { email: billingAddress.email, featured: jobDetails.featured })
+        await axios.post(`${BASE_URL_API}stripe/send-confirmation-email`, { email: billingAddress.email, featured: jobDetails.featured })
     }
 
   return (

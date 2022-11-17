@@ -7,7 +7,7 @@ import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { CONTACT_MESSAGE_TYPE } from '../const/const'
+import { BASE_URL_API, CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import Footer from '../components/Footer'
@@ -57,7 +57,7 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`http://localhost:3000/api/messages`, messageData)
+            const res = await axios.post(`${BASE_URL_API}messages`, messageData)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)
