@@ -735,7 +735,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                     </IconButton>
                                                 </Box>
                                             )}
-                                            {imagePreviewSource && mobile && <Typography sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
+                                            {imagePreviewSource && mobile && <Typography sx={{ wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
                                             {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
                                         </FormControl>
                                     </Grid>
