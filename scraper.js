@@ -7,8 +7,6 @@ async function scrapeJobs() {
     const page = await browser.newPage()
     await page.goto('https://www.simplyhired.com/search?q=react+developer')
 
-    await page.screenshot({ path: 'simplyhired.png' })
-
     const jobs = await page.evaluate(() => {
         let jobList = []
 
@@ -67,7 +65,7 @@ async function scrapeJobs() {
     for (let i = 0; i < jobs.length; i++) {
         const job = jobs[i]
         const url = jobs[i].applicationLink;
-        console.log(job.datePosted)
+
         await page.goto(`${url}`);
         const extraDetails = await page.evaluate((job) => {
             const getPastDate = (daysAgo) => {
@@ -116,17 +114,51 @@ async function scrapeJobs() {
     const supportedJobTypes = ['fulltime', 'parttime', 'contract']
     // Remove jobs that are missing important data
     const jobsToSave = jobs
-                        .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
-                        .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
-    console.log("Dates posted: ", jobsToSave.map(job => job.datePosted))
+        .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
+        .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
+
+    const jobsWithLogo = await Promise.all(
+        jobsToSave.map(async job => {
+            if (job.companyLogo) {
+                const response = await fetch(job.companyLogo)
+                const blob = await response.blob()
+                const arrayBuffer = await blob.arrayBuffer()
+                const buffer = Buffer.from(arrayBuffer)
+                const base64data = buffer.toString('base64');
+                const uploadRes = await uploadToCloudinary(base64data)
+
+                if (uploadRes) {
+                    return {
+                        ...job,
+                        companyLogo: uploadRes
+                    }
+                }
+            }
+            return job
+        })
+    )
+
     // Write to database
-    for (let i = 0; i < jobsToSave.length; i++) {
+    for (let i = 0; i < jobsWithLogo.length; i++) {
         try {
-            const res = await axios.post('http://localhost:3000/api/jobs', jobsToSave[i])
+            const res = await axios.post('http://localhost:3000/api/jobs', jobsWithLogo[i])
             console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
             console.log(res.data)
         } catch (err) {
             console.log(err)
+        }
+    }
+
+    async function uploadToCloudinary (image) {
+        try {
+            const response = await fetch('http://localhost:3000/api/jobs/upload-image-backfill', {
+                method: 'POST',
+                body: image
+            })
+            const data = await response.json()
+            return data
+        } catch (err) {
+            throw err
         }
     }
 }
