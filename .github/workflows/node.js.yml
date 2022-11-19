@@ -24,4 +24,4 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: yarn install
-    - run: node sendSubscriptionEmail.js
+    - run: node cron/sendSubscriptionEmail.js
