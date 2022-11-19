@@ -53,11 +53,11 @@ const EmailFooter = () => {
                 <Close />
               </IconButton>
               {submitted ? (
-                <>
+                <Box pl={1} pr={1}>
                   <Typography color='success.main'>
                     Success! You'll be receiving job alerts to your inbox soon.
                   </Typography>
-                </>
+                </Box>
                 ) : (
                 <Box display='flex' flexDirection='column' width='100%'>
                   <Typography>Get the best jobs right in your inbox</Typography>
