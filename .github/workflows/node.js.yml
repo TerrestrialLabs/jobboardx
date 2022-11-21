@@ -24,4 +24,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: yarn install
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}
     - run: node cron/sendSubscriptionEmail.js
