@@ -33,7 +33,7 @@ export default async function handler(
                 from: 'support@reactdevjobs.io',
                 subject: 'Sending with SendGrid is Fun',
                 text: 'and easy to do anywhere, even with Node.js',
-                html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+                html: '<div style="background-color:#F3F2F1;"><strong>and easy to do anywhere, even with Node.js</strong></div>',
             }
             await sgMail.sendMultiple(message)
             console.log('Subscription emails sent')
