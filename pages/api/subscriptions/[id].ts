@@ -20,6 +20,16 @@ export default async function handler(
 
     dbConnect()
 
+    if (method == 'GET') {
+        try {
+            await Subscription.findById(id)
+            res.status(200).json(true)
+        } catch (err) {
+            // @ts-ignore
+            res.status(500).json(getErrorMessage(err))
+        }
+    }
+
     if (method === 'DELETE') {
         try {
             await Subscription.deleteOne({ _id: id })

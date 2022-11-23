@@ -51,8 +51,6 @@ export default async function handler(
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1 })
                 .limit(fetchLimit)
 
-            // console.log(jobs)
-
             const message = {
                 // to: subscriptions.map(subscription => subscription.email),
                 to: ['contact@goterrestrial.io'],
@@ -67,6 +65,7 @@ export default async function handler(
                         salaryMin: job.salaryMin,
                         salaryMax: job.salaryMax,
                         companyLogo: job.companyLogo ? job.companyLogo : null,
+                        companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                         url: `https://wwww.reactdevjobs.io/${job._id}`
                     })),
                     numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+'` : jobs.length,
