@@ -47,9 +47,9 @@ createOrUpdateJob.post(async (req, res) => {
             const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
             const paymentIntent = await stripe.paymentIntents.retrieve(stripePaymentIntentId)
             // Make sure no other job has been created with the same orderId
-            const jobWithSameOrderId = await Job.find({ orderId: paymentIntent.metadata.orderId })
+            const jobsWithSameOrderId = await Job.find({ orderId: paymentIntent.metadata.orderId })
 
-            if (!paymentIntent || jobWithSameOrderId.length > 0 || paymentIntent.status !== 'succeeded') {
+            if (!paymentIntent || jobsWithSameOrderId.length > 0 || paymentIntent.status !== 'succeeded') {
                 throw Error('Invalid transaction')
             }
             orderId = paymentIntent.metadata.orderId
@@ -103,7 +103,7 @@ createOrUpdateJob.post(async (req, res) => {
             const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
                 .select('-email')
                 .select('-orderId')
-                
+
             res.status(200).json(job)
         }
     } catch(err) {
