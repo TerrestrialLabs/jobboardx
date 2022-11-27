@@ -91,7 +91,7 @@ export default async function handler(
         const filters = getFilters(req.query)
 
         try {
-            const jobs = await Job.find(filters).select('-email')
+            const jobs = await Job.find(filters).select('-email').select('-orderId')
                 // TO DO: Remove createdAt
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1, 'createdAt': -1 })
                 .skip(pageIndex * resultsPerPage)
@@ -122,6 +122,8 @@ export default async function handler(
                 ...req.body,
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date()
             })
+            delete job.email
+            delete job.orderId
             res.status(201).json(job)
         } catch(err) {
             // TO DO
@@ -130,15 +132,15 @@ export default async function handler(
         }
     }
 
-        // TO DO: This deletes jobs backfilled from SimplyHired
-        if (method === 'DELETE') {
-            try {
-                const job = await Job.deleteMany({ companyUrl: 'N/A' })
-                res.status(200).json(true)
-            } catch(err) {
-                // TO DO
-                // @ts-ignore
-                res.status(500).json(getErrorMessage(err))
-            }
-        }
+    // TO DO: This deletes jobs backfilled from SimplyHired
+    // if (method === 'DELETE') {
+    //     try {
+    //         const job = await Job.deleteMany({ companyUrl: 'N/A' })
+    //         res.status(200).json(true)
+    //     } catch(err) {
+    //         // TO DO
+    //         // @ts-ignore
+    //         res.status(500).json(getErrorMessage(err))
+    //     }
+    // }
 }

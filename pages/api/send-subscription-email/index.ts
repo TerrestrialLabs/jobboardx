@@ -52,8 +52,8 @@ export default async function handler(
                 .limit(fetchLimit)
 
             const message = {
-                // to: subscriptions.map(subscription => subscription.email),
-                to: ['contact@goterrestrial.io'],
+                to: subscriptions.map(subscription => subscription.email),
+                // to: ['contact@goterrestrial.io'],
                 from: 'support@reactdevjobs.io',
                 html: "<html></html>",
                 dynamic_template_data: {

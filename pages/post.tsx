@@ -79,22 +79,38 @@ const initEditorValue = [
     }
 ]
 
+// const initJobDetails = {
+//     title: '',
+//     company: '',
+//     companyUrl: '',
+//     type: TYPE.FULLTIME,
+//     location: '',
+//     remote: false,
+//     // description: '',
+//     applicationLink: '',
+//     skills: [],
+//     perks: [],
+//     salaryMin: 0,
+//     salaryMax: 0,
+//     // TO DO: Hardcoded
+//     featured: true
+// }
 const initJobDetails = {
-    title: '',
-    company: '',
-    companyUrl: '',
+    title: 'Test Stripe',
+    company: 'Test Stripe Co',
+    companyUrl: 'https://www.example.com',
     type: TYPE.FULLTIME,
     location: '',
     remote: false,
-    // description: '',
-    applicationLink: '',
-    skills: [],
+    applicationLink: 'https://www.example.com',
+    skills: ['HTML'],
     perks: [],
-    salaryMin: 0,
-    salaryMax: 0,
-    // TO DO: Hardcoded
+    salaryMin: 50000,
+    salaryMax: 100000,
     featured: true
 }
+
+
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
@@ -153,18 +169,32 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [jobError, setJobError] = useState(false)
     const [jobDetails, setJobDetails] = useState<PostForm>(initJobDetails)
 
-    const [billingAddress, setBillingAddress] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        emailConfirmation: '',
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: 'US'
-    })
+    const [billingAddress, setBillingAddress] = useState(
+    // {
+    //     firstName: '',
+    //     lastName: '',
+    //     email: '',
+    //     emailConfirmation: '',
+    //     addressLine1: '',
+    //     addressLine2: '',
+    //     city: '',
+    //     state: '',
+    //     postalCode: '',
+    //     country: 'US'
+    // }
+    {
+        firstName: 'Gregory',
+        lastName: 'A',
+        email: 'contact@goterrestrial.io',
+        emailConfirmation: 'contact@goterrestrial.io',
+        addressLine1: '12 Sherwood Crescent',
+        addressLine2: null,
+        city: 'Dix Hills',
+        state: 'NY',
+        country: 'US',
+        postalCode: '11746'
+    }
+    )
 
     const [imageFileName, setImageFileName] = useState('')
     const [imagePreviewSource, setImagePreviewSource] = useState<string | ArrayBuffer | null>('')
@@ -186,6 +216,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const stripe = useStripe()
     const elements = useElements()
 
+    const [paymentIntentId, setPaymentIntentId] = useState('')
     const [clientSecret, setClientSecret] = useState('')
     const [paymentError, setPaymentError] = useState('')
 
@@ -203,11 +234,13 @@ export const PostForm = ({ edit }: PostFormProps) => {
         try {
             const tokenRes = await axios.get(`${BASE_URL_API}job-update-requests/${router.query.token}`)
             if (tokenRes) {
+                // TO DO: Util function
                 const hours = 24
                 const validDuration = hours * 60 * 60 * 1000
                 const currentDate = new Date()
                 const createdDate = new Date(tokenRes.data.createdAt)
                 const expirationDate = new Date(createdDate.getTime() + validDuration)
+                // TO DO: Expire after use
                 const expired = currentDate >= expirationDate
                 if (expired) {
                     setJobError(true)
@@ -229,7 +262,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                             skills: data.skills,
                             perks: data.perks,
                             featured: data.featured,
-                            // TO DO: Check if saved as number or string
                             salaryMin: data.salaryMin,
                             salaryMax: data.salaryMax
                         }
@@ -256,8 +288,16 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }, [router.query])
 
+    const generateRandomToken = () => {
+        const rand = () => {
+            return Math.random().toString(36).substr(2);
+        }
+        return rand() + rand();
+    }
+
+    // TO DO: Make sure only triggered once
     useEffect(() => {
-        if (!edit) {
+        if (!edit) {            
             const paymentIntentParams = {
                 amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
                 currency: 'USD',
@@ -265,8 +305,9 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
     
             const getClientSecret = async () => {
-                const clientSecret = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
-                setClientSecret(clientSecret.data)
+                const { data } = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
+                setPaymentIntentId(data.paymentIntentId)
+                setClientSecret(data.clientSecret)
             }
     
             getClientSecret()
@@ -404,26 +445,17 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
         setLoading(true)
         try {
+            let paymentResult
             if (!edit) {
-                const paymentResult = await makePayment()
-
+                paymentResult = await makePayment()
                 if (!paymentResult) {
                     throw Error('Payment failed.')
                 }
             }
 
-            // const data = new FormData()
-            // data.set('image', logoFile)
+            const formData = logo ? logo : new FormData()
 
-            // TO DO: Error handling
-            let imageUploadRes
-            if (logo) {
-                imageUploadRes = await axios.post(`${BASE_URL_API}jobs/upload-image`, logo, { 
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                })
-            }
-            
-            const body = { 
+            const jobData = { 
                 ...(edit ? job : {}),
                 ...(!edit ? { email: billingAddress.email } : {}),
                 ...jobDetails,
@@ -432,16 +464,23 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 backfilled: false,
                 company: jobDetails.company.trim(),
                 companyUrl: jobDetails.companyUrl.trim(),
-                companyLogo: logoUrl ? logoUrl : (imageUploadRes?.data ? imageUploadRes.data : ''),
+                companyLogo: logoUrl ? logoUrl : '',
                 description: serialize({ children: descriptionEditorValue }),
                 applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
             }
-            let res
+
+            formData.set('jobData', JSON.stringify(jobData))
+            formData.set('mode', edit ? 'update' : 'create')
+
             if (edit) {
-                res = await axios.put(`${BASE_URL_API}jobs/${job?._id}`, body)
+                formData.set('updateToken', router.query.token as string)
             } else {
-                res = await axios.post(`${BASE_URL_API}jobs`, body)
+                formData.set('stripePaymentIntentId', paymentIntentId)
             }
+
+            const res = await axios.post(`${BASE_URL_API}jobs/create-or-update`, formData, { 
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
             
             res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
         } catch (err) {
@@ -921,7 +960,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         <Grid xs={12} sm={6}>
                                             <FormControl hiddenLabel fullWidth>
                                                 <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Country</Typography>
-                                                {/* <FilledInput error={!!billingAddressErrors['country']} disableUnderline={!billingAddressErrors['country']} onChange={handleBillingAddressChange} name='country' value={billingAddress.country} autoComplete='off' placeholder='Country' fullWidth /> */}
                                                 <Select onChange={(value) => handleBillingAddressSelectChange(value)} name='country' value={billingAddress.country} variant='filled' disableUnderline fullWidth>
                                                     {countryCodes.map(country => <MenuItem key={country.code} value={country.code}>{country.name}</MenuItem>)}
                                                 </Select>

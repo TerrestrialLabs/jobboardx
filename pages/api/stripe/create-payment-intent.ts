@@ -1,16 +1,24 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
-export default async (req: NextApiRequest, res: NextApiResponse<string>) => {
+export default async (req: NextApiRequest, res: NextApiResponse<{ clientSecret: string, paymentIntentId: string }>) => {
     const { method } = req
 
     if (method === 'POST') {
         try {
-            const paymentIntent = await stripe.paymentIntents.create(req.body)
+            const paymentIntent = await stripe.paymentIntents.create({
+                ...req.body,
+                metadata: {
+                    orderId: uuidv4()
+                }
+            })
             
-            res.status(201).json(paymentIntent.client_secret)
+            res.status(201).json({
+                clientSecret: paymentIntent.client_secret,
+                paymentIntentId: paymentIntent.id
+            })
         } catch(err) {
             // TO DO
             // @ts-ignore
