@@ -20,7 +20,6 @@ import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElem
 import countryCodes from '../data/country_codes.json'
 import Footer from '../components/Footer'
 import { useEditor } from '../hooks/editor'
-import { Transforms } from 'slate'
 import type { Node } from 'slate'
 
 export type PostForm = {
@@ -40,9 +39,6 @@ export type PostForm = {
 
 // TO DO:
 //  Level (j/m/s) field
-//  Text editor functions or pre-formatted sections from multiple fields
-//  Request edit post link email
-//  Send email with link to posting and start + end dates
 //  Posting preview
 //  Stepper
 
@@ -79,38 +75,60 @@ const initEditorValue = [
     }
 ]
 
-// const initJobDetails = {
-//     title: '',
-//     company: '',
-//     companyUrl: '',
-//     type: TYPE.FULLTIME,
-//     location: '',
-//     remote: false,
-//     // description: '',
-//     applicationLink: '',
-//     skills: [],
-//     perks: [],
-//     salaryMin: 0,
-//     salaryMax: 0,
-//     // TO DO: Hardcoded
-//     featured: true
-// }
 const initJobDetails = {
-    title: 'Test Stripe',
-    company: 'Test Stripe Co',
-    companyUrl: 'https://www.example.com',
+    title: '',
+    company: '',
+    companyUrl: '',
     type: TYPE.FULLTIME,
     location: '',
     remote: false,
-    applicationLink: 'https://www.example.com',
-    skills: ['HTML'],
+    // description: '',
+    applicationLink: '',
+    skills: [],
     perks: [],
-    salaryMin: 50000,
-    salaryMax: 100000,
+    salaryMin: 0,
+    salaryMax: 0,
     featured: true
 }
+// const initJobDetails = {
+//     title: 'Test Stripe',
+//     company: 'Test Stripe Co',
+//     companyUrl: 'https://www.example.com',
+//     type: TYPE.FULLTIME,
+//     location: '',
+//     remote: false,
+//     applicationLink: 'https://www.example.com',
+//     skills: ['HTML'],
+//     perks: [],
+//     salaryMin: 50000,
+//     salaryMax: 100000,
+//     featured: true
+// }
 
-
+const initBillingAddress = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    emailConfirmation: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'US'
+}
+// const initBillingAddress = {
+//     firstName: 'Gregory',
+//     lastName: 'A',
+//     email: 'contact@goterrestrial.io',
+//     emailConfirmation: 'contact@goterrestrial.io',
+//     addressLine1: '12 Sherwood Crescent',
+//     addressLine2: null,
+//     city: 'Dix Hills',
+//     state: 'NY',
+//     postalCode: '11746',
+//     country: 'US'
+// }
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
@@ -169,32 +187,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [jobError, setJobError] = useState(false)
     const [jobDetails, setJobDetails] = useState<PostForm>(initJobDetails)
 
-    const [billingAddress, setBillingAddress] = useState(
-    // {
-    //     firstName: '',
-    //     lastName: '',
-    //     email: '',
-    //     emailConfirmation: '',
-    //     addressLine1: '',
-    //     addressLine2: '',
-    //     city: '',
-    //     state: '',
-    //     postalCode: '',
-    //     country: 'US'
-    // }
-    {
-        firstName: 'Gregory',
-        lastName: 'A',
-        email: 'contact@goterrestrial.io',
-        emailConfirmation: 'contact@goterrestrial.io',
-        addressLine1: '12 Sherwood Crescent',
-        addressLine2: null,
-        city: 'Dix Hills',
-        state: 'NY',
-        country: 'US',
-        postalCode: '11746'
-    }
-    )
+    const [billingAddress, setBillingAddress] = useState(initBillingAddress)
 
     const [imageFileName, setImageFileName] = useState('')
     const [imagePreviewSource, setImagePreviewSource] = useState<string | ArrayBuffer | null>('')
