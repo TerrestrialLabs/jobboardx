@@ -1,20 +1,23 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
 import '../styles/globals.css'
-import Head from 'next/head'
-import type { AppProps } from 'next/app'
-import { ThemeProvider } from '@mui/material/styles'
-import theme from '../config/theme'
-import { CssBaseline } from '@mui/material'
-import { CacheProvider, EmotionCache } from '@emotion/react'
-import createEmotionCache from '../config/createEmotionCache'
+import Head from 'next/head';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { CacheProvider, EmotionCache } from '@emotion/react';
+import theme from '../config/theme';
+import createEmotionCache from '../config/createEmotionCache';
+import { AppProps } from 'next/app';
 
-const clientSideEmotionCache = createEmotionCache()
+const clientSideEmotionCache = createEmotionCache();
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-function MyApp(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+export default function MyApp(props: MyAppProps) {
+  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -25,7 +28,11 @@ function MyApp(props: MyAppProps) {
         <Component {...pageProps} />
       </ThemeProvider>
     </CacheProvider>
-  )
+  );
 }
 
-export default MyApp
+MyApp.propTypes = {
+  Component: PropTypes.elementType.isRequired,
+  emotionCache: PropTypes.object,
+  pageProps: PropTypes.object.isRequired,
+}
