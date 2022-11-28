@@ -126,57 +126,55 @@ const Contact: NextPage = () => {
                     </Grid>
 
                     <Grid xs={12} sm={10} lg={8} p={2} container>
-                        <Grid xs={12} sm={12} pb={mobile ? 2 : 4} container>
+                        <Grid xs={12} sm={12} pb={mobile ? 2 : 4}>
                             <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                                <Box>
-                                    <Grid container spacing={2}>
-                                        {showErrorMessage && (
-                                            <Grid xs={12}>
-                                                <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">Please fix the following errors and resubmit.</Alert>
-                                            </Grid>
-                                        )}
-
-                                        {submitted && (
-                                            <Grid xs={12}>
-                                                <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">Your message has been sent.</Alert>
-                                            </Grid>
-                                        )}
-
-                                        <Grid xs={12} sm={6}>
-                                            <FormControl hiddenLabel fullWidth>
-                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
-                                                <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={messageData.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='Email address' fullWidth />
-                                                <FormHelperText error>{errors['email']}</FormHelperText>
-                                            </FormControl>
+                                <Grid container spacing={2}>
+                                    {showErrorMessage && (
+                                        <Grid xs={12}>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">Please fix the following errors and resubmit.</Alert>
                                         </Grid>
+                                    )}
 
-                                        <Grid xs={12} sm={6}>
-                                            <FormControl hiddenLabel fullWidth>
-                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Category</Typography>
-                                                <Select onChange={(value) => handleSelectChange(value)} name='category' value={messageData.category} variant='filled' disableUnderline fullWidth>
-                                                    <MenuItem value={CONTACT_MESSAGE_TYPE.CUSTOMER_SUPPORT}>{CONTACT_MESSAGE_TYPE.CUSTOMER_SUPPORT}</MenuItem>
-                                                    <MenuItem value={CONTACT_MESSAGE_TYPE.FEEDBACK}>{CONTACT_MESSAGE_TYPE.FEEDBACK}</MenuItem>
-                                                    <MenuItem value={CONTACT_MESSAGE_TYPE.FEATURE_REQUEST}>{CONTACT_MESSAGE_TYPE.FEATURE_REQUEST}</MenuItem>
-                                                    <MenuItem value={CONTACT_MESSAGE_TYPE.OTHER}>{CONTACT_MESSAGE_TYPE.OTHER}</MenuItem>
-                                                </Select>
-                                            </FormControl>
+                                    {submitted && (
+                                        <Grid xs={12}>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">Your message has been sent.</Alert>
                                         </Grid>
+                                    )}
 
-                                        <Grid xs={12} sm={12}>
-                                            <FormControl hiddenLabel fullWidth>
-                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Message</Typography>
-                                                <FilledInput multiline rows={6} error={!!errors['message']} disableUnderline={!errors['message']} onChange={handleInputChange} name='message' value={messageData.message} autoComplete='off' placeholder='Message' fullWidth sx={{ verticalAlign: 'center' }} />
-                                                <FormHelperText error>{errors['message']}</FormHelperText>
-                                            </FormControl>
-                                        </Grid>
-
-                                        <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                            <Button fullWidth={mobile} disabled={loading} onClick={submit} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
-                                                {loading ? <CircularProgress color='secondary' size={22} /> : 'Submit'}
-                                            </Button>
-                                        </Grid>
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
+                                            <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={messageData.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='Email address' fullWidth />
+                                            <FormHelperText error>{errors['email']}</FormHelperText>
+                                        </FormControl>
                                     </Grid>
-                                </Box>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Category</Typography>
+                                            <Select onChange={(value) => handleSelectChange(value)} name='category' value={messageData.category} variant='filled' disableUnderline fullWidth>
+                                                <MenuItem value={CONTACT_MESSAGE_TYPE.CUSTOMER_SUPPORT}>{CONTACT_MESSAGE_TYPE.CUSTOMER_SUPPORT}</MenuItem>
+                                                <MenuItem value={CONTACT_MESSAGE_TYPE.FEEDBACK}>{CONTACT_MESSAGE_TYPE.FEEDBACK}</MenuItem>
+                                                <MenuItem value={CONTACT_MESSAGE_TYPE.FEATURE_REQUEST}>{CONTACT_MESSAGE_TYPE.FEATURE_REQUEST}</MenuItem>
+                                                <MenuItem value={CONTACT_MESSAGE_TYPE.OTHER}>{CONTACT_MESSAGE_TYPE.OTHER}</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={12}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Message</Typography>
+                                            <FilledInput multiline rows={6} error={!!errors['message']} disableUnderline={!errors['message']} onChange={handleInputChange} name='message' value={messageData.message} autoComplete='off' placeholder='Message' fullWidth sx={{ verticalAlign: 'center' }} />
+                                            <FormHelperText error>{errors['message']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Button fullWidth={mobile} disabled={loading} onClick={submit} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Submit'}
+                                        </Button>
+                                    </Grid>
+                                </Grid>
                             </Box>
                         </Grid>
                     </Grid>
