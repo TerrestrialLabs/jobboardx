@@ -249,7 +249,7 @@ const CompanyBox = ({ companyJobsCount, data, mobile }: CompanyBoxProps) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-    const res = await axios.get(`http://localhost:3000/api/jobs/${params?.id}`)
+    const res = await axios.get(`${BASE_URL_API}jobs/${params?.id}`)
 
     return {
         props: {
