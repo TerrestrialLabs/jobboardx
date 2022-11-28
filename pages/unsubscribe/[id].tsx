@@ -1,10 +1,10 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Box, CircularProgress, Grid, Link, Typography } from '@mui/material'
-import homeStyles from '../styles/Home.module.css'
+import homeStyles from '../../styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { BASE_URL_API } from '../const/const'
+import { BASE_URL_API } from '../../const/const'
 import { useRouter } from 'next/router'
 
 const Unsubscribe: NextPage = () => {
@@ -25,8 +25,10 @@ const Unsubscribe: NextPage = () => {
     }
 
     useEffect(() => {
-        fetchSubscription()
-    }, [])
+        if (router.query.id) {
+            fetchSubscription()
+        }
+    }, [router.query.id])
 
     return (
         <div className={homeStyles.container} style={{ height: '100vh', backgroundColor: '#f5f5f5' }}>

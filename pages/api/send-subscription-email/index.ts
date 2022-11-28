@@ -54,7 +54,7 @@ export default async function handler(
             const message = {
                 to: subscriptions.map(subscription => subscription.email),
                 // to: ['contact@goterrestrial.io'],
-                from: 'support@reactdevjobs.io',
+                from: 'React Jobs <support@reactdevjobs.io>',
                 html: "<html></html>",
                 dynamic_template_data: {
                     subject: "New React jobs for you",
@@ -72,7 +72,8 @@ export default async function handler(
                     timeStamp: currentDate,
                     dateFormat: "MMMM D, YYYY",
                     // TO DO: Hardcoded
-                    unsubscribeUrl: `https://wwww.reactdevjobs.io/unsubscribe/${subscriptions[0]._id}`
+                    unsubscribeUrl: `https://wwww.reactdevjobs.io/unsubscribe/${subscriptions[0]._id}`,
+                    // unsubscribeUrl: `http://localhost:3000/unsubscribe/${subscriptions[0]._id}`
                 },
                 template_id: 'd-2b27defb433c4a7e99667df4ed069625'
             }
