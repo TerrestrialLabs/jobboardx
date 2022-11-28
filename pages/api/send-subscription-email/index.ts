@@ -4,6 +4,7 @@ import Subscription from '../../../models/Subscription'
 import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
+import { v4 as uuid } from 'uuid'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -51,9 +52,8 @@ export default async function handler(
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1 })
                 .limit(fetchLimit)
 
-            const message = {
-                to: subscriptions.map(subscription => subscription.email),
-                // to: ['contact@goterrestrial.io'],
+            const messages = subscriptions.map(subscription => ({
+                to: subscription.email,
                 from: 'React Jobs <support@reactdevjobs.io>',
                 html: "<html></html>",
                 dynamic_template_data: {
@@ -72,14 +72,20 @@ export default async function handler(
                     timeStamp: currentDate,
                     dateFormat: "MMMM D, YYYY",
                     // TO DO: Hardcoded
-                    unsubscribeUrl: `https://wwww.reactdevjobs.io/unsubscribe/${subscriptions[0]._id}`,
-                    // unsubscribeUrl: `http://localhost:3000/unsubscribe/${subscriptions[0]._id}`
+                    // unsubscribeUrl: `http://localhost:3000/unsubscribe/${subscription._id}`
+                    unsubscribeUrl: `https://wwww.reactdevjobs.io/unsubscribe/${subscription._id}`
                 },
                 template_id: 'd-2b27defb433c4a7e99667df4ed069625'
+            }))
+
+            // SendGrid can send up to 1000 emails at a time
+            const chunkSize = 1000;
+            for (let i = 0; i < messages.length; i += chunkSize) {
+                const chunk = messages.slice(i, i + chunkSize);
+                await sgMail.send(chunk)
+                console.log('Subscription emails sent')
             }
 
-            await sgMail.sendMultiple(message)
-            console.log('Subscription emails sent')
             res.status(201).json(true)
         } catch(err) {
             // TO DO
