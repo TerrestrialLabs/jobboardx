@@ -390,16 +390,18 @@ const ListItem = ({
     }}>
       <Grid container alignItems='center'>
         <Grid xs={5} container alignItems='center'>
-          <Grid mr={2}>
-            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
+          <Grid xs={2}>
+            <Box mr={2} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
               {companyLogo && <img style={{ borderRadius: '50%' }} src={companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
               {!companyLogo && <Typography fontSize={20}>{company.slice(0, 1).toUpperCase()}</Typography>}
             </Box>
           </Grid>
 
-          <Grid>
-            <Typography variant='subtitle1' sx={{ fontWeight: '600' }}>{title}</Typography>
-            <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{company}</Typography>
+          <Grid xs={10}>
+            <Box mr={2}>
+              <Typography variant='subtitle1' sx={{ fontWeight: '600' }}>{title}</Typography>
+              <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{company}</Typography>
+            </Box>
           </Grid>
         </Grid>
         <Grid xs={5} container>
