@@ -28,7 +28,7 @@ const Privacy: NextPage = () => {
                     <Grid xs={11} sm={10}>
                         <Box>
                             <h1 className={styles.headerone}>Privacy Policy</h1>
-                            <Typography variant='caption'>Last updated: November 16, 2022</Typography>
+                            <Typography variant='caption'>Last updated: November 28, 2022</Typography>
                             <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
                             <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
                             <h1 className={styles.headerone}>Interpretation and Definitions</h1>
@@ -244,9 +244,9 @@ const Privacy: NextPage = () => {
                             <p>We may use Email Marketing Service Providers to manage and send emails to You.</p>
                             <ul>
                             <li>
-                            <p><strong>Mailchimp</strong></p>
-                            <p>Mailchimp is an email marketing sending service provided by The Rocket Science Group LLC.</p>
-                            <p>For more information on the privacy practices of Mailchimp, please visit their Privacy policy: <a href="https://mailchimp.com/legal/privacy/" rel="external noreferrer nofollow noopener" target="_blank">https://mailchimp.com/legal/privacy/</a></p>
+                            <p><strong>SendGrid</strong></p>
+                            <p>SendGrid is an email marketing sending service provided by Twilio Inc.</p>
+                            <p>For more information on the privacy practices of SendGrid, please visit their Privacy policy: <a href="https://www.twilio.com/legal/privacy" rel="external noreferrer nofollow noopener" target="_blank">https://www.twilio.com/legal/privacy/</a></p>
                             </li>
                             </ul>
                             <h2 className={styles.headertwo}>Payments</h2>
