@@ -208,9 +208,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     const stripe = useStripe()
     const elements = useElements()
-
-    const [paymentIntentId, setPaymentIntentId] = useState('')
-    const [clientSecret, setClientSecret] = useState('')
     const [paymentError, setPaymentError] = useState('')
 
     const jobDetailsErrorAlertRef = useRef<null | HTMLDivElement>(null)
@@ -287,25 +284,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
         return rand() + rand();
     }
-
-    // TO DO: Make sure only triggered once
-    useEffect(() => {
-        if (!edit) {            
-            const paymentIntentParams = {
-                amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
-                currency: 'USD',
-                ...(billingAddress.email ? { receipt_email: billingAddress.email } : {})
-            }
-    
-            const getClientSecret = async () => {
-                const { data } = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
-                setPaymentIntentId(data.paymentIntentId)
-                setClientSecret(data.clientSecret)
-            }
-    
-            getClientSecret()
-        }
-    }, [jobDetails.featured])
 
     const setDescriptionValue = (value: { type: string, children: { text: string; }[] }[]) => {
         // Hack to fix bug of remaining node being ul or nl when deleting all text
@@ -468,7 +446,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             if (edit) {
                 formData.set('updateToken', router.query.token as string)
             } else {
-                formData.set('stripePaymentIntentId', paymentIntentId)
+                formData.set('stripePaymentIntentId', paymentResult?.paymentIntent.id as string)
             }
 
             const res = await axios.post(`${BASE_URL_API}jobs/create-or-update`, formData, { 
@@ -560,6 +538,15 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     const makePayment = async () => {
         if (stripe && elements && !edit) {
+            const paymentIntentParams = {
+                amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
+                currency: 'USD',
+                receipt_email: billingAddress.email
+            }
+
+            // TO DO: Clean up payment intent if transaction fails
+            const paymentIntent = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
+
             const cardElement = elements.getElement(CardNumberElement)
             const stripeData = {
                 payment_method: {
@@ -580,7 +567,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
 
             // @ts-ignore
-            const paymentResult = await stripe.confirmCardPayment(clientSecret, stripeData)
+            const paymentResult = await stripe.confirmCardPayment(paymentIntent.data.clientSecret, stripeData)
 
             if (paymentResult.error) {
                 setPaymentError(paymentResult.error.message || '')

@@ -4,12 +4,15 @@ import nextConnect from 'next-connect'
 import multer from 'multer'
 import Job from '../../../models/Job'
 import JobUpdateRequest from '../../../models/JobUpdateRequest'
+import dbConnect from '../../../mongodb/dbconnect'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
+
+dbConnect()
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage }) // TO DO: Check here for file size
@@ -47,7 +50,7 @@ createOrUpdateJob.post(async (req, res) => {
             const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
             const paymentIntent = await stripe.paymentIntents.retrieve(stripePaymentIntentId)
             // Make sure no other job has been created with the same orderId
-            const jobsWithSameOrderId = await Job.find({ orderId: paymentIntent.metadata.orderId })
+            const jobsWithSameOrderId = await Job.find({ orderId: paymentIntent.metadata.orderId }).exec()
 
             if (!paymentIntent || jobsWithSameOrderId.length > 0 || paymentIntent.status !== 'succeeded') {
                 throw Error('Invalid transaction')
