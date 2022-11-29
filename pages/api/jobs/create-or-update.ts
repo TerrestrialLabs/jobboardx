@@ -5,12 +5,18 @@ import multer from 'multer'
 import Job from '../../../models/Job'
 import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import dbConnect from '../../../mongodb/dbconnect'
+import sgMail from '@sendgrid/mail'
+import { JobData } from '.'
+import { BASE_URL, PRICE, TYPE_MAP } from '../../../const/const'
+import { add, format, parseISO } from 'date-fns'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
 dbConnect()
 
@@ -101,6 +107,8 @@ createOrUpdateJob.post(async (req, res) => {
             })
             delete job.orderId
 
+            await sendConfirmationEmail(job)
+
             res.status(201).json(job)
         } else if (mode === 'update') {
             const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
@@ -123,3 +131,42 @@ export const config = {
 }
 
 export default createOrUpdateJob
+
+const sendConfirmationEmail = async (job: JobData & { email: string }) => {
+    try {
+        const startDate = job.datePosted
+        const endDate = add(startDate, { days: 30 })
+        const message = {
+            to: job.email,
+            from: 'React Jobs <support@reactdevjobs.io>',
+            html: "<html></html>",
+            dynamic_template_data: {
+                subject: "Your job has been posted",
+                job: {
+                    postType: job.featured ? 'Featured' : 'Regular',
+                    type: TYPE_MAP[job.type],
+                    title: job.title,
+                    company: job.company,
+                    location: job.location,
+                    salaryMin: job.salaryMin,
+                    salaryMax: job.salaryMax,
+                    companyLogo: job.companyLogo ? job.companyLogo : null,
+                    companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
+                    url: `${BASE_URL}jobs/${job._id}`
+                },
+                price: job.featured ? PRICE.featured : PRICE.regular,
+                startDate: format(startDate, 'MMM. d, yyyy'),
+                endDate: format(endDate, 'MMM. d, yyyy')
+            },
+            template_id: 'd-5dbc7dfe9f7c43608b56fa9b5800b363'
+        }
+
+        const res = await sgMail.send(message)
+        if (res[0] && res[0].statusCode === 202) {
+            console.log('Confirmation email sent')
+            return res
+        }
+    } catch (err) {
+        throw Error('Failed to send confirmation email.')
+    }
+}

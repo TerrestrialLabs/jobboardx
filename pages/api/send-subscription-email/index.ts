@@ -4,7 +4,6 @@ import Subscription from '../../../models/Subscription'
 import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
-import { v4 as uuid } from 'uuid'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 

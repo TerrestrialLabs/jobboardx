@@ -8,7 +8,7 @@ import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { BASE_URL_API, PERKS, SKILLS, TYPE, TYPE_MAP } from '../const/const'
+import { BASE_URL_API, PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import TextEditor, { TextEditorPlaceholder } from '../components/post/TextEditor'
@@ -62,11 +62,6 @@ const SUPPORTED_CARDS = [
     "unionpay",
     "visa"
 ]
-
-const PRICE: { [key: string]: number } = {
-    regular: 49,
-    featured: 99
-}
 
 const initEditorValue = [
     {
@@ -278,13 +273,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }, [router.query])
 
-    const generateRandomToken = () => {
-        const rand = () => {
-            return Math.random().toString(36).substr(2);
-        }
-        return rand() + rand();
-    }
-
     const setDescriptionValue = (value: { type: string, children: { text: string; }[] }[]) => {
         // Hack to fix bug of remaining node being ul or nl when deleting all text
         if (value.length === 1 && value[0]?.type === 'list-item') {
@@ -378,10 +366,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
         
         if (!isJobDetailsValid) {
-            // window.scrollTo({
-            //     top: 0,
-            //     behavior: "smooth"
-            // });
             jobDetailsErrorAlertRef.current && jobDetailsErrorAlertRef.current.scrollIntoView()
         } else if (!isBillingAddressValid) {
             billingAddressErrorAlertRef.current && billingAddressErrorAlertRef.current.scrollIntoView()
@@ -575,15 +559,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
             } else {
                 if (paymentResult.paymentIntent.status === "succeeded") {
                     setPaymentError('')
-                    sendConfirmationEmail()
                     return paymentResult
                 }
             }
         }
-    }
-
-    const sendConfirmationEmail = async () => {
-        await axios.post(`${BASE_URL_API}stripe/send-confirmation-email`, { email: billingAddress.email, featured: jobDetails.featured })
     }
 
   return (
@@ -1080,18 +1059,6 @@ const Chip = ({ color, value }: { color: string, value: string }) => {
             color: '#fff'
         }}>
             {value}
-        </Box>
-    )
-}
-
-type PostingInfoBoxProps = {
-    mobile: boolean
-}
-const PostingInfoBox = ({ mobile }: PostingInfoBoxProps) => {
-    return (
-        <Box ml={mobile ? 0 : 4} mb={mobile ? 0 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
-            {/* <Typography>Your job will be seen by <strong>12,782</strong> professionals.</Typography> */}
-            <Typography textAlign='center'>Your job will be live for <strong>30</strong> days.</Typography>
         </Box>
     )
 }
