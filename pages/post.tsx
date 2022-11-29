@@ -440,7 +440,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
             res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
         } catch (err) {
             console.log(err)
-        } finally {
             setLoading(false)
         }
     }
