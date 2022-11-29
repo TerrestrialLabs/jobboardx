@@ -4,6 +4,7 @@ import Subscription from '../../../models/Subscription'
 import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
+import { BASE_URL } from '../../../const/const'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -65,14 +66,12 @@ export default async function handler(
                         salaryMax: job.salaryMax,
                         companyLogo: job.companyLogo ? job.companyLogo : null,
                         companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                        url: `https://wwww.reactdevjobs.io/${job._id}`
+                        url: `${BASE_URL}${job._id}`
                     })),
                     numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+'` : jobs.length,
                     timeStamp: currentDate,
                     dateFormat: "MMMM D, YYYY",
-                    // TO DO: Hardcoded
-                    // unsubscribeUrl: `http://localhost:3000/unsubscribe/${subscription._id}`
-                    unsubscribeUrl: `https://wwww.reactdevjobs.io/unsubscribe/${subscription._id}`
+                    unsubscribeUrl: `${BASE_URL}unsubscribe/${subscription._id}`
                 },
                 template_id: 'd-2b27defb433c4a7e99667df4ed069625'
             }))

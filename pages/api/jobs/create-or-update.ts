@@ -8,7 +8,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import { JobData } from '.'
 import { BASE_URL, PRICE, TYPE_MAP } from '../../../const/const'
-import { add, format, parseISO } from 'date-fns'
+import { add, format } from 'date-fns'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -107,13 +107,14 @@ createOrUpdateJob.post(async (req, res) => {
             })
             delete job.orderId
 
-            await sendConfirmationEmail(job)
+            await sendConfirmationEmail({ job, mode })
 
             res.status(201).json(job)
         } else if (mode === 'update') {
             const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
-                .select('-email')
                 .select('-orderId')
+
+            await sendConfirmationEmail({ job, mode })
 
             res.status(200).json(job)
         }
@@ -132,7 +133,11 @@ export const config = {
 
 export default createOrUpdateJob
 
-const sendConfirmationEmail = async (job: JobData & { email: string }) => {
+type SendConfirmationEmailParams = {
+    job: JobData & { email: string }, 
+    mode: string
+}
+export const sendConfirmationEmail = async ({ job, mode }: SendConfirmationEmailParams) => {
     try {
         const startDate = job.datePosted
         const endDate = add(startDate, { days: 30 })
@@ -141,7 +146,7 @@ const sendConfirmationEmail = async (job: JobData & { email: string }) => {
             from: 'React Jobs <support@reactdevjobs.io>',
             html: "<html></html>",
             dynamic_template_data: {
-                subject: "Your job has been posted",
+                subject: `Your job has been ${mode === 'create' ? 'posted' : 'updated'}`,
                 job: {
                     postType: job.featured ? 'Featured' : 'Regular',
                     type: TYPE_MAP[job.type],
@@ -158,7 +163,7 @@ const sendConfirmationEmail = async (job: JobData & { email: string }) => {
                 startDate: format(startDate, 'MMM. d, yyyy'),
                 endDate: format(endDate, 'MMM. d, yyyy')
             },
-            template_id: 'd-5dbc7dfe9f7c43608b56fa9b5800b363'
+            template_id: mode === 'create' ? 'd-5dbc7dfe9f7c43608b56fa9b5800b363' : 'd-d3b3ae5b86364b20b449921da615506e'
         }
 
         const res = await sgMail.send(message)
