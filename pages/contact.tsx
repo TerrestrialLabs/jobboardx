@@ -4,13 +4,10 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import React, { useState } from 'react'
 import styles from '../styles/Home.module.css'
-import type { JobData } from './api/jobs'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { BASE_URL_API, CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
-import Footer from '../components/Footer'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -107,15 +104,6 @@ const Contact: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
-                <Grid container justifyContent='center'>
-                    <Grid xs={11} sm={10} display='flex' justifyContent='space-between'>
-                        <Link href='/'><Typography color='#fff' variant='h4' sx={{ cursor: 'pointer' }}>React Jobs</Typography></Link>
-                        <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
-                    </Grid>
-                </Grid>
-            </Box>
-
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
                 <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 2 : 4}>
                     <Grid xs={12} sm={10} lg={8} p={2} pb={mobile ? 0 : 2}>
@@ -180,8 +168,6 @@ const Contact: NextPage = () => {
                     </Grid>
                 </Grid>
             </main>
-
-            <Footer />
         </div>
     )
 }

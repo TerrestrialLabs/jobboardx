@@ -18,7 +18,6 @@ import { Close, Lock, Looks3, Looks4, LooksOne, LooksTwo } from '@mui/icons-mate
 import { loadStripe } from '@stripe/stripe-js'
 import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
 import countryCodes from '../data/country_codes.json'
-import Footer from '../components/Footer'
 import { useEditor } from '../hooks/editor'
 import type { Node } from 'slate'
 
@@ -572,15 +571,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
-          <Grid container justifyContent='center'>
-              <Grid xs={10} display='flex' justifyContent='space-between' alignContent='center'>
-                  <Link href='/'><Typography  color='#fff' variant='h4' sx={{ cursor: 'pointer', textDecoration: 'none' }}>React Jobs</Typography></Link>
-                  <Button sx={{ flexShrink: 0 }} href='/' variant='contained' color='secondary' disableElevation>All jobs</Button>
-              </Grid>
-          </Grid>
-      </Box>
-
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         {jobLoading ? (
             <Box sx={{ height: 'calc(100vh - 58px)'}} display='flex' alignItems='center' justifyContent='center'>
@@ -810,7 +800,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
                                     {edit && (
                                         <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: '200px' }}>
                                                 {loading ? <CircularProgress color='secondary' size={22} /> : 'Update job'}
                                             </Button>
                                         </Grid>
@@ -1022,7 +1012,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         </Grid>
                                         
                                         <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: '200px' }}>
                                                 {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
                                             </Button>
                                         </Grid>
@@ -1035,8 +1025,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
             </Grid>
         )}
       </main>
-
-      {!jobLoading && <Footer />}
     </div>
   )
 }

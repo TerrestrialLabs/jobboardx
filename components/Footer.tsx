@@ -3,10 +3,19 @@ import Image from 'next/image'
 import { Box, Grid, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
+import { useRouter } from 'next/router'
 
 const Footer = () => {
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
+
+    const router = useRouter()
+
+    const unsubscribePage = router.pathname === '/unsubscribe/[id]'
+
+    if (unsubscribePage) {
+        return null
+    }
     
     return (
         <footer style={{ padding: '2rem', paddingBottom: '3rem', borderTop: '1px solid #eaeaea' }}>

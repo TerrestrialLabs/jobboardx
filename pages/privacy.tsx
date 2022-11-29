@@ -1,9 +1,8 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Box, Button, Grid, Link, Typography } from '@mui/material'
+import { Box, Grid, Typography } from '@mui/material'
 import homeStyles from '../styles/Home.module.css'
 import styles from '../styles/Terms.module.css'
-import Footer from '../components/Footer'
 
 const Privacy: NextPage = () => {
     return (
@@ -14,18 +13,9 @@ const Privacy: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
-                <Grid container justifyContent='center'>
-                    <Grid xs={11} sm={10} display='flex' justifyContent='space-between' alignContent='center'>
-                        <Link href='/'><Typography  color='#fff' variant='h4' sx={{ cursor: 'pointer', textDecoration: 'none' }}>React Jobs</Typography></Link>
-                        <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
-                    </Grid>
-                </Grid>
-            </Box>
-
             <main className={homeStyles.main} style={{backgroundColor: '#f5f5f5', fontFamily: 'Poppins, sans-serif', paddingTop: 58}}>
                 <Grid container justifyContent='center' pt={1} pb={2}>
-                    <Grid xs={11} sm={10}>
+                    <Grid xs={11} sm={9}>
                         <Box>
                             <h1 className={styles.headerone}>Privacy Policy</h1>
                             <Typography variant='caption'>Last updated: November 28, 2022</Typography>
@@ -520,8 +510,6 @@ const Privacy: NextPage = () => {
                     </Grid>
                 </Grid>
             </main>
-
-            <Footer />
         </div>
     )
 }

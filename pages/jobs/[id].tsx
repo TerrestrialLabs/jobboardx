@@ -15,7 +15,6 @@ import ReactHtmlParser from 'react-html-parser'
 import NextLink from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
-import Footer from '../../components/Footer'
 
 interface Props {
     data: JobData
@@ -52,27 +51,18 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>React Jobs | Post a job</title>
+                <title>React Jobs | Job Description</title>
                 <meta name="description" content="Post a job" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-    
-            <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
-                <Grid container justifyContent='center'>
-                    <Grid item xs={11} sm={10} display='flex' justifyContent='space-between'>
-                        <Link href='/'><Typography color='#fff' variant='h4' sx={{ cursor: 'pointer' }}>React Jobs</Typography></Link>
-                        <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
-                    </Grid>
-                </Grid>
-            </Box>
 
             {mobile && requestUpdateModalOpen ? (
                 <JobUpdateRequestModal mobile open={requestUpdateModalOpen} closeModal={() => setRequestUpdateModalOpen(false)} />
             ) : (
                 <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
                     {data && (
-                        <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
-                            <Grid item xs={12} sm={10} lg={9} p={2} container>
+                        <Grid  container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
+                            <Grid item xs={12} sm={10} lg={9} p={mobile ? 2 : 0} pt={2} container>
                                 <Grid item xs={12} sm={8}>
                                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1, position: 'relative' }}>
                                         <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
@@ -205,7 +195,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
 
             <EmailFooter />
 
-            {!(mobile && requestUpdateModalOpen) && <Footer />}
+            {/* {!(mobile && requestUpdateModalOpen) && <Footer />} */}
         </div>
     )
 }

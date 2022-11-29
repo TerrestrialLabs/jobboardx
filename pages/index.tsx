@@ -8,7 +8,6 @@ import styles from '../styles/Home.module.css'
 import { getTimeDifferenceString } from '../utils/utils'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import { BASE_URL_API, TYPE, TYPE_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
@@ -16,7 +15,6 @@ import axios from 'axios'
 import cities from '../data/world_cities.json'
 import { useWindowSize } from '../hooks/hooks'
 import EmailFooter from '../components/EmailFooter'
-import Footer from '../components/Footer'
 
 type Filters = {
   search: string,
@@ -176,15 +174,6 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
-          <Grid container justifyContent='center'>
-              <Grid xs={11} sm={10} display='flex' justifyContent='space-between' alignContent='center'>
-                  <Link href='/'><Typography  color='#fff' variant='h4' sx={{ cursor: 'pointer', textDecoration: 'none' }}>React Jobs</Typography></Link>
-                  <Button sx={{ flexShrink: 0 }} href='/post' variant='contained' color='secondary' disableElevation>Post a job</Button>
-              </Grid>
-          </Grid>
-      </Box>
-
       {filtersOpen ? (
         <FiltersPanel 
           filters={filters}
@@ -331,7 +320,7 @@ const Home: NextPage = () => {
 
                 {jobs.length < totalJobs && (
                   <Box mt={4} display='flex' justifyContent='center'>
-                    <Button variant='contained' onClick={loadMoreJobs}>Load More</Button>
+                    <Button sx={{ height: '45px' }} disableElevation variant='contained' onClick={loadMoreJobs}>Load More</Button>
                   </Box>
                 )}
               </Box>
@@ -342,7 +331,7 @@ const Home: NextPage = () => {
 
       <EmailFooter />
 
-      {!filtersOpen && <Footer />}
+      {/* {!filtersOpen && <Footer />} */}
     </div>
   )
 }

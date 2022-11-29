@@ -68,7 +68,7 @@ export default async function handler(
                         companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                         url: `${BASE_URL}${job._id}`
                     })),
-                    numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+'` : jobs.length,
+                    numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+` : jobs.length,
                     timeStamp: currentDate,
                     dateFormat: "MMMM D, YYYY",
                     unsubscribeUrl: `${BASE_URL}unsubscribe/${subscription._id}`
