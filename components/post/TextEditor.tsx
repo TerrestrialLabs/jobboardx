@@ -155,7 +155,7 @@ const SlateElement = ({ attributes, children, element }: any) => {
 const Toolbar = () => {
     return (
         <Box sx={{ backgroundColor: 'lightgrey', display: 'flex', borderTopLeftRadius: '4px', borderTopRightRadius: '4px' }}>
-            <ToggleButtonGroup>
+            <Box display='flex'>
                 {MarkButton({ 
                     format: "bold", 
                     icon: <FaBold size={14} /> 
@@ -177,7 +177,7 @@ const Toolbar = () => {
                     format: "bulleted-list",
                     icon: <MdList size={30} />,
                 })}
-            </ToggleButtonGroup>
+            </Box>
         </Box>
     )
 }

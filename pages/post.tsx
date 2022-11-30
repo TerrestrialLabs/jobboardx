@@ -1,4 +1,4 @@
-import { Alert, Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, Divider, FilledInput, FormControl, FormHelperText, IconButton, Input, InputLabel, makeStyles, MenuItem, Select, SelectChangeEvent, TextField, Theme, Typography } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, Divider, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -7,14 +7,13 @@ import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import { BASE_URL_API, PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import TextEditor, { TextEditorPlaceholder } from '../components/post/TextEditor'
 import { deserialize, serialize } from '../utils/serialize'
 import { useWindowSize } from '../hooks/hooks'
-import { Close, Lock, Looks3, Looks4, LooksOne, LooksTwo } from '@mui/icons-material'
+import { Close, Lock, Looks3, LooksOne, LooksTwo } from '@mui/icons-material'
 import { loadStripe } from '@stripe/stripe-js'
 import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
 import countryCodes from '../data/country_codes.json'
@@ -738,7 +737,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                 limit: 10
                                             })}
                                             onChange={(e, value) => handleAutocompleteChange(value || '')}
-                                            value={jobDetails.location}
+                                            value={jobDetails.location ? jobDetails.location : null}
                                             inputValue={locationText}
                                             onInputChange={(event, newValue) => handleLocationTextChange(newValue)}
                                         />
@@ -1030,25 +1029,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
 }
 
 export default Post
-
-const Chip = ({ color, value }: { color: string, value: string }) => {
-    return (
-        <Box key={value} sx={{
-            backgroundColor: color === 'red' ? '#e74c3c' : 'secondary.main',
-            border: `1px solid ${color === 'red' ? '#e74c3c' : 'secondary.main'}`,
-            cursor: 'pointer',
-            margin: 0.5,
-            padding: 0.75,
-            borderRadius: 1,
-            transition: '0.3s',
-            fontSize: '14.5px',
-            fontWeight: 600,
-            color: '#fff'
-        }}>
-            {value}
-        </Box>
-    )
-}
 
 // @ts-ignore
 const StripeInput = ({ component: Component, inputRef, ...props }) => {

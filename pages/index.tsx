@@ -236,7 +236,7 @@ const Home: NextPage = () => {
                               limit: 10
                           })}
                           onChange={(e, value) => handleAutocompleteChange(value || '')}
-                          value={filters.location}
+                          value={filters.location ? filters.location : null}
                         />
                       </FormControl>
                     </Grid>
@@ -270,7 +270,7 @@ const Home: NextPage = () => {
                                 limit: 10
                             })}
                             onChange={(e, value) => handleAutocompleteChange(value || '')}
-                            value={filters.location}
+                            value={filters.location ? filters.location : null}
                           />
                         </FormControl>
                       </Grid>
