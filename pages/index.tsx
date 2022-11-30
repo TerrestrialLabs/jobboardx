@@ -39,7 +39,7 @@ const Home: NextPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const windowSize = useWindowSize()
-  const mobile = !!(windowSize.width && windowSize.width < 500)
+  const mobile = !!(windowSize.width && windowSize.width < 500 )
 
   // @ts-ignore
   const numFiltersSelected = Object.keys(filters).filter(key => key !== 'search' && key !== 'location' && filters[key] !== 'any' && filters[key] !== 0).length
@@ -197,13 +197,14 @@ const Home: NextPage = () => {
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center'>
           <Grid xs={12} sm={9}>
-            <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/images/hero.jpeg")', backgroundPosition: 'center', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: mobile ? 'center' : 'flex-end'}}>
-              <Typography textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>Find your dream React job</Typography>
+            <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: mobile ? 'center' : 'flex-end'}}>
+              <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Mount Fuji hero image' src='/images/hero.jpeg' layout='fill' objectFit='cover' objectPosition='center' />
+              <Typography sx={{ zIndex: 1 }} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>Find your dream React job</Typography>
             </Box>
           </Grid>
         </Grid>
 
-        <Grid container justifyContent='center'>
+        <Grid container justifyContent='center' sx={{ position: 'relative' }}>
           <Grid xs={11} sm={9}>
             <Box p={2} pt={2} mt={-5} mb={2} sx={{
               backgroundColor: '#fff',
@@ -341,8 +342,6 @@ const Home: NextPage = () => {
       </main>
 
       <EmailFooter />
-
-      {/* {!filtersOpen && <Footer />} */}
     </div>
   )
 }

@@ -25,7 +25,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const windowSize = useWindowSize()
-    const mobile = !!(windowSize.width && windowSize.width < 500)
+    const mobile = !windowSize.width || windowSize.width < 500
 
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
