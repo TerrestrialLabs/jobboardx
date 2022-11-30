@@ -342,7 +342,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
         // BILLING ADDRESS VALIDATION
 
         if (!edit) {
-            if (billingAddress.email !== billingAddress.emailConfirmation) {
+            if (billingAddress.email.trim().toLowerCase() !== billingAddress.emailConfirmation.trim().toLowerCase()) {
                 newBillingAddressErrors['emailConfirmation'] = ERROR.EMAIL_CONFIRMATION
                 isBillingAddressValid = false
             }
@@ -411,7 +411,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
             const jobData = { 
                 ...(edit ? job : {}),
-                ...(!edit ? { email: billingAddress.email } : {}),
+                ...(!edit ? { email: billingAddress.email.trim().toLowerCase() } : {}),
                 ...jobDetails,
                 remote: jobDetails.remote || jobDetails.location === 'Remote',
                 title: jobDetails.title.trim(),
