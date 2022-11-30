@@ -935,11 +935,11 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                     name='creditCardNumber'
                                                     variant='filled'
                                                     hiddenLabel
-                                                    error={!!jobDetailsErrors['applicationLink']} 
+                                                    error={!!paymentError} 
                                                     fullWidth
                                                     InputLabelProps={{ shrink: true }}
                                                     InputProps={{
-                                                        disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                        disableUnderline: !paymentError,
                                                         // @ts-ignore
                                                         inputComponent: StripeInput,
                                                         inputProps: {
@@ -957,11 +957,11 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                     name='creditCardExpiration'
                                                     variant='filled'
                                                     hiddenLabel
-                                                    error={!!jobDetailsErrors['applicationLink']} 
+                                                    error={!!paymentError} 
                                                     fullWidth
                                                     InputLabelProps={{ shrink: true }}
                                                     InputProps={{
-                                                        disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                        disableUnderline: !paymentError,
                                                         // @ts-ignore
                                                         inputComponent: StripeInput,
                                                         inputProps: {
@@ -979,11 +979,11 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                     name='cvc'
                                                     variant='filled'
                                                     hiddenLabel
-                                                    error={!!jobDetailsErrors['applicationLink']} 
+                                                    error={!!paymentError} 
                                                     fullWidth
                                                     InputLabelProps={{ shrink: true }}
                                                     InputProps={{
-                                                        disableUnderline: !jobDetailsErrors['applicationLink'],
+                                                        disableUnderline: !paymentError,
                                                         // @ts-ignore
                                                         inputComponent: StripeInput,
                                                         inputProps: {
