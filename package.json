@@ -36,6 +36,7 @@
     "react-dom": "18.2.0",
     "react-html-parser": "^2.0.2",
     "react-icons": "^4.6.0",
+    "react-intersection-observer": "^9.4.1",
     "slate": "^0.84.0",
     "slate-history": "^0.66.0",
     "slate-hyperscript": "^0.77.0",

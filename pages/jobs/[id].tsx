@@ -30,6 +30,11 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
 
+    // Analytics
+    useEffect(() => {
+        axios.post(`${BASE_URL_API}analytics/job-view`)
+    }, [])
+
     // When request update panel open on mobile don't allow scroll
     useEffect(() => {
         if (requestUpdateModalOpen && mobile) {
