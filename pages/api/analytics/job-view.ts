@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Event from '../../../models/Event'
+import UserEvent from '../../../models/UserEvent'
 import type { NextRequest } from 'next/server'
 
 function getErrorMessage(error: unknown) {
@@ -22,14 +22,12 @@ export default async function handler(
         try {
             const ipAddress = req.headers['x-forwarded-for']  || req.socket.remoteAddress
 
-            console.log('req.headers: ', req.headers)
-
-            const res = await Event.create({
+            await UserEvent.create({
+                jobId: req.body.jobId,
                 event: 'job-view',
                 ipAddress
             })
             
-            console.log('Event logged: ', res.type)
             res.status(201).json(true)
         } catch(err) {
             console.log('There was an error sending the email: ', err)

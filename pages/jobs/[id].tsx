@@ -24,6 +24,8 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
+    const router = useRouter()
+
     const windowSize = useWindowSize()
     const mobile = !windowSize.width || windowSize.width < 500
 
@@ -32,8 +34,8 @@ const JobDetail: NextPage<Props> = ({ data }) => {
 
     // Analytics
     useEffect(() => {
-        axios.post(`${BASE_URL_API}analytics/job-view`)
-    }, [])
+        axios.post(`${BASE_URL_API}analytics/job-view`, { jobId: router.query.id })
+    }, [router.query.id])
 
     // When request update panel open on mobile don't allow scroll
     useEffect(() => {
