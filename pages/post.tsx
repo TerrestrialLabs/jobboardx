@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import { BASE_URL_API, PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
-import TextEditor, { TextEditorPlaceholder } from '../components/post/TextEditor'
+import { TextEditorPlaceholder } from '../components/post/TextEditor'
 import { deserialize, serialize } from '../utils/serialize'
 import { useWindowSize } from '../hooks/hooks'
 import { Close, Lock, Looks3, LooksOne, LooksTwo } from '@mui/icons-material'
@@ -19,6 +19,12 @@ import { CardNumberElement, CardExpiryElement, CardCvcElement, Elements, useElem
 import countryCodes from '../data/country_codes.json'
 import { useEditor } from '../hooks/editor'
 import type { Node } from 'slate'
+import dynamic from 'next/dynamic'
+
+// Slate doesn't play nicely with SSR, throws hydration error
+const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
+    ssr: false
+})
 
 export type PostForm = {
     title: string
