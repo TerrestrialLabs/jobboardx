@@ -5,6 +5,7 @@ import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
 import { BASE_URL } from '../../../const/const'
+import { formatSalaryRange } from '../../../utils/utils'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -62,8 +63,7 @@ export default async function handler(
                         title: job.title,
                         company: job.company,
                         location: job.location,
-                        salaryMin: job.salaryMin,
-                        salaryMax: job.salaryMax,
+                        salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                         companyLogo: job.companyLogo ? job.companyLogo : null,
                         companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                         url: `${BASE_URL}${job._id}`

@@ -6,6 +6,7 @@ import type { SentMessageInfo } from 'nodemailer'
 import Job from '../../../models/Job'
 import { BASE_URL, TYPE_MAP } from '../../../const/const'
 import sgMail from '@sendgrid/mail'
+import { formatSalaryRange } from '../../../utils/utils'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -49,8 +50,7 @@ export default async function handler(
                             title: job.title,
                             company: job.company,
                             location: job.location,
-                            salaryMin: job.salaryMin,
-                            salaryMax: job.salaryMax,
+                            salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                             companyLogo: job.companyLogo ? job.companyLogo : null,
                             companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                             url: `${BASE_URL}jobs/${job._id}`

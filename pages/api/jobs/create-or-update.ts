@@ -9,6 +9,7 @@ import sgMail from '@sendgrid/mail'
 import { JobData } from '.'
 import { BASE_URL, PRICE, TYPE_MAP } from '../../../const/const'
 import { add, format } from 'date-fns'
+import { formatSalaryRange } from '../../../utils/utils'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -153,8 +154,7 @@ export const sendConfirmationEmail = async ({ job, mode }: SendConfirmationEmail
                     title: job.title,
                     company: job.company,
                     location: job.location,
-                    salaryMin: job.salaryMin,
-                    salaryMax: job.salaryMax,
+                    salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                     companyLogo: job.companyLogo ? job.companyLogo : null,
                     companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                     url: `${BASE_URL}jobs/${job._id}`
