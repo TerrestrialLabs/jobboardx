@@ -50,14 +50,23 @@ const Home: NextPage = () => {
   const resultsPerPage = 10
 
   // TO DO: Testing
-  const testingDeleteBackfilledJobs = async () => {
-    await axios.delete(`${BASE_URL_API}jobs`)
-  }
+  // const testingDeleteBackfilledJobs = async () => {
+  //   await axios.delete(`${BASE_URL_API}jobs`)
+  // }
 
   // TO DO: DANGEROUS!!!
   // useEffect(() => {
   //   testingDeleteBackfilledJobs()
   // }, [])
+
+  // When filters panel open on mobile don't allow scroll
+  useEffect(() => {
+    if (filtersOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+  }, [filtersOpen])
 
   useEffect(() => {
     if (router.isReady && !jobs.length && loading && !!window) {
@@ -174,16 +183,18 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {filtersOpen ? (
+      {filtersOpen && (
         <FiltersPanel 
+          open={filtersOpen}
           filters={filters}
           handleFilterInputChange={handleFilterInputChange}
           handleFilterSelectChange={handleFilterSelectChange}
           setFiltersOpen={setFiltersOpen}
           search={() => searchJobs(filters)}
         />
-      ) :
-      (<main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
+      )}
+
+      <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center'>
           <Grid xs={12} sm={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ backgroundImage: 'linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/images/hero.jpeg")', backgroundPosition: 'center', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: mobile ? 'center' : 'flex-end'}}>
@@ -327,7 +338,7 @@ const Home: NextPage = () => {
             )}
           </Grid>
         </Grid>
-      </main>)}
+      </main>
 
       <EmailFooter />
 
@@ -551,46 +562,53 @@ const ListItemMobile = ({
 }
 
 type FiltersPanelProps = {
+  open: boolean
   filters: Filters
   handleFilterInputChange: (e: { target: { name: any; value: any } }) => void
   handleFilterSelectChange: (e: SelectChangeEvent<string | number>) => void
   setFiltersOpen: Dispatch<SetStateAction<boolean>>
   search: () => void
 }
-const FiltersPanel = ({ filters, handleFilterInputChange, handleFilterSelectChange, setFiltersOpen, search }: FiltersPanelProps) => {
+const FiltersPanel = ({ open, filters, handleFilterInputChange, handleFilterSelectChange, setFiltersOpen, search }: FiltersPanelProps) => {
+  if (!open) {
+    return null
+  }
+
   return (
-    <Box sx={{ paddingTop: '58px', position: 'relative' }}>
-      <IconButton onClick={() => setFiltersOpen(false)} style={{ position: 'absolute', top: '62px', right: '0.25rem' }}>
-        <Close />
-      </IconButton>
+    <Box sx={{ paddingTop: '58px', position: 'fixed', height: '100vh', backgroundColor: '#fff', zIndex: 2, top: 0 }}>
+      <Box sx={{ position: 'relative' }}>
+        <IconButton onClick={() => setFiltersOpen(false)} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
+          <Close />
+        </IconButton>
 
-      <Grid container justifyContent='center' paddingTop='1.5rem' paddingBottom='1rem'>
-        <Grid xs={11} container>
-          <Typography fontWeight='bold' fontSize={20} mb={2}>
-            Search filters
-          </Typography>
+        <Grid container justifyContent='center' paddingTop='1.5rem' paddingBottom='1rem'>
+          <Grid xs={11} container>
+            <Typography fontWeight='bold' fontSize={20} mb={2}>
+              Search filters
+            </Typography>
 
-          <Grid mb={2} xs={12} sx={{ display: 'flex' }}>
-            <FormControl hiddenLabel fullWidth>
-              <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>
-              <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='type' value={filters.type} variant='filled' disableUnderline>
-                <MenuItem value={'any'}>Any</MenuItem>
-                <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
-                <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
-                <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+            <Grid mb={2} xs={12} sx={{ display: 'flex' }}>
+              <FormControl hiddenLabel fullWidth>
+                <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>
+                <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='type' value={filters.type} variant='filled' disableUnderline>
+                  <MenuItem value={'any'}>Any</MenuItem>
+                  <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
+                  <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
+                  <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
 
-          <Grid mb={4} xs={12} sx={{ display: 'flex' }}>
-            <SalaryField mobile onChange={handleFilterSelectChange} value={filters.salaryMin} />
-          </Grid>
+            <Grid mb={4} xs={12} sx={{ display: 'flex' }}>
+              <SalaryField mobile onChange={handleFilterSelectChange} value={filters.salaryMin} />
+            </Grid>
 
-          <Grid xs={12} sx={{ display: 'flex' }}>
-            <Button sx={{ height: '45px' }} fullWidth onClick={search} variant='contained' color='primary' disableElevation>Search</Button>
+            <Grid xs={12} sx={{ display: 'flex' }}>
+              <Button sx={{ height: '45px' }} fullWidth onClick={search} variant='contained' color='primary' disableElevation>Search</Button>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   )
 }

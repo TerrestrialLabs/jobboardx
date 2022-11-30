@@ -20,7 +20,6 @@ interface Props {
     data: JobData
 }
 
-// TO DO: Dynamically change head
 const JobDetail: NextPage<Props> = ({ data }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
@@ -30,6 +29,15 @@ const JobDetail: NextPage<Props> = ({ data }) => {
 
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
+
+    // When request update panel open on mobile don't allow scroll
+    useEffect(() => {
+        if (requestUpdateModalOpen && mobile) {
+          document.body.style.overflow = 'hidden'
+        } else {
+          document.body.style.overflow = 'auto'
+        }
+    }, [requestUpdateModalOpen])
 
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`${BASE_URL_API}jobs/count`, { params: { search: data.company } })
@@ -313,25 +321,29 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
                     Request update link
                 </Typography>
             )}
+            
             <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 You will receive a secure link to update your job posting at the email which you used to create it.
             </Typography>
             <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 The link will be valid for 24 hours.
             </Typography>
-            {submitted ? (
+
+            {submitted && (
                 <>
                     <Typography mt={3} color='success.main'>
                         An email with a job update link has been sent to your inbox.
                     </Typography>
                 </>
-            ) : (
-                <Box display='flex' mt={2}>
+            )}
+            
+            {!submitted && (
+                <Box display='flex' flexDirection={mobile ? 'column' : 'row'} mt={2}>
                     <FormControl hiddenLabel fullWidth>
-                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: mobile ? 0 : '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />
                         {error && <FormHelperText error>Invalid email address</FormHelperText>}
                     </FormControl>
-                    <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px' }}>
+                    <Button onClick={createJobUpdateRequest} variant='contained' disableElevation sx={{ height: '45px', marginTop: mobile ? 4 : 0 }}>
                         {loading ? <CircularProgress color='secondary' size={22} /> : 'Request'}
                     </Button>
                 </Box>
@@ -341,13 +353,15 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
 
     if (mobile) {
         return (
-            <Box p={2} pt={'58px'} pb={3} position='relative'>
-                <IconButton onClick={closeModal} style={{ position: 'absolute', top: '62px', right: '0.25rem' }}>
-                    <Close />
-                </IconButton>
+            <Box sx={{ paddingTop: '58px', position: 'fixed', height: '100vh', backgroundColor: '#fff', zIndex: 2, top: 0 }}>
+                <Box p={2} pb={3} pt={mobile ? 0 : 2} position='relative'>
+                    <IconButton onClick={closeModal} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
+                        <Close />
+                    </IconButton>
 
-                <Box pt={3}>
-                    {content}
+                    <Box pt={3}>
+                        {content}
+                    </Box>
                 </Box>
             </Box>
         )
