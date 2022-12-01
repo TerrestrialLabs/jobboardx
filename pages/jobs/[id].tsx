@@ -18,16 +18,15 @@ import EmailFooter from '../../components/EmailFooter'
 
 interface Props {
     data: JobData
-    host: string
+    baseUrl: string
+    baseUrlApi: string
 }
 
-const JobDetail: NextPage<Props> = ({ data, host }) => {
+const JobDetail: NextPage<Props> = ({ data, baseUrl, baseUrlApi }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const router = useRouter()
-
-    console.log('host: ', host)
 
     const windowSize = useWindowSize()
     const mobile = !windowSize.width || windowSize.width < 500
@@ -36,17 +35,14 @@ const JobDetail: NextPage<Props> = ({ data, host }) => {
     const location = getLocationString()
 
     const trackJobView = () => {
-        axios.post(`${BASE_URL_API}analytics/job-view`, { jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-view`, { jobId: router.query.id })
     }
 
     const trackJobApplyClick = () => {
-        axios.post(`${BASE_URL_API}analytics/job-apply-click`, { jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobId: router.query.id })
     }
 
     useEffect(() => {
-        // TO DO: TESTING
-        alert(host)
-
         trackJobView()
     }, [router.query.id])
 
@@ -60,7 +56,7 @@ const JobDetail: NextPage<Props> = ({ data, host }) => {
     }, [requestUpdateModalOpen])
 
     const fetchCompanyJobsCount = async () => {
-        const res = await axios.get(`${BASE_URL_API}jobs/count`, { params: { search: data.company } })
+        const res = await axios.get(`${baseUrlApi}jobs/count`, { params: { search: data.company } })
         setCompanyJobsCount(res.data)
     }
 
@@ -268,12 +264,17 @@ const CompanyBox = ({ companyJobsCount, data, mobile, trackJobApplyClick }: Comp
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const res = await axios.get(`${BASE_URL_API}jobs/${context.params?.id}`)
+    const protocol = context.req.headers.host?.includes('localhost') ? 'http' : 'https'
+    const baseUrl = `${protocol}://${context.req.headers.host}/`
+    const baseUrlApi = `${baseUrl}api/`
+
+    const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
 
     return {
         props: {
             data: res.data,
-            host: context.req.headers.host
+            baseUrlApi,
+            baseUrl
         }
     }
 }
