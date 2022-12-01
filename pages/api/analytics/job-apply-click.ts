@@ -23,10 +23,10 @@ export default async function handler(
 
             await UserEvent.create({
                 jobId: req.body.jobId,
-                event: 'job-view',
+                event: 'job-apply-click',
                 ipAddress
             })
-
+            
             res.status(201).json(true)
         } catch(err) {
             // @ts-ignore

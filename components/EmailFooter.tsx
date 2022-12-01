@@ -47,7 +47,7 @@ const EmailFooter = () => {
     if (mobile) {
       return (
         <Grid container>
-          <Grid xs={11}>
+          <Grid item xs={11}>
             <Box sx={{ backgroundColor: '#fff', borderTop: '1px solid #e8e8e8', zIndex: 999 }} padding='1rem' width='100%' display='flex' alignItems='center' justifyContent='center' position='fixed' bottom={0}>
               <IconButton onClick={() => setOpen(false)} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
                 <Close />
@@ -61,7 +61,7 @@ const EmailFooter = () => {
                 ) : (
                 <Box display='flex' flexDirection='column' width='100%'>
                   <Typography>Get the best jobs right in your inbox</Typography>
-                  <Grid xs={12}>
+                  <Grid item xs={12}>
                     <Box display='flex' mt={1}>
                       <FormControl hiddenLabel fullWidth>
                         <FilledInput placeholder='Your email address' error={error} disableUnderline={!error} sx={{ marginRight: '1rem', height: '45px' }} value={email} onChange={(e) => setEmail(e.target.value)} />

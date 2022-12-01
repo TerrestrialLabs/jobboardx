@@ -32,9 +32,16 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
 
-    // Analytics
-    useEffect(() => {
+    const trackJobView = () => {
         axios.post(`${BASE_URL_API}analytics/job-view`, { jobId: router.query.id })
+    }
+
+    const trackJobApplyClick = () => {
+        axios.post(`${BASE_URL_API}analytics/job-apply-click`, { jobId: router.query.id })
+    }
+
+    useEffect(() => {
+        trackJobView()
     }, [router.query.id])
 
     // When request update panel open on mobile don't allow scroll
@@ -108,7 +115,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             {mobile && (
                                             <Box display='flex' justifyContent='center' mt={2}>
                                                 <Grid item xs={12}>
-                                                    <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
+                                                    <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
                                                         Apply
                                                     </Button>
                                                 </Grid>
@@ -179,7 +186,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                             <Grid item xs={12} p={0} mt={6}>
                                                 <Box display='flex' justifyContent='center'>
                                                     <Grid item xs={12} sm={6}>
-                                                        <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
+                                                        <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
                                                             Apply
                                                         </Button>
                                                     </Grid>
@@ -190,7 +197,7 @@ const JobDetail: NextPage<Props> = ({ data }) => {
                                 </Grid>
 
                                 <Grid item xs={12} sm={4}>
-                                    <CompanyBox companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
+                                    <CompanyBox trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
 
                                     <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
                                         <Typography mb={2}>Is this your job?</Typography> 
@@ -221,8 +228,9 @@ type CompanyBoxProps = {
     companyJobsCount: number
     data: JobData
     mobile: boolean
+    trackJobApplyClick: () => void
 }
-const CompanyBox = ({ companyJobsCount, data, mobile }: CompanyBoxProps) => {
+const CompanyBox = ({ companyJobsCount, data, mobile, trackJobApplyClick }: CompanyBoxProps) => {
     return (
         <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
             <Box display='flex' flexDirection='column' alignItems='center'>
@@ -245,7 +253,7 @@ const CompanyBox = ({ companyJobsCount, data, mobile }: CompanyBoxProps) => {
                 </Link>
             )}
             {!mobile && (
-                <Button fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
+                <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
                     Apply
                 </Button>
             )}

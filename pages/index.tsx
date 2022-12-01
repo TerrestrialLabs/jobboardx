@@ -59,6 +59,10 @@ const Home: NextPage = () => {
   //   testingDeleteBackfilledJobs()
   // }, [])
 
+  const trackJobApplyClick = (jobId: string) => {
+    axios.post(`${BASE_URL_API}analytics/job-apply-click`, { jobId })
+  }
+
   // When filters panel open on mobile don't allow scroll
   useEffect(() => {
     if (filtersOpen) {
@@ -317,13 +321,15 @@ const Home: NextPage = () => {
                     key={job._id} 
                     first={index === 0} 
                     last={index === jobs.length - 1} 
+                    trackJobApplyClick={trackJobApplyClick}
                     {...job} 
                   />
                  : 
                   <ListItem
                     key={job._id} 
                     first={index === 0} 
-                    last={index === jobs.length - 1} 
+                    last={index === jobs.length - 1}
+                    trackJobApplyClick={trackJobApplyClick}
                     {...job} 
                   />
                 )}
@@ -351,6 +357,7 @@ export default Home
 type ListItemProps = JobData & {
   first: boolean
   last: boolean
+  trackJobApplyClick: (value: string) => void
 }
 const ListItem = ({
   _id,
@@ -368,7 +375,8 @@ const ListItem = ({
   featured,
   applicationLink,
   salaryMin,
-  salaryMax
+  salaryMax,
+  trackJobApplyClick
 }: ListItemProps) => {
   const router = useRouter()
 
@@ -440,7 +448,7 @@ const ListItem = ({
           </Grid>
           <Grid>
             <Box mt={2}>
-              <Button variant='outlined' href={applicationLink}>Apply</Button>
+              <Button variant='outlined' onClick={() => trackJobApplyClick(_id)} href={applicationLink}>Apply</Button>
             </Box>
           </Grid>
         </Grid>
@@ -466,7 +474,8 @@ const ListItemMobile = ({
   featured,
   applicationLink,
   salaryMin,
-  salaryMax
+  salaryMax,
+  trackJobApplyClick
 }: ListItemProps) => {
   const router = useRouter()
 
@@ -553,7 +562,7 @@ const ListItemMobile = ({
       </Box>
 
       <Box mt={2} display='flex' justifyContent='space-between' alignItems='center'>
-        <Button sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
+        <Button onClick={() => trackJobApplyClick(_id)} sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
         <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
       </Box>
     </Box>
