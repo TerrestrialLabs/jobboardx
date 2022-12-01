@@ -99,7 +99,7 @@ const Contact: NextPage = () => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{'React Jobs | Contact'}</title>
+                <title>React Jobs | Contact</title>
                 <meta name="description" content="Contact" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

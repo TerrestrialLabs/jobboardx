@@ -172,6 +172,12 @@ const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 const Post: NextPage = () => {
     return (
         <Elements stripe={stripe}>
+            <Head>
+                <title>React Jobs | Post a job</title>
+                <meta name="description" content="Post a job" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+
             <PostForm />
         </Elements>
     )
@@ -570,12 +576,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>{`React Jobs | ${edit ? 'Update job post' : 'Post a job'}`}</title>
-        <meta name="description" content="Post a job" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         {jobLoading ? (
             <Box sx={{ height: 'calc(100vh - 58px)'}} display='flex' alignItems='center' justifyContent='center'>

@@ -73,8 +73,8 @@ const JobDetail: NextPage<Props> = ({ data }) => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>React Jobs | Job Description</title>
-                <meta name="description" content="Post a job" />
+                <title>{`React Jobs | ${data.title} @ ${data.company}`}</title>
+                <meta name="description" content={`${data.title} @ ${data.company}`} />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
