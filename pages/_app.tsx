@@ -20,10 +20,12 @@ const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
   jobboard: JobBoardData
+  baseUrl: string
+  baseUrlApi: string
 }
 
 export default function MyApp(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard } = props;
+  const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi } = props;
 
   return (
     <CacheProvider value={emotionCache}>
@@ -33,7 +35,7 @@ export default function MyApp(props: MyAppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        <JobBoardContext.Provider value={{ jobboard }}>
+        <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
           <Layout>
           <Component {...pageProps} />
         </Layout>
@@ -62,6 +64,8 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
 
   return { 
     ...pageProps,
-    jobboard: res.data 
+    jobboard: res.data,
+    baseUrl,
+    baseUrlApi
   }
 }

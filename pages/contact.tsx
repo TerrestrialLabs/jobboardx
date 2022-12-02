@@ -2,12 +2,13 @@ import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHel
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { BASE_URL_API, CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -26,6 +27,8 @@ const initState = {
 }
 
 const Contact: NextPage = () => {
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    
     const [messageData, setMessageData] = useState(initState)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrors)
@@ -99,7 +102,7 @@ const Contact: NextPage = () => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>React Jobs | Contact</title>
+                <title>{`${jobboard.title} | Contact`}</title>
                 <meta name="description" content="Contact" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

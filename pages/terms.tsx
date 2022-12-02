@@ -3,12 +3,16 @@ import Head from 'next/head'
 import { Box, Grid, Typography } from '@mui/material'
 import homeStyles from '../styles/Home.module.css'
 import styles from '../styles/Terms.module.css'
+import { useContext } from 'react'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 const Terms: NextPage = () => {
+    const { baseUrl, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    
     return (
         <div className={homeStyles.container}>
             <Head>
-                <title>React Jobs | Terms & Conditions</title>
+                <title>{`${jobboard.title} | Terms & Conditions`}</title>
                 <meta name="description" content="Terms & Conditions" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -66,7 +70,7 @@ const Terms: NextPage = () => {
                             <p><strong>Third-party Social Media Service</strong> means any services or content (including data, information, products or services) provided by a third-party that may be displayed, included or made available by the Service.</p>
                             </li>
                             <li>
-                            <p><strong>Website</strong> refers to React Jobs, accessible from <a href="https://www.reactdevjobs.io" rel="external noreferrer nofollow noopener" target="_blank">https://www.reactdevjobs.io</a></p>
+                            <p><strong>Website</strong> refers to {jobboard.title}, accessible from <a href={baseUrl} rel="external noreferrer nofollow noopener" target="_blank">{baseUrl}</a></p>
                             </li>
                             <li>
                             <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</p>
@@ -150,7 +154,7 @@ const Terms: NextPage = () => {
                             <h1 className={styles.headerone}>Copyright Policy</h1>
                             <h2 className={styles.headertwo}>Intellectual Property Infringement</h2>
                             <p>We respect the intellectual property rights of others. It is Our policy to respond to any claim that Content posted on the Service infringes a copyright or other intellectual property infringement of any person.</p>
-                            <p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of our copyright agent via email at support@reactdevjobs.io and include in Your notice a detailed description of the alleged infringement.</p>
+                            <p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of our copyright agent via email at {jobboard.title} and include in Your notice a detailed description of the alleged infringement.</p>
                             <p>You may be held accountable for damages (including costs and attorneys' fees) for misrepresenting that any Content is infringing Your copyright.</p>
                             <h2 className={styles.headertwo}>DMCA Notice and DMCA Procedure for Copyright Infringement Claims</h2>
                             <p>You may submit a notification pursuant to the Digital Millennium Copyright Act (DMCA) by providing our Copyright Agent with the following information in writing (see 17 U.S.C 512(c)(3) for further detail):</p>
@@ -162,7 +166,7 @@ const Terms: NextPage = () => {
                             <li>A statement by You that You have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law.</li>
                             <li>A statement by You, made under penalty of perjury, that the above information in Your notice is accurate and that You are the copyright owner or authorized to act on the copyright owner's behalf.</li>
                             </ul>
-                            <p>You can contact our copyright agent via email at support@reactdevjobs.io.
+                            <p>You can contact our copyright agent via email at {jobboard.email}.
                             Upon receipt of a notification, the Company will take whatever action, in its sole discretion, it deems appropriate, including removal of the challenged content from the Service.</p>
                             <h1 className={styles.headerone}>Intellectual Property</h1>
                             <p>The Service and its original content (excluding Content provided by You or other users), features and functionality are and will remain the exclusive property of the Company and its licensors.</p>
@@ -207,7 +211,7 @@ const Terms: NextPage = () => {
                             <h1 className={styles.headerone}>Contact Us</h1>
                             <p>If you have any questions about these Terms and Conditions, You can contact us:</p>
                             <ul>
-                            <li>By visiting this page on our website: <a href="https://www.reactdevjobs.io/contact" rel="external noreferrer nofollow noopener" target="_blank">https://www.reactdevjobs.io/contact</a></li>
+                            <li>By visiting this page on our website: <a href={`${baseUrl}contact`} rel="external noreferrer nofollow noopener" target="_blank">{`${baseUrl}contact`}</a></li>
                             </ul>
                         </Box>
                     </Grid>

@@ -4,8 +4,12 @@ import { Box, Grid, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
 import { useRouter } from 'next/router'
+import { useContext } from 'react'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 const Footer = () => {
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
@@ -42,7 +46,7 @@ const Footer = () => {
             <Grid container justifyContent='center' pt={mobile ? 6 : 4}>
                 <Grid item xs={6} >
                     <Box display='flex' justifyContent={mobile ? 'center' : 'flex-start'}>
-                        <Typography color='grey'>React Jobs &#169; 2022</Typography>
+                        <Typography color='grey'>{jobboard.title} &#169; 2022</Typography>
                     </Box>
                 </Grid>
             </Grid>

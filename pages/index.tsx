@@ -6,7 +6,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { getTimeDifferenceString } from '../utils/utils'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { BASE_URL_API, TYPE, TYPE_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
@@ -15,6 +15,7 @@ import axios from 'axios'
 import cities from '../data/world_cities.json'
 import { useWindowSize } from '../hooks/hooks'
 import EmailFooter from '../components/EmailFooter'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 type Filters = {
   search: string,
@@ -24,6 +25,8 @@ type Filters = {
 }
 
 const Home: NextPage = () => {
+  const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
   const filterDefaults: Filters = {
     search: '',
     type: 'any',
@@ -126,7 +129,9 @@ const Home: NextPage = () => {
       router.push(`/?${queryString}`, { query: params })
     }
 
-    const res = await axios.get(`${BASE_URL_API}jobs`, { params: router.query })
+    console.log('router.query: ', router.query)
+
+    const res = await axios.get(`${BASE_URL_API}jobs`, { params: { ...router.query, jobboardId: jobboard._id } })
 
     setJobs(res.data)
     setLoading(false)
@@ -182,8 +187,8 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>React Jobs</title>
-        <meta name="description" content="Find your dream React job" />
+        <title>{jobboard.title}</title>
+        <meta name="description" content="Home" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -203,7 +208,7 @@ const Home: NextPage = () => {
           <Grid xs={12} sm={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: mobile ? 'center' : 'flex-end'}}>
               <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Mount Fuji hero image' src='/images/hero.jpeg' layout='fill' objectFit='cover' objectPosition='center' />
-              <Typography sx={{ zIndex: 1 }} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>Find your dream React job</Typography>
+              <Typography sx={{ zIndex: 1 }} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>{jobboard.homeTitle}</Typography>
             </Box>
           </Grid>
         </Grid>

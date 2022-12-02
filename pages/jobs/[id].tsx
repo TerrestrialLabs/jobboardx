@@ -15,14 +15,16 @@ import ReactHtmlParser from 'react-html-parser'
 import NextLink from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
+import { JobBoardData } from '../api/jobboards'
 
 interface Props {
     data: JobData
     baseUrl: string
     baseUrlApi: string
+    jobboard: JobBoardData
 }
 
-const JobDetail: NextPage<Props> = ({ data, baseUrl, baseUrlApi }) => {
+const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
     const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
@@ -75,7 +77,7 @@ const JobDetail: NextPage<Props> = ({ data, baseUrl, baseUrlApi }) => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`React Jobs | ${data.title} @ ${data.company}`}</title>
+                <title>{`${jobboard.title} | ${data.title} @ ${data.company}`}</title>
                 <meta name="description" content={`${data.title} @ ${data.company}`} />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -269,10 +271,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const baseUrlApi = `${baseUrl}api/`
 
     const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
+    const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
 
     return {
         props: {
             data: res.data,
+            jobboard: jobboardRes.data,
             baseUrlApi,
             baseUrl
         }

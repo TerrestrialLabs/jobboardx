@@ -2,12 +2,15 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Box, CircularProgress, Grid, Link, Typography } from '@mui/material'
 import homeStyles from '../../styles/Home.module.css'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { BASE_URL_API } from '../../const/const'
 import { useRouter } from 'next/router'
+import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 
 const Unsubscribe: NextPage = () => {
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    
     const [loading, setLoading] = useState(true)
     const router = useRouter()
 
@@ -33,7 +36,7 @@ const Unsubscribe: NextPage = () => {
     return (
         <div className={homeStyles.container} style={{ height: '100vh', backgroundColor: '#f5f5f5' }}>
             <Head>
-                <title>React Jobs | Unsubscribe</title>
+                <title>{`${jobboard.title} | Unsubscribe`}</title>
                 <meta name="description" content="Unsubscribe" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -49,7 +52,7 @@ const Unsubscribe: NextPage = () => {
                             <Box display='flex' flexDirection='column' sx={{ borderRadius: 1, backgroundColor: '#fff', marginTop: '3rem', padding: '2rem', border: '1px solid #e7e7e7' }}>
                                 <Link href='/' style={{ textDecoration: 'none' }}>
                                     <Typography color='primary' variant='h4' sx={{ cursor: 'pointer', textDecoration: 'none', marginBottom: '1rem' }}>
-                                        React Jobs
+                                        {jobboard.title}
                                     </Typography>
                                 </Link>
 

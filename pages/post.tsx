@@ -3,7 +3,7 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
@@ -20,6 +20,7 @@ import countryCodes from '../data/country_codes.json'
 import { useEditor } from '../hooks/editor'
 import type { Node } from 'slate'
 import dynamic from 'next/dynamic'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -170,10 +171,12 @@ const unselectedPostTypeStyle = {
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 
 const Post: NextPage = () => {
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
     return (
         <Elements stripe={stripe}>
             <Head>
-                <title>React Jobs | Post a job</title>
+                <title>{`${jobboard.title} | Post a job`}</title>
                 <meta name="description" content="Post a job" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -187,6 +190,8 @@ type PostFormProps = {
     edit?: boolean
 }
 export const PostForm = ({ edit }: PostFormProps) => {  
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    
     const [job, setJob] = useState<JobData | null>(null)
     const [jobLoading, setJobLoading] = useState(edit)
     const [jobError, setJobError] = useState(false)
@@ -773,7 +778,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             disableClearable
                                             disablePortal
                                             renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
-                                            options={SKILLS}
+                                            options={jobboard.skills}
                                             onChange={(e, value) => handleSkillsChange(value || '')}
                                             value={jobDetails.skills}
                                         />
