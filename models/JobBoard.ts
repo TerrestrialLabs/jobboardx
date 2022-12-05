@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const JobBoardSchema = new mongoose.Schema({
     title: { type: String, required: true },
     domain: { type: String, required: true, unique: true },
+    logo: { type: String, required: true },
     company: { type: String, required: true },
     email: { type: String, required: true },
     homeTitle: { type: String, required: true },

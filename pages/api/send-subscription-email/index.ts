@@ -61,6 +61,10 @@ export default async function handler(
                 html: "<html></html>",
                 dynamic_template_data: {
                     subject: "New jobs for you",
+                    jobboard: {
+                        domain: jobboard.domain,
+                        title: jobboard.title
+                    },
                     jobs: jobs.slice(0, 12).map(job => ({
                         title: job.title,
                         company: job.company,

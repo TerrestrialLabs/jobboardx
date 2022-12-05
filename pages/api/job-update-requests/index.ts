@@ -45,6 +45,10 @@ export default async function handler(
                     html: "<html></html>",
                     dynamic_template_data: {
                         subject: 'Job posting update request',
+                        jobboard: {
+                            domain: jobboard.domain,
+                            title: jobboard.title
+                        },
                         job: {
                             postType: job.featured ? 'Featured' : 'Regular',
                             type: TYPE_MAP[job.type],

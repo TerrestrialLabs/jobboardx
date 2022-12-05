@@ -153,6 +153,10 @@ export const sendConfirmationEmail = async ({ host, job, mode }: SendConfirmatio
             html: "<html></html>",
             dynamic_template_data: {
                 subject: `Your job has been ${mode === 'create' ? 'posted' : 'updated'}`,
+                jobboard: {
+                    domain: jobboard.domain,
+                    title: jobboard.title
+                },
                 job: {
                     postType: job.featured ? 'Featured' : 'Regular',
                     type: TYPE_MAP[job.type],
