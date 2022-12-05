@@ -5,7 +5,6 @@ import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
 import { formatSalaryRange } from '../../../utils/utils'
-import JobBoard from '../../../models/JobBoard'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -34,7 +33,7 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const jobboard = req.body.jobboard
-            const subscriptions = await Subscription.find().exec()
+            const subscriptions = await Subscription.find({ jobboardId: jobboard._id }).exec()
 
             if (!subscriptions.length) {
                 res.status(201).json(true)
@@ -49,7 +48,7 @@ export default async function handler(
             // await SubscriptionEmail.create({})
 
             const fetchLimit = 13
-            const jobs = await Job.find({ datePosted: { $gte: lastEmailDate } })
+            const jobs = await Job.find({ jobboardId: jobboard._id, datePosted: { $gte: lastEmailDate } })
                 .select('-email')
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1 })
                 .limit(fetchLimit)
@@ -71,7 +70,7 @@ export default async function handler(
                         salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                         companyLogo: job.companyLogo ? job.companyLogo : null,
                         companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                        url: `https://${jobboard.domain}/${job._id}`
+                        url: `https://${jobboard.domain}/jobs/${job._id}`
                     })),
                     numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+` : jobs.length,
                     timeStamp: currentDate,

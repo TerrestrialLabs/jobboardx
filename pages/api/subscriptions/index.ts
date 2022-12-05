@@ -25,7 +25,7 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
-            const existingSubscription = await Subscription.findOne({ email: req.body.email }).exec()
+            const existingSubscription = await Subscription.findOne({ jobboardId: req.body.jobboardId, email: req.body.email }).exec()
             if (!existingSubscription) {
                 await Subscription.create(req.body)
             }
