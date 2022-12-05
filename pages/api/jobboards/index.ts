@@ -24,11 +24,21 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobBoardData>
+    res: NextApiResponse<JobBoardData | JobBoardData[]>
 ) {
     const { method } = req
 
     dbConnect()
+
+    if (method === 'GET') {
+        try {
+            const jobboards = await JobBoard.find()
+            res.status(201).json(jobboards)
+        } catch(err) {
+            // @ts-ignore
+            res.status(500).json(getErrorMessage(err))
+        }
+    }
     
     if (method === 'POST') {
         try {

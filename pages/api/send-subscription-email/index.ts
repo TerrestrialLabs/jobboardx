@@ -33,8 +33,7 @@ export default async function handler(
     // TO DO: Only send new jobs since last email/week >= timestamp of last sent job (save in DB collection)
     if (method === 'POST') {
         try {
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-            const jobboard = await JobBoard.findOne({ domain })
+            const jobboard = req.body.jobboard
             const subscriptions = await Subscription.find().exec()
 
             if (!subscriptions.length) {
