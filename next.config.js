@@ -10,6 +10,9 @@ const nextConfig = {
         permanent: false
       }
     ]
+  },
+  images: {
+    domains: ['res.cloudinary.com'],
   }
 }
 
