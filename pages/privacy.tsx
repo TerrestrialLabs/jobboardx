@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { Box, Grid, Typography } from '@mui/material'
 import homeStyles from '../styles/Home.module.css'
@@ -519,3 +519,7 @@ const Privacy: NextPage = () => {
 }
 
 export default Privacy
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    return { props: {} }
+}

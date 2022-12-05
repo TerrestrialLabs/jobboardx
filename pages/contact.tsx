@@ -1,6 +1,6 @@
 import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useState } from 'react'
 import styles from '../styles/Home.module.css'
@@ -176,3 +176,7 @@ const Contact: NextPage = () => {
 }
 
 export default Contact
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    return { props: {} }
+}
