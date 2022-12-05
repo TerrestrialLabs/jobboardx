@@ -2,7 +2,9 @@ const puppeteer = require('puppeteer')
 const fs = require('fs/promises')
 const axios = require('axios')
 
-async function scrapeJobs() {
+async function scrapeJobs(domain) {
+    const jobboard = await axios.get(`https://${domain}/api/jobboards/current`)
+
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
     await page.goto('https://www.simplyhired.com/search?q=react+developer')
@@ -21,6 +23,8 @@ async function scrapeJobs() {
             const remote = location === 'Remote'
 
             jobList.push({
+                email: 'backfill@example.com',
+                orderId: 'backfill',
                 title: element.querySelector('.jobposting-title').textContent.trim(),
                 company: element.querySelector('.jobposting-company').textContent.trim(),
                 location,
@@ -141,7 +145,10 @@ async function scrapeJobs() {
     // Write to database
     for (let i = 0; i < jobsWithLogo.length; i++) {
         try {
-            const res = await axios.post('http://localhost:3000/api/jobs/create-backfilled-job', jobsWithLogo[i])
+            const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, {
+                jobboardId: jobboard._id,
+                ...jobsWithLogo[i]
+            })
             console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
             console.log(res.data)
         } catch (err) {
@@ -151,7 +158,7 @@ async function scrapeJobs() {
 
     async function uploadToCloudinary (image) {
         try {
-            const response = await fetch('http://localhost:3000/api/jobs/upload-image-backfill', {
+            const response = await fetch(`https://${domain}/api/jobs/upload-image-backfill`, {
                 method: 'POST',
                 body: image
             })
@@ -163,4 +170,4 @@ async function scrapeJobs() {
     }
 }
 
-scrapeJobs()
+scrapeJobs('www.reactdevjobs.io')
