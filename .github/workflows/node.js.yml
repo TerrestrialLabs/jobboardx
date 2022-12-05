@@ -3,7 +3,9 @@
 
 name: Subsciption Email Cron Job 2
 
-on: [workflow_dispatch]
+on:
+  schedule:
+  - cron: "0 13 * * 1"
 
 jobs:
   build:
