@@ -150,8 +150,7 @@ async function scrapeJobs(domain) {
                 orderId: uuid.v4(),
                 jobboardId: jobboard.data._id
             }
-            // const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, body)
-            const res = await axios.post(`http://localhost:3000/api/jobs/create-backfilled-job`, body)
+            const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, body)
             console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
             console.log(res.data)
         } catch (err) {
