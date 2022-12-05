@@ -62,6 +62,7 @@ export default async function handler(
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date()
             })
 
+            // For some reason we get an error even though we're doing this after creating job
             // delete job.email
             // delete job.orderId
 
