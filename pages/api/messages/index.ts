@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import JobUpdateRequest from '../../../models/JobUpdateRequest'
-import * as nodemailer from 'nodemailer'
-import type { SentMessageInfo } from 'nodemailer'
-import Job from '../../../models/Job'
+import sgMail from '@sendgrid/mail'
 import Message from '../../../models/Message'
+import JobBoard from '../../../models/JobBoard'
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
 export type JobUpdateRequestData = {
     _id: string,
@@ -29,20 +29,14 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
+            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+            const jobboard = await JobBoard.findOne({ domain })
+
             await Message.create(req.body)
 
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: 'support@reactdevjobs.io',
-                    pass: process.env.GOOGLE_APP_PASSWORD
-                }
-            })
-
-            const mailOptions = {
-                // TO DO: How to show sender's email?
-                from: 'React Jobs <support@reactdevjobs.io>',
-                to: 'React Jobs <support@reactdevjobs.io>',
+            const message = {
+                to: jobboard.email,
+                from: `${jobboard.title} <${jobboard.email}>`,
                 subject: `Message | ${req.body.category}`,
                 html: 
                     `<html>
@@ -56,13 +50,7 @@ export default async function handler(
                     </html>`
             }
 
-            transporter.sendMail(mailOptions, (err: Error | null, res: SentMessageInfo) => {
-                if (err) {
-                    console.log('There was an error sending the contact email: ', err)
-                } else {
-                    console.log('Contact email sent.')
-                }
-            })
+            await sgMail.send(message)
 
             res.status(201).json(true)
         } catch(err) {

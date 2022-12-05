@@ -4,21 +4,20 @@ import { Box, CircularProgress, Grid, Link, Typography } from '@mui/material'
 import homeStyles from '../../styles/Home.module.css'
 import { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
-import { BASE_URL_API } from '../../const/const'
 import { useRouter } from 'next/router'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 
 const Unsubscribe: NextPage = () => {
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [loading, setLoading] = useState(true)
     const router = useRouter()
 
     const fetchSubscription = async () => {
         try {
-            const res = await axios.get(`${BASE_URL_API}subscriptions/${router.query.id}`)
+            const res = await axios.get(`${baseUrlApi}subscriptions/${router.query.id}`)
             if (res.data) {
-                await axios.delete(`${BASE_URL_API}subscriptions/${router.query.id}`)
+                await axios.delete(`${baseUrlApi}subscriptions/${router.query.id}`)
             }
         } catch (err) {
             console.log(err)

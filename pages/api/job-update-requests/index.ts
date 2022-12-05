@@ -1,12 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import JobUpdateRequest from '../../../models/JobUpdateRequest'
-import * as nodemailer from 'nodemailer'
-import type { SentMessageInfo } from 'nodemailer'
 import Job from '../../../models/Job'
-import { BASE_URL, TYPE_MAP } from '../../../const/const'
+import { TYPE_MAP } from '../../../const/const'
 import sgMail from '@sendgrid/mail'
 import { formatSalaryRange } from '../../../utils/utils'
+import JobBoard from '../../../models/JobBoard'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -33,6 +32,8 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
+            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+            const jobboard = await JobBoard.findOne({ domain })
             const job = await Job.findOne({ _id: req.body.jobId })
 
             if (job.email === req.body.email) {
@@ -40,7 +41,7 @@ export default async function handler(
 
                 const message = {
                     to: job.email,
-                    from: 'React Jobs <support@reactdevjobs.io>',
+                    from: `${jobboard.title} <${jobboard.email}>`,
                     html: "<html></html>",
                     dynamic_template_data: {
                         subject: 'Job posting update request',
@@ -53,9 +54,9 @@ export default async function handler(
                             salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                             companyLogo: job.companyLogo ? job.companyLogo : null,
                             companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                            url: `${BASE_URL}jobs/${job._id}`
+                            url: `https://${jobboard.domain}/jobs/${job._id}`
                         },
-                        updateUrl: `${BASE_URL}jobs/edit/${jobUpdateRequest._id}`
+                        updateUrl: `https://${jobboard.domain}/jobs/edit/${jobUpdateRequest._id}`
                     },
                     template_id: 'd-1f886db2ebbd4ac49ca882112b80eeea'
                 }

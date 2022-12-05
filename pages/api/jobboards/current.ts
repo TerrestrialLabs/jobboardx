@@ -16,16 +16,16 @@ export default async function handler(
     res: NextApiResponse<JobBoardData>
 ) {
     const { 
-        method,
-        query: { id }
+        method
     } = req
 
     dbConnect()
 
     if (method === 'GET') {
         // Hardcode default job board for local development
-        const url = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-        const jobboard = await JobBoard.findOne({ url }).select('-email')
+        // TO DO: Save default domain in env var
+        const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+        const jobboard = await JobBoard.findOne({ domain }).select('-email')
         // @ts-ignore
         res.status(200).json(jobboard)
     }

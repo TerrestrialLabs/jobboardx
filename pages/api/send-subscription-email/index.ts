@@ -4,8 +4,8 @@ import Subscription from '../../../models/Subscription'
 import sgMail from '@sendgrid/mail'
 import Job from '../../../models/Job'
 import SubscriptionEmail from '../../../models/SubscriptionEmail'
-import { BASE_URL } from '../../../const/const'
 import { formatSalaryRange } from '../../../utils/utils'
+import JobBoard from '../../../models/JobBoard'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -33,6 +33,8 @@ export default async function handler(
     // TO DO: Only send new jobs since last email/week >= timestamp of last sent job (save in DB collection)
     if (method === 'POST') {
         try {
+            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+            const jobboard = await JobBoard.findOne({ domain })
             const subscriptions = await Subscription.find().exec()
 
             if (!subscriptions.length) {
@@ -55,10 +57,10 @@ export default async function handler(
 
             const messages = subscriptions.map(subscription => ({
                 to: subscription.email,
-                from: 'React Jobs <support@reactdevjobs.io>',
+                from: `${jobboard.title} <${jobboard.email}>`,
                 html: "<html></html>",
                 dynamic_template_data: {
-                    subject: "New React jobs for you",
+                    subject: "New jobs for you",
                     jobs: jobs.slice(0, 12).map(job => ({
                         title: job.title,
                         company: job.company,
@@ -66,12 +68,12 @@ export default async function handler(
                         salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                         companyLogo: job.companyLogo ? job.companyLogo : null,
                         companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                        url: `${BASE_URL}${job._id}`
+                        url: `https://${jobboard.domain}/${job._id}`
                     })),
                     numJobs: jobs.length === fetchLimit ? `${fetchLimit - 1}+` : jobs.length,
                     timeStamp: currentDate,
                     dateFormat: "MMMM D, YYYY",
-                    unsubscribeUrl: `${BASE_URL}unsubscribe/${subscription._id}`
+                    unsubscribeUrl: `https://${jobboard.domain}/unsubscribe/${subscription._id}`
                 },
                 template_id: 'd-2b27defb433c4a7e99667df4ed069625'
             }))

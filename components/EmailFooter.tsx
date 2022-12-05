@@ -1,22 +1,24 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { useWindowSize } from "../hooks/hooks"
 import axios from 'axios'
 import { Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
-import { BASE_URL_API } from '../const/const'
+import { JobBoardContext, JobBoardContextValue } from "../context/JobBoardContext"
 
 const EmailFooter = () => {
-    const [open, setOpen] = useState(true)
-    const [email, setEmail] = useState('')
-    const [error, setError] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [submitted, setSubmitted] = useState(false)
+  const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
   
-    const windowSize = useWindowSize()
-    const mobile = windowSize.width && windowSize.width < 500
-  
-    const validate = () => {
-      return email.length > 0 && isValidEmail(email)
+  const [open, setOpen] = useState(true)
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const windowSize = useWindowSize()
+  const mobile = windowSize.width && windowSize.width < 500
+
+  const validate = () => {
+    return email.length > 0 && isValidEmail(email)
   }
   
     const isValidEmail = (email: string) => {
@@ -35,7 +37,7 @@ const EmailFooter = () => {
             return
         }
         setError(false)
-        await axios.post(`${BASE_URL_API}subscriptions`, { email })
+        await axios.post(`${baseUrlApi}subscriptions`, { jobboardId: jobboard._id, email })
         setLoading(false)
         setSubmitted(true)
     }

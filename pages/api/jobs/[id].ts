@@ -4,6 +4,7 @@ import Job from '../../../models/Job'
 
 export type JobData = {
     _id: string
+    jobboardId: string
     backfilled: boolean
     createdAt: Date
     datePosted: Date
@@ -41,7 +42,6 @@ export default async function handler(
 
     dbConnect()
 
-    // TO DO: We don't want email field
     if (method === 'GET') {
         const job = await Job.findById(id).select('-email').select('-orderId')
         // TO DO

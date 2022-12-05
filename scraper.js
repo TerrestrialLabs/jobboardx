@@ -141,7 +141,7 @@ async function scrapeJobs() {
     // Write to database
     for (let i = 0; i < jobsWithLogo.length; i++) {
         try {
-            const res = await axios.post('http://localhost:3000/api/jobs', jobsWithLogo[i])
+            const res = await axios.post('http://localhost:3000/api/jobs/create-backfilled-job', jobsWithLogo[i])
             console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
             console.log(res.data)
         } catch (err) {

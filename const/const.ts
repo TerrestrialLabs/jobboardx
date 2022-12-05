@@ -1,8 +1,5 @@
 // TO DO: Break up into separate files
 
-export const BASE_URL_API = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/api/' : 'https://www.reactdevjobs.io/api/'
-export const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'https://www.reactdevjobs.io/'
-
 export const PRICE: { [key: string]: number } = {
     regular: 49,
     featured: 99

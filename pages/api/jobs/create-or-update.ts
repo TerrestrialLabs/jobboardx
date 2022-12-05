@@ -7,9 +7,10 @@ import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import { JobData } from '.'
-import { BASE_URL, PRICE, TYPE_MAP } from '../../../const/const'
+import { PRICE, TYPE_MAP } from '../../../const/const'
 import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
+import JobBoard from '../../../models/JobBoard'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -108,14 +109,14 @@ createOrUpdateJob.post(async (req, res) => {
             })
             delete job.orderId
 
-            await sendConfirmationEmail({ job, mode })
+            await sendConfirmationEmail({ host: req.headers.host, job, mode })
 
             res.status(201).json(job)
         } else if (mode === 'update') {
             const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
                 .select('-orderId')
 
-            await sendConfirmationEmail({ job, mode })
+            await sendConfirmationEmail({ host: req.headers.host, job, mode })
 
             res.status(200).json(job)
         }
@@ -135,16 +136,20 @@ export const config = {
 export default createOrUpdateJob
 
 type SendConfirmationEmailParams = {
+    host: string | undefined
     job: JobData & { email: string }, 
     mode: string
 }
-export const sendConfirmationEmail = async ({ job, mode }: SendConfirmationEmailParams) => {
+export const sendConfirmationEmail = async ({ host, job, mode }: SendConfirmationEmailParams) => {
     try {
+        const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
+        const jobboard = await JobBoard.findOne({ domain })
+
         const startDate = job.datePosted
         const endDate = add(startDate, { days: 30 })
         const message = {
             to: job.email,
-            from: 'React Jobs <support@reactdevjobs.io>',
+            from: `${jobboard.title} <${jobboard.email}>`,
             html: "<html></html>",
             dynamic_template_data: {
                 subject: `Your job has been ${mode === 'create' ? 'posted' : 'updated'}`,
@@ -157,7 +162,7 @@ export const sendConfirmationEmail = async ({ job, mode }: SendConfirmationEmail
                     salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
                     companyLogo: job.companyLogo ? job.companyLogo : null,
                     companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                    url: `${BASE_URL}jobs/${job._id}`
+                    url: `https://${jobboard.domain}/jobs/${job._id}`
                 },
                 price: job.featured ? PRICE.featured : PRICE.regular,
                 startDate: format(startDate, 'MMM. d, yyyy'),

@@ -5,7 +5,7 @@ import Head from 'next/head'
 import React, { useContext, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
-import { BASE_URL_API, CONTACT_MESSAGE_TYPE } from '../const/const'
+import { CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
@@ -27,7 +27,7 @@ const initState = {
 }
 
 const Contact: NextPage = () => {
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [messageData, setMessageData] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -57,7 +57,7 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${BASE_URL_API}messages`, messageData)
+            const res = await axios.post(`${baseUrlApi}messages`, messageData)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)

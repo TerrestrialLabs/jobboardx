@@ -4,6 +4,7 @@ import Subscription from '../../../models/Subscription'
 
 export type SubscriptionData = {
     _id: string,
+    jobboardId: string
     email: string
 }
 

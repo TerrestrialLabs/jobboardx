@@ -1,13 +1,12 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import Link from 'next/link'
-import { BASE_URL_API, CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
+import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -38,6 +37,8 @@ const initState = {
 }
 
 const CreateBoardForm: NextPage = () => {
+    const { baseUrlApi } = useContext(JobBoardContext) as JobBoardContextValue
+    
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrors)
@@ -64,7 +65,7 @@ const CreateBoardForm: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${BASE_URL_API}jobboards`, form)
+            const res = await axios.post(`${baseUrlApi}jobboards`, form)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)

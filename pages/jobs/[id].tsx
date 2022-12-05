@@ -2,13 +2,13 @@ import { Alert, Box, Button, CircularProgress, Divider, FilledInput, FormControl
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useRouter } from 'next/router'
 import type { JobData } from '../api/jobs'
 import { format, parseISO } from 'date-fns'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
-import { BASE_URL_API, TYPE_MAP } from '../../const/const'
+import { TYPE_MAP } from '../../const/const'
 import { formatSalaryRange } from '../../utils/utils'
 import axios from 'axios'
 import ReactHtmlParser from 'react-html-parser'
@@ -16,6 +16,7 @@ import NextLink from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
 import { JobBoardData } from '../api/jobboards'
+import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 
 interface Props {
     data: JobData
@@ -37,11 +38,11 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     const location = getLocationString()
 
     const trackJobView = () => {
-        axios.post(`${baseUrlApi}analytics/job-view`, { jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-view`, { jobboardId: jobboard._id, jobId: router.query.id })
     }
 
     const trackJobApplyClick = () => {
-        axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobboardId: jobboard._id, jobId: router.query.id })
     }
 
     useEffect(() => {
@@ -289,6 +290,8 @@ type JobUpdateRequestModalProps = {
     open: boolean
 }
 const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestModalProps) => {
+    const { baseUrlApi } = useContext(JobBoardContext) as JobBoardContextValue
+
     const [email, setEmail] = useState('')
     const [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -315,7 +318,7 @@ const JobUpdateRequestModal = ({ closeModal, mobile, open }: JobUpdateRequestMod
             return
         }
         setError(false)
-        axios.post(`${BASE_URL_API}job-update-requests`, {
+        axios.post(`${baseUrlApi}job-update-requests`, {
             email,
             jobId: router.query.id
         })

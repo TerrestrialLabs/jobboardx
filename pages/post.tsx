@@ -7,7 +7,7 @@ import React, { useContext, useEffect, useImperativeHandle, useRef, useState } f
 import styles from '../styles/Home.module.css'
 import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
-import { BASE_URL_API, PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
+import { PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import { TextEditorPlaceholder } from '../components/post/TextEditor'
@@ -171,7 +171,7 @@ const unselectedPostTypeStyle = {
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 
 const Post: NextPage = () => {
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     return (
         <Elements stripe={stripe}>
@@ -190,7 +190,7 @@ type PostFormProps = {
     edit?: boolean
 }
 export const PostForm = ({ edit }: PostFormProps) => {  
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [job, setJob] = useState<JobData | null>(null)
     const [jobLoading, setJobLoading] = useState(edit)
@@ -232,7 +232,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const loadJob = async () => {
         setJobLoading(true)
         try {
-            const tokenRes = await axios.get(`${BASE_URL_API}job-update-requests/${router.query.token}`)
+            const tokenRes = await axios.get(`${baseUrlApi}job-update-requests/${router.query.token}`)
             if (tokenRes) {
                 // TO DO: Util function
                 const hours = 24
@@ -246,7 +246,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     setJobError(true)
                     throw Error('Expired edit link.')
                 } else {
-                    const jobRes = await axios.get(`${BASE_URL_API}jobs/${tokenRes.data.jobId}`)
+                    const jobRes = await axios.get(`${baseUrlApi}jobs/${tokenRes.data.jobId}`)
                     if (jobRes) {
                         const { data } = jobRes
                         // TO DO: Set state
@@ -426,6 +426,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             const formData = logo ? logo : new FormData()
 
             const jobData = { 
+                jobboardId: jobboard._id,
                 ...(edit ? job : {}),
                 ...(!edit ? { email: billingAddress.email.trim().toLowerCase() } : {}),
                 ...jobDetails,
@@ -448,7 +449,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 formData.set('stripePaymentIntentId', paymentResult?.paymentIntent.id as string)
             }
 
-            const res = await axios.post(`${BASE_URL_API}jobs/create-or-update`, formData, { 
+            const res = await axios.post(`${baseUrlApi}jobs/create-or-update`, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
             
@@ -543,7 +544,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
 
             // TO DO: Clean up payment intent if transaction fails
-            const paymentIntent = await axios.post(`${BASE_URL_API}stripe/create-payment-intent`, paymentIntentParams)
+            const paymentIntent = await axios.post(`${baseUrlApi}stripe/create-payment-intent`, paymentIntentParams)
 
             const cardElement = elements.getElement(CardNumberElement)
             const stripeData = {

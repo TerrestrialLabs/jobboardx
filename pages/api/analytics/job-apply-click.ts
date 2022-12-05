@@ -22,6 +22,7 @@ export default async function handler(
             const ipAddress = req.headers['x-forwarded-for']  || req.socket.remoteAddress
 
             await UserEvent.create({
+                jobboardId: req.body.jobboardId,
                 jobId: req.body.jobId,
                 event: 'job-apply-click',
                 ipAddress

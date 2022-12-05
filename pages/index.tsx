@@ -1,14 +1,14 @@
 import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { getTimeDifferenceString } from '../utils/utils'
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { BASE_URL_API, TYPE, TYPE_MAP } from '../const/const'
+import { TYPE, TYPE_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import type { JobData } from './api/jobs'
 import axios from 'axios'
@@ -25,7 +25,7 @@ type Filters = {
 }
 
 const Home: NextPage = () => {
-  const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+  const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
   const filterDefaults: Filters = {
     search: '',
@@ -54,7 +54,7 @@ const Home: NextPage = () => {
 
   // TO DO: Testing
   // const testingDeleteBackfilledJobs = async () => {
-  //   await axios.delete(`${BASE_URL_API}jobs`)
+  //   await axios.delete(`${baseUrlApi}jobs`)
   // }
 
   // TO DO: DANGEROUS!!!
@@ -63,7 +63,7 @@ const Home: NextPage = () => {
   // }, [])
 
   const trackJobApplyClick = (jobId: string) => {
-    axios.post(`${BASE_URL_API}analytics/job-apply-click`, { jobId })
+    axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobId })
   }
 
   // When filters panel open on mobile don't allow scroll
@@ -129,16 +129,14 @@ const Home: NextPage = () => {
       router.push(`/?${queryString}`, { query: params })
     }
 
-    console.log('router.query: ', router.query)
-
-    const res = await axios.get(`${BASE_URL_API}jobs`, { params: { ...router.query, jobboardId: jobboard._id } })
+    const res = await axios.get(`${baseUrlApi}jobs`, { params: { ...router.query, jobboardId: jobboard._id } })
 
     setJobs(res.data)
     setLoading(false)
   }
 
   const fetchJobsCount = async (params: any) => {
-    const res = await axios.get(`${BASE_URL_API}jobs/count`, { params })
+    const res = await axios.get(`${baseUrlApi}jobs/count`, { params: { ...params, jobboardId: jobboard._id } })
     setTotalJobs(res.data)
   }
 
@@ -164,7 +162,7 @@ const Home: NextPage = () => {
 
     router.push(`/?${queryString}`, { query: params })
 
-    const res = await axios.get(`${BASE_URL_API}jobs`, { params })
+    const res = await axios.get(`${baseUrlApi}jobs`, { params: { ...params, jobboardId: jobboard._id } })
 
     setFiltersOpen(false)
     fetchJobsCount(params)
@@ -173,7 +171,7 @@ const Home: NextPage = () => {
   }
 
   const loadMoreJobs = async () => {
-    const res = await axios.get(`${BASE_URL_API}jobs`, { params: { ...router.query, pageIndex: Math.ceil(jobs.length / resultsPerPage) } })
+    const res = await axios.get(`${baseUrlApi}jobs`, { params: { ...router.query, jobboardId: jobboard._id, pageIndex: Math.ceil(jobs.length / resultsPerPage) } })
     const newJobs = await res.data
     setJobs([...jobs, ...newJobs])
   }
@@ -358,6 +356,10 @@ const Home: NextPage = () => {
 }
 
 export default Home
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    return { props: {} }
+}
 
 type ListItemProps = JobData & {
   first: boolean

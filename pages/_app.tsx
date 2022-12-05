@@ -12,7 +12,7 @@ import Layout from '../components/Layout';
 import { NextApiRequest } from 'next';
 import axios from 'axios';
 import { JobBoardContext } from '../context/JobBoardContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { JobBoardData } from './api/jobboards';
 
 const clientSideEmotionCache = createEmotionCache();
@@ -26,6 +26,14 @@ interface MyAppProps extends AppProps {
 
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi } = props;
+
+  // TO DO: TEMP - add jobboardId field
+  // useEffect(() => {
+  //   async function addJobboardIds () {
+  //     await axios.post(`${baseUrlApi}jobs/add-jobboard-id`, { jobboardId: jobboard._id })
+  //   }
+  //   addJobboardIds()
+  // }, [])
 
   return (
     <CacheProvider value={emotionCache}>

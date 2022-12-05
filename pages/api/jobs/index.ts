@@ -13,6 +13,7 @@ type Filters = {
 
 export type JobData = {
     _id: string
+    jobboardId: string
     backfilled: boolean
     createdAt: Date
     datePosted: Date
@@ -105,38 +106,11 @@ export default async function handler(
             res.status(500).json(getErrorMessage(err))
         }
     }
-    
-    if (method === 'POST') {
-        try {
-            const existingJob = await Job.findOne({ applicationLink: req.body.applicationLink, backfilled: true }).exec()
-            const clientCompany = await Job.findOne({ company: req.body.company, backfilled: false })
-            // We've already scraped this job
-            if (existingJob && req.body.backfilled) {
-                throw Error('This job already exists')
-            }
-            // Silently fail if scraped job company has a real job posting
-            if (clientCompany && req.body.backfilled) {
-                throw Error('This company already exists')
-            }
-            // TO DO: Any point in removing email from response? 
-            const job = await Job.create({
-                ...req.body,
-                datePosted: req.body.datePosted ? req.body.datePosted : new Date()
-            })
-            delete job.email
-            delete job.orderId
-            res.status(201).json(job)
-        } catch(err) {
-            // TO DO
-            // @ts-ignore
-            res.status(500).json(getErrorMessage(err))
-        }
-    }
 
-    // TO DO: This deletes jobs backfilled from SimplyHired
+    // TO DO: This deletes backfilled jobs
     // if (method === 'DELETE') {
     //     try {
-    //         const job = await Job.deleteMany({ companyUrl: 'N/A' })
+    //         const job = await Job.deleteMany({ backfilled: true })
     //         res.status(200).json(true)
     //     } catch(err) {
     //         // TO DO

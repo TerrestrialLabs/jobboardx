@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 const JobSchema = new mongoose.Schema({
+    jobboardId: { type: String, required: true },
     title: { type: String, required: true },
     backfilled: { type: Boolean, required: true },
     company: { type: String, required: true },
