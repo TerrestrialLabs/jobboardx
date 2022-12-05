@@ -62,8 +62,9 @@ export default async function handler(
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date()
             })
 
-            delete job.email
-            delete job.orderId
+            // delete job.email
+            // delete job.orderId
+
             res.status(201).json(job)
         } catch(err) {
             // TO DO
