@@ -6,12 +6,6 @@ import JobBoard from '../../../models/JobBoard'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
-export type JobUpdateRequestData = {
-    _id: string,
-    jobId: string,
-    email: string
-}
-
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
         return error.message
@@ -32,7 +26,7 @@ export default async function handler(
             const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
             const jobboard = await JobBoard.findOne({ domain })
 
-            await Message.create(req.body)
+            await Message.create({ ...req.body, jobboardId: jobboard._id })
 
             const message = {
                 to: jobboard.email,

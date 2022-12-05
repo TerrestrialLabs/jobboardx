@@ -40,7 +40,7 @@ const Terms: NextPage = () => {
                             <p><strong>Country</strong> refers to: New York,  United States</p>
                             </li>
                             <li>
-                            <p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Terrestrial, LLC, 151 Garfield Pl, 2L, Brooklyn, NY 11215.</p>
+                            <p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to {jobboard.company}.</p>
                             </li>
                             <li>
                             <p><strong>Content</strong> refers to content such as text, images, or other information that can be posted, uploaded, linked to or otherwise made available by You, regardless of the form of that content.</p>

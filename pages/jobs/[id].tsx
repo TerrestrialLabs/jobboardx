@@ -59,7 +59,7 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     }, [requestUpdateModalOpen])
 
     const fetchCompanyJobsCount = async () => {
-        const res = await axios.get(`${baseUrlApi}jobs/count`, { params: { search: data.company } })
+        const res = await axios.get(`${baseUrlApi}jobs/count`, { params: { jobboardId: jobboard._id, search: data.company } })
         setCompanyJobsCount(res.data)
     }
 
