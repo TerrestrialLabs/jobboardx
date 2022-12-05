@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer')
 const fs = require('fs/promises')
 const axios = require('axios')
+const uuid = require('uuid')
 
 async function scrapeJobs(domain) {
     const jobboard = await axios.get(`https://${domain}/api/jobboards/current`)
@@ -23,8 +24,6 @@ async function scrapeJobs(domain) {
             const remote = location === 'Remote'
 
             jobList.push({
-                email: 'backfill@example.com',
-                orderId: 'backfill',
                 title: element.querySelector('.jobposting-title').textContent.trim(),
                 company: element.querySelector('.jobposting-company').textContent.trim(),
                 location,
@@ -145,10 +144,13 @@ async function scrapeJobs(domain) {
     // Write to database
     for (let i = 0; i < jobsWithLogo.length; i++) {
         try {
-            const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, {
-                jobboardId: jobboard._id,
-                ...jobsWithLogo[i]
-            })
+            const body = {
+                ...jobsWithLogo[i],
+                email: 'backfill@example.com',
+                orderId: uuid.v4(),
+                jobboardId: jobboard.data._id
+            }
+            const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, body)
             console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
             console.log(res.data)
         } catch (err) {

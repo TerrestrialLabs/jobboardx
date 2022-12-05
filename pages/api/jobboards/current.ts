@@ -27,7 +27,6 @@ export default async function handler(
             // TO DO: Save default domain in env var
             const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
             const jobboard = await JobBoard.findOne({ domain }).select('-email')
-            console.log('jobboard: ', jobboard)
             // @ts-ignore
             res.status(200).json(jobboard)
         } catch (err) {

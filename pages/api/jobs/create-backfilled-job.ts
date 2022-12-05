@@ -59,9 +59,9 @@ export default async function handler(
             const job = await Job.create({
                 ...req.body,
                 backfilled: true,
-                datePosted: req.body.datePosted ? req.body.datePosted : new Date(),
-                orderId: null
+                datePosted: req.body.datePosted ? req.body.datePosted : new Date()
             })
+
             delete job.email
             delete job.orderId
             res.status(201).json(job)
