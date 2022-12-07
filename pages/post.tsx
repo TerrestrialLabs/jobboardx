@@ -592,8 +592,8 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 <Typography sx={{ marginBottom: '58px' }}>This link is expired or invalid.</Typography>
             </Box>
         ) : (
-            <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 2 : 4}>
-                <Grid xs={12} sm={10} lg={8} p={2} pb={mobile ? 0 : 2}>
+            <Grid container justifyContent='center' pb={mobile ? 2 : 4}>
+                <Grid xs={12} sm={10} lg={8} p={2} pt={0} pb={mobile ? 0 : 2}>
                     <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                         <Typography mb={2} variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Post a job</Typography>
                         <Typography variant='h2' fontSize={16} color='grey'>Hire the best React developers for an affordable price.</Typography>
