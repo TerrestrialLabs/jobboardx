@@ -4,8 +4,9 @@ import EmailProvider from 'next-auth/providers/email'
 import { MongoClient } from 'mongodb'
 import sgMail from '@sendgrid/mail'
 import { JobBoardData } from '../jobboards'
-import axios from 'axios'
 import User from '../../../models/User'
+import JobBoard from '../../../models/JobBoard'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -15,51 +16,56 @@ const THIRTY_MINUTES = 30 * 60
 const client = new MongoClient(process.env.MONGODB_URL as string);
 const clientPromise = client.connect();
 
-export default NextAuth({
-    secret: process.env.NEXTAUTH_SECRET,
-    session: {
-        strategy: 'jwt',
-        maxAge: THIRTY_DAYS,
-        updateAge: THIRTY_MINUTES
-    },
-    adapter: MongoDBAdapter(clientPromise),
-    providers: [
-        EmailProvider({
-            server: {
-                host: process.env.SENDGRID_SERVER_HOST,
-                port: parseInt(process.env.SENDGRID_PORT as string),
-                auth: {
-                    user: process.env.SENDGRID_USERNAME,
-                    pass: process.env.SENDGRID_API_KEY
-                }
-            },
-            from: 'React Jobs <support@reactdevjobs.io>',
-            sendVerificationRequest({ identifier, url, provider }) {
-                customSendVerificationRequest({ identifier, url, provider })
-            },
-        })
-    ]
-})
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+    const jobboard = await JobBoard.findOne({ domain })
+
+    if (!jobboard) {
+        throw new Error('Sign in email could not be sent')
+    }
+
+    return NextAuth(req, res, {
+        secret: process.env.NEXTAUTH_SECRET,
+        session: {
+            strategy: 'jwt',
+            maxAge: THIRTY_DAYS,
+            updateAge: THIRTY_MINUTES
+        },
+        adapter: MongoDBAdapter(clientPromise),
+        providers: [
+            EmailProvider({
+                server: {
+                    host: process.env.SENDGRID_SERVER_HOST,
+                    port: parseInt(process.env.SENDGRID_PORT as string),
+                    auth: {
+                        user: process.env.SENDGRID_USERNAME,
+                        pass: process.env.SENDGRID_API_KEY
+                    }
+                },
+                from: `${jobboard.title} <${jobboard.email}>`,
+                sendVerificationRequest({ identifier, url, provider }) {
+                    customSendVerificationRequest({ identifier, url, provider, jobboard })
+                },
+            })
+        ]
+    })
+}
 
 type CustomSendVerificationRequestParams = { 
     identifier: string
     url: string
     provider: any
+    jobboard: JobBoardData
 }
 async function customSendVerificationRequest(params: CustomSendVerificationRequestParams) {
-    const { identifier, url, provider } = params
+    const { identifier, url, provider, jobboard } = params
     const { host } = new URL(url)
 
     const employer = User.findOne({ email: identifier, role: 'employer' })
     if (!employer) {
-        throw new Error('Sign in email could not be sent')
-    }
-
-    const baseUrlApi = `http${host.includes('localhost') ? '' : 's'}://${host}/api/`
-    const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
-    const jobboard: JobBoardData = jobboardRes.data
-
-    if (!jobboard) {
         throw new Error('Sign in email could not be sent')
     }
 

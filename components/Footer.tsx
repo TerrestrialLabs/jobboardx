@@ -7,12 +7,7 @@ import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 
-var os = require('os');
-
 const Footer = () => {
-
-    console.log("OS HOSTNAME: ", os.hostname())
-
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const windowSize = useWindowSize()
