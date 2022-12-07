@@ -20,7 +20,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+    const local = req.headers.host?.includes('localhost')
+    const domain = local ? 'www.reactdevjobs.io' : req.headers.host
     const jobboard = await JobBoard.findOne({ domain })
 
     if (!jobboard) {
@@ -39,7 +40,7 @@ export default async function handler(
             EmailProvider({
                 server: {
                     host: process.env.SENDGRID_SERVER_HOST,
-                    port: parseInt(process.env.SENDGRID_PORT as string),
+                    port: parseInt((local ? process.env.SENDGRID_PORT_LOCAL : process.env.SENDGRID_PORT_SSL) as string),
                     auth: {
                         user: process.env.SENDGRID_USERNAME,
                         pass: process.env.SENDGRID_API_KEY
@@ -63,12 +64,6 @@ type CustomSendVerificationRequestParams = {
 async function customSendVerificationRequest(params: CustomSendVerificationRequestParams) {
     const { identifier, url, provider, jobboard } = params
     const { host } = new URL(url)
-
-    const employer = await User.findOne({ email: identifier, role: 'employer' })
-    if (!employer) {
-        // Don't indicate that email exists
-        return
-    }
 
     const message = {
         to: identifier,
