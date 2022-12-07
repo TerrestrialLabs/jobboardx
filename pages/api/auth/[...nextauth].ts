@@ -64,9 +64,10 @@ async function customSendVerificationRequest(params: CustomSendVerificationReque
     const { identifier, url, provider, jobboard } = params
     const { host } = new URL(url)
 
-    const employer = User.findOne({ email: identifier, role: 'employer' })
+    const employer = await User.findOne({ email: identifier, role: 'employer' })
     if (!employer) {
-        throw new Error('Sign in email could not be sent')
+        // Don't indicate that email exists
+        return
     }
 
     const message = {
