@@ -14,6 +14,7 @@ import axios from 'axios';
 import { JobBoardContext } from '../context/JobBoardContext';
 import { useEffect, useState } from 'react';
 import { JobBoardData } from './api/jobboards';
+import { SessionProvider } from 'next-auth/react'
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -43,12 +44,14 @@ export default function MyApp(props: MyAppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
-          <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <SessionProvider session={pageProps.session}>
+          <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
 
-        </JobBoardContext.Provider>
+          </JobBoardContext.Provider>
+        </SessionProvider>
       </ThemeProvider>
     </CacheProvider>
   );

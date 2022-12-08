@@ -27,9 +27,13 @@ const Footer = () => {
             <Grid container justifyContent='center'>
                 <Grid item xs={12} sm={6} display='flex' flexDirection={mobile ? 'column' : 'row'}>
                     <Grid item xs={12} sm={4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                        <Typography fontWeight='bold' mb={1}>Job seekers</Typography>
+                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/'>Search jobs</Link></Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
                         <Typography fontWeight='bold' mb={1}>Employers</Typography>
                         <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/post'>Post a job</Link></Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/login'>Log in</Link></Typography>
+                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/login'>Sign in</Link></Typography>
                         <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/signup'>Sign up</Link></Typography>
                     </Grid>
                     <Grid item xs={12} sm={4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>

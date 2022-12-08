@@ -8,6 +8,7 @@ import Link from 'next/link'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import { getCsrfToken, signIn } from 'next-auth/react'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -16,19 +17,21 @@ const ERROR = {
 }
 
 const initErrors: { [key: string]: string } = {
-    email: '',
-    password: ''
+    email: ''
 }
 
 const initState = {
-    email: '',
-    password: ''
+    email: ''
 }
 
-const Contact: NextPage = () => {
+interface Props {
+    csrfToken: string
+}
+
+const Login: NextPage<Props> = ({ csrfToken }) => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
-    const [data, setData] = useState(initState)
+    const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrors)
     const [submitted, setSubmitted] = useState(false)
@@ -40,7 +43,7 @@ const Contact: NextPage = () => {
 
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
-        setData({ ...data, [e.target.name]: e.target.value })
+        setForm({ ...form, [e.target.name]: e.target.value })
     }
 
     const submit = async () => {
@@ -52,11 +55,11 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}auth/signin`, data)
+            const res = await axios.post(`${baseUrlApi}auth/signin`, form)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)
-                setData(initState)
+                setForm(initState)
             }
         } catch (err) {
             console.log(err)
@@ -69,16 +72,14 @@ const Contact: NextPage = () => {
         let isValid = true
         const newErrors = Object.assign({}, initErrors)
 
-        if (!isValidEmail(data.email)) {
+        if (!isValidEmail(form.email)) {
             newErrors['email'] = ERROR.EMAIL
             isValid = false
         }
-        for (const field in data) {
-            // @ts-ignore
-            if ((typeof data[field] === 'string' && !data[field].trim())) {
-                newErrors[field] = ERROR.EMPTY
-                isValid = false
-            }
+
+        if (form.email.trim().length === 0) {
+            newErrors.email = ERROR.EMPTY
+            isValid = false
         }
 
         setErrors(newErrors)
@@ -94,6 +95,18 @@ const Contact: NextPage = () => {
         }
     }
 
+    const login = async () => {
+        const isValid = validate()
+        if (!isValid) {
+            return
+        }
+        setErrors({ email: '' })
+        setLoading(true)
+        await signIn('email', { email: form.email })
+        setLoading(false)
+        setSubmitted(true)
+    }
+
     return (
         <div className={styles.container}>
             <Head>
@@ -103,10 +116,29 @@ const Contact: NextPage = () => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid container>
-                    <Grid>
-                        <Box>
-                            <Typography>Employer Sign In</Typography>
+                <Grid p={mobile ? 0 : 12} container justifyContent='center'>
+                    {/* TO DO: Make or import reusable card component */}
+                    <Grid xs={12} sm={4}>
+                        <Box p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                            <Grid xs={12}>
+                                <Box mb={4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
+                            </Grid>
+
+                            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
+                            <Grid xs={12}>
+                                <FormControl hiddenLabel fullWidth>
+                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
+                                    <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
+                                    <FormHelperText error>{errors['email']}</FormHelperText>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid xs={12} sm={12} pt={2} display='flex' justifyContent='center'>
+                                <Button onClick={login} fullWidth={mobile} disabled={loading} variant='contained' disableElevation color='primary' sx={{ minWidth: '100%' }}>
+                                    {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
+                                </Button>
+                            </Grid>
                         </Box>
                     </Grid>
                 </Grid>
@@ -115,8 +147,10 @@ const Contact: NextPage = () => {
     )
 }
 
-export default Contact
+export default Login
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    return { props: {} }
+    const csrfToken = await getCsrfToken(context)
+
+    return { props: { csrfToken } }
 }
