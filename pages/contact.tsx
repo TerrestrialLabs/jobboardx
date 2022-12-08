@@ -108,8 +108,8 @@ const Contact: NextPage = () => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 2 : 4}>
-                    <Grid xs={12} sm={10} lg={8} p={2} pb={mobile ? 0 : 2}>
+                <Grid container justifyContent='center' pb={mobile ? 2 : 4}>
+                    <Grid xs={12} sm={10} lg={8} p={2} pt={0} pb={mobile ? 0 : 2}>
                         <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                             <Typography mb={2} variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Get in touch</Typography>
                             <Typography variant='h2' fontSize={16} color='grey'>Request support, suggest feedback, or submit a feature request. We love to hear from you!</Typography>

@@ -12,8 +12,7 @@ import { getCsrfToken, signIn } from 'next-auth/react'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
-    EMAIL: 'Invalid email format',
-    PASSWORD_SHORT: 'Password should be at least 8 characters'
+    EMAIL: 'Invalid email format'
 }
 
 const initErrors: { [key: string]: string } = {
@@ -116,15 +115,21 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid p={mobile ? 0 : 12} container justifyContent='center'>
+                <Grid p={mobile ? 2 : 12} container justifyContent='center'>
                     {/* TO DO: Make or import reusable card component */}
                     <Grid xs={12} sm={4}>
-                        <Box p={4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                             <Grid xs={12}>
-                                <Box mb={4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
+                                <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
                             </Grid>
 
                             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
+                            {showErrorMessage && (
+                                <Grid xs={12}>
+                                    <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                </Grid>
+                            )}
 
                             <Grid xs={12}>
                                 <FormControl hiddenLabel fullWidth>

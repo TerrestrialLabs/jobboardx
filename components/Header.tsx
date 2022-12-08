@@ -53,9 +53,11 @@ const Header = () => {
             }}
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
+            <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>
             {session && <MenuItem onClick={logout}>Logout</MenuItem>}
 
-            {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/login'>Employer sign in</Link></MenuItem>}
+            {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/login'>Log in</Link></MenuItem>}
+            {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/signup'>Sign up</Link></MenuItem>}
         </Menu>
     )
 

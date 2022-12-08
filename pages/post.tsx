@@ -811,7 +811,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
                                     {edit && (
                                         <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: '200px' }}>
+                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: mobile ? '100%' : '200px' }}>
                                                 {loading ? <CircularProgress color='secondary' size={22} /> : 'Update job'}
                                             </Button>
                                         </Grid>
@@ -1023,7 +1023,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         </Grid>
                                         
                                         <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: '200px' }}>
+                                            <Button fullWidth={mobile} disabled={loading} onClick={createOrUpdateJob} variant='contained' disableElevation color='primary' sx={{ height: '45px', width: mobile ? '100%' : '200px' }}>
                                                 {loading ? <CircularProgress color='secondary' size={22} /> : 'Post job'}
                                             </Button>
                                         </Grid>
