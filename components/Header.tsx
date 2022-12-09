@@ -64,9 +64,16 @@ const Header = () => {
     return (
         <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
             <Grid container justifyContent='center'>
-                <Grid xs={11} sm={9}>
-                    <Box display='flex' justifyContent='space-between' alignContent='center'>
-                        <Link href='/'><Typography  color='#fff' variant='h1' fontSize={28} lineHeight={'42px'} fontWeight='bold' sx={{ cursor: 'pointer', textDecoration: 'none' }}>{jobboard.title}</Typography></Link>
+                <Grid xs={11} sm={9} display='flex' justifyContent='space-between' alignContent='center'>
+                    
+                        <Grid xs={5} sm={8}>
+                            <Link href='/'>
+                                <Typography noWrap textOverflow='ellipsis' color='#fff' variant='h1' fontSize={mobile ? 20 : 28} lineHeight={'42px'} fontWeight='bold' sx={{ cursor: 'pointer', textDecoration: 'none' }}>
+                                    {/* {jobboard.title} */}
+                                    This is a really long job board title
+                                </Typography>
+                            </Link>
+                        </Grid>
 
                         {/* {!mobile && (
                             <Box>
@@ -91,7 +98,7 @@ const Header = () => {
 
                             <Button sx={{ flexShrink: 0 }} href={postFormPage ? '/' : '/post'} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>
                         </Box>
-                    </Box>
+                    
                 </Grid>
             </Grid>
         </Box>

@@ -104,7 +104,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         setErrors({ email: '' })
         setLoading(true)
         try {
-            await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
+            await signIn('email', { email: form.email, redirect: false, callbackUrl: '/dashboard' })
             setSubmitted(true)
         } catch (err) {
             // TO DO: Check for status & display message

@@ -4,6 +4,8 @@ const JobSchema = new mongoose.Schema({
     jobboardId: { type: String, required: true },
     title: { type: String, required: true },
     backfilled: { type: Boolean, required: true },
+    // TO DO: Required or not?
+    employerId: { type: String },
     company: { type: String, required: true },
     companyUrl: { type: String, required: true },
     companyLogo: { type: String, required: false },

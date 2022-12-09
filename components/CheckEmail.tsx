@@ -8,8 +8,8 @@ const CheckEmail = ({ signup }: { signup?: boolean }) => {
 
     return (
         <Grid p={mobile ? 2 : 12} container justifyContent='center'>
-            <Grid xs={12} sm={4}>
-                <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+            <Grid xs={12}>
+                <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px' }}>
                     <Grid xs={12}>
                         <Box mb={4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Check your email</Typography></Box>
                     </Grid>
