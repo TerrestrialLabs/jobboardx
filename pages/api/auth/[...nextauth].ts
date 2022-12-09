@@ -28,6 +28,13 @@ export default async function handler(
         throw new Error('Sign in email could not be sent')
     }
 
+    if (req.body.email) {
+        const user = await User.findOne({ email: req.body.email })
+        if (!user) {
+            return res.status(401).json({ error: 'An account with this email could not be found' });
+        }
+    }
+
     return NextAuth(req, res, {
         secret: process.env.NEXTAUTH_SECRET,
         session: {
@@ -51,7 +58,12 @@ export default async function handler(
                     customSendVerificationRequest({ identifier, url, provider, jobboard })
                 },
             })
-        ]
+        ],
+        pages: {
+            signIn: '/login',
+            signOut: '/',
+            error: '/login-error'
+        }
     })
 }
 
@@ -68,9 +80,16 @@ async function customSendVerificationRequest(params: CustomSendVerificationReque
     const message = {
         to: identifier,
         from: provider.from,
-        subject: `Sign in to ${jobboard.title}`,
-        text: text({ url, host, jobboard }),
-        html: html({ url, host, jobboard })
+        html: "<html></html>",
+        dynamic_template_data: {
+            subject: `Sign in to ${jobboard.title}`,
+            jobboard: {
+                domain: jobboard.domain,
+                title: jobboard.title
+            },
+            signInUrl: url
+        },
+        template_id: 'd-acac1596586f4a53acc8a2045537f177'
     }
 
     try {
@@ -467,7 +486,7 @@ function html(params: { url: string, host: string, jobboard: JobBoardData }) {
     </html>`
 }
   
-  // Email Text body (fallback for email clients that don't render HTML)
-  function text({ url, host, jobboard }: { url: string; host: string, jobboard: JobBoardData }) {
-    return `Sign in to ${jobboard.title}\n${url}\n\n`
-  }  
+// Email Text body (fallback for email clients that don't render HTML)
+function text({ url, host, jobboard }: { url: string; host: string, jobboard: JobBoardData }) {
+return `Sign in to ${jobboard.title}\n${url}\n\n`
+}  

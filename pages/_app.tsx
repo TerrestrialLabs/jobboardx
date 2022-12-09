@@ -28,14 +28,6 @@ interface MyAppProps extends AppProps {
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi } = props;
 
-  // TO DO: TEMP - add jobboardId field
-  // useEffect(() => {
-  //   async function addJobboardIds () {
-  //     await axios.post(`${baseUrlApi}jobs/add-jobboard-id`, { jobboardId: jobboard._id })
-  //   }
-  //   addJobboardIds()
-  // }, [])
-
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -43,8 +35,7 @@ export default function MyApp(props: MyAppProps) {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
-        <SessionProvider session={pageProps.session}>
+        <SessionProvider session={(pageProps as { session: any }).session}>
           <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
             <Layout>
               <Component {...pageProps} />

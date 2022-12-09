@@ -49,8 +49,6 @@ const CreateBoardForm: NextPage = () => {
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
-    console.log('form: ', form)
-
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setForm({ ...form, [e.target.name]: e.target.value })

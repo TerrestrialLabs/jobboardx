@@ -11,7 +11,7 @@ async function run() {
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ jobboard })
                 }).then(res => {
-                    res.json().then(data => console.log('data: ', data))
+                    res.json()
                 }).catch(err => console.log("ERROR"))
             })
         })

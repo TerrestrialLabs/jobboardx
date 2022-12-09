@@ -10,6 +10,7 @@ import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { getCsrfToken, signIn } from 'next-auth/react'
 import { Close } from '@mui/icons-material'
+import CheckEmail from '../components/CheckEmail'
 
 // TO DO: Import from const
 const ERROR = {
@@ -40,7 +41,7 @@ interface Props {
 }
 
 const Login: NextPage<Props> = ({ csrfToken }) => {
-    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -167,14 +168,9 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
             const res = await axios.post(`${baseUrlApi}auth/signup`, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
-
-            console.log('res: ', res)
             
-            // res.status === 201 && router.push(`/jobs/${res.data._id}`)
-
             if (res.status === 201) {
-                // TO DO: Sign in employer - send verification email (give them a month?)
-                await signIn('email', { email: form.email })
+                await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
             }
         } catch (err) {
             if (axios.isAxiosError(err)) {
@@ -204,85 +200,88 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid p={mobile ? 2 : 12} container justifyContent='center'>
-                    {/* TO DO: Make or import reusable card component */}
-                    <Grid xs={12} sm={10} lg={8}>
-                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                            <Grid xs={12}>
-                                <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign Up</Typography></Box>
-                            </Grid>
+                {submitted && <CheckEmail signup />}
 
-                            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-
-                            {showErrorMessage && (
+                {!submitted && (
+                    <Grid p={mobile ? 2 : 12} container justifyContent='center'>
+                        <Grid xs={12} sm={10} lg={8}>
+                            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                 <Grid xs={12}>
-                                    <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
-                                </Grid>
-                            )}
-
-                            <Grid container spacing={2}>
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
-                                        <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
-                                        <FormHelperText error>{errors['email']}</FormHelperText>
-                                    </FormControl>
+                                    <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign Up</Typography></Box>
                                 </Grid>
 
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
-                                        <FilledInput error={!!errors['emailConfirmation']} disableUnderline={!errors['emailConfirmation']} onChange={handleInputChange} name='emailConfirmation' value={form.emailConfirmation} autoComplete='off' inputProps={{ label: 'Email Confirmation' }} required placeholder='you@example.com' fullWidth />
-                                        <FormHelperText error>{errors['emailConfirmation']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
+                                <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company</Typography>
-                                        <FilledInput error={!!errors['company']} disableUnderline={!errors['company']} onChange={handleInputChange} name='company' value={form.company} autoComplete='off' inputProps={{ label: 'Company' }} required placeholder='Company' fullWidth />
-                                        <FormHelperText error>{errors['company']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
+                                {showErrorMessage && (
+                                    <Grid xs={12}>
+                                        <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                    </Grid>
+                                )}
 
-                                <Grid xs={12} sm={6}>
-                                    <FormControl hiddenLabel fullWidth>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
-                                        <FilledInput error={!!errors['website']} disableUnderline={!errors['website']} onChange={handleInputChange} name='website' value={form.website} autoComplete='off' inputProps={{ label: 'Company Website' }} required placeholder='Company Website' fullWidth />
-                                        <FormHelperText error>{errors['website']}</FormHelperText>
-                                    </FormControl>
-                                </Grid>
+                                <Grid container spacing={2}>
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
+                                            <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
+                                            <FormHelperText error>{errors['email']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
 
-                                <Grid xs={12}>
-                                    <FormControl hiddenLabel fullWidth sx={{ position: 'relative' }}>
-                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Logo</Typography>
-                                        <FilledInput disableUnderline value={mobile ? '' : imageFileName} disabled sx={{ paddingLeft: 15, backgroundColor: 'rgba(0, 0, 0, 0.06) !important'}} />
-                                        <Button disableElevation variant="contained" component="label" style={{ position: 'absolute', marginTop: 38, left: '0.75rem' }}>
-                                            Choose file
-                                            <input onChange={handleFileInputChange} hidden accept="image/*" multiple type="file" />
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
+                                            <FilledInput error={!!errors['emailConfirmation']} disableUnderline={!errors['emailConfirmation']} onChange={handleInputChange} name='emailConfirmation' value={form.emailConfirmation} autoComplete='off' inputProps={{ label: 'Email Confirmation' }} required placeholder='you@example.com' fullWidth />
+                                            <FormHelperText error>{errors['emailConfirmation']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company</Typography>
+                                            <FilledInput error={!!errors['company']} disableUnderline={!errors['company']} onChange={handleInputChange} name='company' value={form.company} autoComplete='off' inputProps={{ label: 'Company' }} required placeholder='Company' fullWidth />
+                                            <FormHelperText error>{errors['company']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
+                                            <FilledInput error={!!errors['website']} disableUnderline={!errors['website']} onChange={handleInputChange} name='website' value={form.website} autoComplete='off' inputProps={{ label: 'Company Website' }} required placeholder='Company Website' fullWidth />
+                                            <FormHelperText error>{errors['website']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <FormControl hiddenLabel fullWidth sx={{ position: 'relative' }}>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Logo</Typography>
+                                            <FilledInput disableUnderline value={mobile ? '' : imageFileName} disabled sx={{ paddingLeft: 15, backgroundColor: 'rgba(0, 0, 0, 0.06) !important'}} />
+                                            <Button disableElevation variant="contained" component="label" style={{ position: 'absolute', marginTop: 38, left: '0.75rem' }}>
+                                                Choose file
+                                                <input onChange={handleFileInputChange} hidden accept="image/*" multiple type="file" />
+                                            </Button>
+                                            {imagePreviewSource && (
+                                                <Box display='flex' alignItems='center' sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', paddingBottom: mobile ? '8px' : '17px', height: '100px' }}>
+                                                    <img src={imagePreviewSource as string} alt='Logo preview' style={{ height: '100%' }} />
+                                                    <IconButton onClick={removeLogo} sx={{ marginLeft: 1 }}>
+                                                        <Close fontSize='small' />
+                                                    </IconButton>
+                                                </Box>
+                                            )}
+                                            {imagePreviewSource && mobile && <Typography sx={{ wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
+                                            {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Button fullWidth={mobile} disabled={loading} onClick={signUp} variant='contained' disableElevation color='primary' sx={{ width: mobile ? '100%' : '200px' }}>
+                                            {loading ? <CircularProgress color='secondary' size={22} /> : 'Create Account'}
                                         </Button>
-                                        {imagePreviewSource && (
-                                            <Box display='flex' alignItems='center' sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', paddingBottom: mobile ? '8px' : '17px', height: '100px' }}>
-                                                <img src={imagePreviewSource as string} alt='Logo preview' style={{ height: '100%' }} />
-                                                <IconButton onClick={removeLogo} sx={{ marginLeft: 1 }}>
-                                                    <Close fontSize='small' />
-                                                </IconButton>
-                                            </Box>
-                                        )}
-                                        {imagePreviewSource && mobile && <Typography sx={{ wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
-                                        {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
-                                    </FormControl>
+                                    </Grid>
                                 </Grid>
-
-                                <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                    <Button fullWidth={mobile} disabled={loading} onClick={signUp} variant='contained' disableElevation color='primary' sx={{ width: mobile ? '100%' : '200px' }}>
-                                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Create Account'}
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Box>
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
             </main>
         </div>
     )

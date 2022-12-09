@@ -9,10 +9,12 @@ import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { getCsrfToken, signIn } from 'next-auth/react'
+import CheckEmail from '../components/CheckEmail'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
-    EMAIL: 'Invalid email format'
+    EMAIL: 'Invalid email format',
+    INVALID: 'An account with this email address was not found'
 }
 
 const initErrors: { [key: string]: string } = {
@@ -28,7 +30,7 @@ interface Props {
 }
 
 const Login: NextPage<Props> = ({ csrfToken }) => {
-    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -101,9 +103,14 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         }
         setErrors({ email: '' })
         setLoading(true)
-        await signIn('email', { email: form.email })
+        try {
+            await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
+            setSubmitted(true)
+        } catch (err) {
+            // TO DO: Check for status & display message
+            setErrors({ ...errors, email: ERROR.INVALID })
+        }
         setLoading(false)
-        setSubmitted(true)
     }
 
     return (
@@ -115,38 +122,52 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid p={mobile ? 2 : 12} container justifyContent='center'>
-                    {/* TO DO: Make or import reusable card component */}
-                    <Grid xs={12} sm={4}>
-                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                            <Grid xs={12}>
-                                <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
-                            </Grid>
+                {submitted && <CheckEmail />}
 
-                            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-
-                            {showErrorMessage && (
+                {!submitted && (               
+                    <Grid p={mobile ? 2 : 12} container justifyContent='center'>
+                        <Grid xs={12} sm={4}>
+                            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                 <Grid xs={12}>
-                                    <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                    <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>{submitted ? 'Check your email' : 'Employer Sign In'}</Typography></Box>
                                 </Grid>
-                            )}
 
-                            <Grid xs={12}>
-                                <FormControl hiddenLabel fullWidth>
-                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
-                                    <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
-                                    <FormHelperText error>{errors['email']}</FormHelperText>
-                                </FormControl>
-                            </Grid>
+                                {submitted && (
+                                    <Box>
+                                        <Typography textAlign='center'>A sign in link has been sent to your email address.</Typography>
+                                    </Box>
+                                )}
 
-                            <Grid xs={12} sm={12} pt={2} display='flex' justifyContent='center'>
-                                <Button onClick={login} fullWidth={mobile} disabled={loading} variant='contained' disableElevation color='primary' sx={{ minWidth: '100%' }}>
-                                    {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
-                                </Button>
-                            </Grid>
-                        </Box>
+                                {!submitted && (
+                                    <>
+                                        <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
+                                        {showErrorMessage && (
+                                            <Grid xs={12}>
+                                                <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                            </Grid>
+                                        )}
+
+                                        <Grid xs={12}>
+                                            <FormControl hiddenLabel fullWidth>
+                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
+                                                <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
+                                                <FormHelperText error>{errors['email']}</FormHelperText>
+                                            </FormControl>
+                                        </Grid>
+
+                                        <Grid xs={12} sm={12} pt={2} display='flex' justifyContent='center'>
+                                            <Button onClick={login} fullWidth={mobile} disabled={loading} variant='contained' disableElevation color='primary' sx={{ minWidth: '100%' }}>
+                                                {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
+                                            </Button>
+                                        </Grid>
+                                    </>
+                                )}
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
+
             </main>
         </div>
     )
