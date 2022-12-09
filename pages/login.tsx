@@ -47,28 +47,6 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const submit = async () => {
-        const isValid = validate()
-        if (!isValid) {
-            return
-        }
-        setLoading(true)
-        setErrors(initErrors)
-        setSubmitted(false)
-        try {
-            const res = await axios.post(`${baseUrlApi}auth/signin`, form)
-            if (res.status === 201) {
-                setErrors(initErrors)
-                setSubmitted(true)
-                setForm(initState)
-            }
-        } catch (err) {
-            console.log(err)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     const validate = () => {
         let isValid = true
         const newErrors = Object.assign({}, initErrors)
@@ -101,7 +79,8 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         if (!isValid) {
             return
         }
-        setErrors({ email: '' })
+
+        setErrors(initErrors)
         setLoading(true)
         try {
             await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
