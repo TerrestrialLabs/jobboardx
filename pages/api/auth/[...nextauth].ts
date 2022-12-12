@@ -24,8 +24,6 @@ export default async function handler(
         process.env.NEXTAUTH_URL = 'https://www.reactdevjobs.io'
     }
 
-    // console.log('process.env.NEXTAUTH_URL: ', process.env.NEXTAUTH_URL)
-
     const local = req.headers.host?.includes('localhost')
     const domain = local ? 'www.reactdevjobs.io' : req.headers.host
     const jobboard = await JobBoard.findOne({ domain })
@@ -41,7 +39,7 @@ export default async function handler(
         }
     }
 
-    return NextAuth(req, res, {
+    return await NextAuth(req, res, {
         secret: process.env.NEXTAUTH_SECRET,
         session: {
             strategy: 'jwt',

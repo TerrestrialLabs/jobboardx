@@ -8,7 +8,7 @@ import Link from 'next/link'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { getCsrfToken, signIn } from 'next-auth/react'
+import { getCsrfToken, getProviders, signIn } from 'next-auth/react'
 import CheckEmail from '../components/CheckEmail'
 
 const ERROR = {
@@ -156,6 +156,7 @@ export default Login
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
     const csrfToken = await getCsrfToken(context)
+    const providers = await getProviders()
 
-    return { props: { csrfToken } }
+    return { props: { csrfToken, providers } }
 }
