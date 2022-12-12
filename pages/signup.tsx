@@ -219,7 +219,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                 )}
 
                                 <Grid container spacing={2}>
-                                    <Grid xs={12} sm={6}>
+                                    <Grid xs={12} md={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
                                             <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
@@ -227,7 +227,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                         </FormControl>
                                     </Grid>
 
-                                    <Grid xs={12} sm={6}>
+                                    <Grid xs={12} md={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
                                             <FilledInput error={!!errors['emailConfirmation']} disableUnderline={!errors['emailConfirmation']} onChange={handleInputChange} name='emailConfirmation' value={form.emailConfirmation} autoComplete='off' inputProps={{ label: 'Email Confirmation' }} required placeholder='you@example.com' fullWidth />
@@ -235,7 +235,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                         </FormControl>
                                     </Grid>
 
-                                    <Grid xs={12} sm={6}>
+                                    <Grid xs={12} md={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company</Typography>
                                             <FilledInput error={!!errors['company']} disableUnderline={!errors['company']} onChange={handleInputChange} name='company' value={form.company} autoComplete='off' inputProps={{ label: 'Company' }} required placeholder='Company' fullWidth />
@@ -243,7 +243,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                         </FormControl>
                                     </Grid>
 
-                                    <Grid xs={12} sm={6}>
+                                    <Grid xs={12} md={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
                                             <FilledInput error={!!errors['website']} disableUnderline={!errors['website']} onChange={handleInputChange} name='website' value={form.website} autoComplete='off' inputProps={{ label: 'Company Website' }} required placeholder='Company Website' fullWidth />

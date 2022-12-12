@@ -82,8 +82,6 @@ async function customSendVerificationRequest(params: CustomSendVerificationReque
     const { identifier, url, provider, jobboard } = params
     const { host } = new URL(url)
 
-console.log("SEND EMAIL FUNC")
-
     const message = {
         to: identifier,
         from: provider.from,
