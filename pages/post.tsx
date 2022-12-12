@@ -174,7 +174,7 @@ const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 const Post: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { status } = useSession()
+    const { data: session, status } = useSession()
 
     const router = useRouter()
 
@@ -218,6 +218,8 @@ type PostFormProps = {
 }
 export const PostForm = ({ edit }: PostFormProps) => {  
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
+    const { data: session } = useSession()
     
     const [job, setJob] = useState<JobData | null>(null)
     const [jobLoading, setJobLoading] = useState(edit)
@@ -420,54 +422,58 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const createOrUpdateJob = async () => {
-        const isValid = validate()
-        if (!isValid) {
-            return
-        }
-        setLoading(true)
-        try {
-            let paymentResult
-            if (!edit) {
-                paymentResult = await makePayment()
-                if (!paymentResult) {
-                    throw Error('Payment failed.')
+        if (session && session.user) {
+            const isValid = validate()
+            if (!isValid) {
+                return
+            }
+            setLoading(true)
+            try {
+                let paymentResult
+                if (!edit) {
+                    paymentResult = await makePayment()
+                    if (!paymentResult) {
+                        throw Error('Payment failed.')
+                    }
                 }
+    
+                const formData = logo ? logo : new FormData()
+    
+                const jobData = { 
+                    // @ts-ignore
+                    employerId: session.user.id,
+                    jobboardId: jobboard._id,
+                    ...(edit ? job : {}),
+                    ...(!edit ? { email: billingAddress.email.trim().toLowerCase() } : {}),
+                    ...jobDetails,
+                    remote: jobDetails.remote || jobDetails.location === 'Remote',
+                    title: jobDetails.title.trim(),
+                    backfilled: false,
+                    company: jobDetails.company.trim(),
+                    companyUrl: jobDetails.companyUrl.trim(),
+                    companyLogo: logoUrl ? logoUrl : '',
+                    description: serialize({ children: descriptionEditorValue }),
+                    applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
+                }
+    
+                formData.set('jobData', JSON.stringify(jobData))
+                formData.set('mode', edit ? 'update' : 'create')
+    
+                if (edit) {
+                    formData.set('updateToken', router.query.token as string)
+                } else {
+                    formData.set('stripePaymentIntentId', paymentResult?.paymentIntent.id as string)
+                }
+    
+                const res = await axios.post(`${baseUrlApi}jobs/create-or-update`, formData, { 
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+                
+                res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
+            } catch (err) {
+                console.log(err)
+                setLoading(false)
             }
-
-            const formData = logo ? logo : new FormData()
-
-            const jobData = { 
-                jobboardId: jobboard._id,
-                ...(edit ? job : {}),
-                ...(!edit ? { email: billingAddress.email.trim().toLowerCase() } : {}),
-                ...jobDetails,
-                remote: jobDetails.remote || jobDetails.location === 'Remote',
-                title: jobDetails.title.trim(),
-                backfilled: false,
-                company: jobDetails.company.trim(),
-                companyUrl: jobDetails.companyUrl.trim(),
-                companyLogo: logoUrl ? logoUrl : '',
-                description: serialize({ children: descriptionEditorValue }),
-                applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
-            }
-
-            formData.set('jobData', JSON.stringify(jobData))
-            formData.set('mode', edit ? 'update' : 'create')
-
-            if (edit) {
-                formData.set('updateToken', router.query.token as string)
-            } else {
-                formData.set('stripePaymentIntentId', paymentResult?.paymentIntent.id as string)
-            }
-
-            const res = await axios.post(`${baseUrlApi}jobs/create-or-update`, formData, { 
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-            
-            res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
-        } catch (err) {
-            console.log(err)
-            setLoading(false)
         }
     }
 
