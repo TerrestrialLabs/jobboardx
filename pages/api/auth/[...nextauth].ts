@@ -20,12 +20,13 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    if (req.headers.host) {
-        process.env.NEXTAUTH_URL = 'https://www.reactdevjobs.io'
-    }
-
     const local = req.headers.host?.includes('localhost')
     const domain = local ? 'www.reactdevjobs.io' : req.headers.host
+
+    if (req.headers.host) {
+        process.env.NEXTAUTH_URL = local ? 'http://localhost:3000' : `https://${domain}`
+    }
+
     const jobboard = await JobBoard.findOne({ domain })
 
     if (!jobboard) {
