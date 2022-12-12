@@ -204,13 +204,13 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
                                 <Grid item xs={12} sm={4}>
                                     <CompanyBox trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
 
-                                    <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
+                                    {/* <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column'>
                                         <Typography mb={2}>Is this your job?</Typography> 
                                         <Typography mb={2}>Click here to request a secure link to edit your posting.</Typography>
                                         <Button onClick={() => setRequestUpdateModalOpen(true)} fullWidth variant='contained' disableElevation color='secondary'>
                                             Request Update Link
                                         </Button>
-                                    </Box>
+                                    </Box> */}
                                 </Grid>
                             </Grid>
                         </Grid>

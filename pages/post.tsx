@@ -259,48 +259,32 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const loadJob = async () => {
         setJobLoading(true)
         try {
-            const tokenRes = await axios.get(`${baseUrlApi}job-update-requests/${router.query.token}`)
-            if (tokenRes) {
-                // TO DO: Util function
-                const hours = 24
-                const validDuration = hours * 60 * 60 * 1000
-                const currentDate = new Date()
-                const createdDate = new Date(tokenRes.data.createdAt)
-                const expirationDate = new Date(createdDate.getTime() + validDuration)
-                // TO DO: Expire after use
-                const expired = currentDate >= expirationDate
-                if (expired) {
-                    setJobError(true)
-                    throw Error('Expired edit link.')
-                } else {
-                    const jobRes = await axios.get(`${baseUrlApi}jobs/${tokenRes.data.jobId}`)
-                    if (jobRes) {
-                        const { data } = jobRes
-                        // TO DO: Set state
-                        const updatedJobDetails = {
-                            ...initJobDetails,
-                            title: data.title,
-                            company: data.company,
-                            companyUrl: data.companyUrl,
-                            type: data.type,
-                            location: data.location,
-                            remote: data.remote,
-                            applicationLink: data.applicationLink,
-                            skills: data.skills,
-                            perks: data.perks,
-                            featured: data.featured,
-                            salaryMin: data.salaryMin,
-                            salaryMax: data.salaryMax
-                        }
-                        setJob(data)
-                        setJobDetails(updatedJobDetails)
-                        const descriptionDocument = new DOMParser().parseFromString(`<body>${data.description}</body>`, 'text/html')
-                        const descriptionSlateNodes = deserialize(descriptionDocument.body)
-                        setEditorValueFromExistingJob(descriptionSlateNodes)
-                        setLogoUrl(data.companyLogo)
-                        handleLocationTextChange(data.location)
-                    }
+            const jobRes = await axios.get(`${baseUrlApi}jobs/${router.query.id}`)
+            if (jobRes) {
+                const { data } = jobRes
+                // TO DO: Set state
+                const updatedJobDetails = {
+                    ...initJobDetails,
+                    title: data.title,
+                    company: data.company,
+                    companyUrl: data.companyUrl,
+                    type: data.type,
+                    location: data.location,
+                    remote: data.remote,
+                    applicationLink: data.applicationLink,
+                    skills: data.skills,
+                    perks: data.perks,
+                    featured: data.featured,
+                    salaryMin: data.salaryMin,
+                    salaryMax: data.salaryMax
                 }
+                setJob(data)
+                setJobDetails(updatedJobDetails)
+                const descriptionDocument = new DOMParser().parseFromString(`<body>${data.description}</body>`, 'text/html')
+                const descriptionSlateNodes = deserialize(descriptionDocument.body)
+                setEditorValueFromExistingJob(descriptionSlateNodes)
+                setLogoUrl(data.companyLogo)
+                handleLocationTextChange(data.location)
             }
         } catch (err) {
             setJobError(true)
@@ -310,10 +294,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     useEffect(() => {
-        if (edit && router.query.token) {
+        if (edit && router.query.id) {
             loadJob()
         }
-    }, [router.query])
+    }, [router.query.id])
 
     const setDescriptionValue = (value: { type: string, children: { text: string; }[] }[]) => {
         // Hack to fix bug of remaining node being ul or nl when deleting all text
