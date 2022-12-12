@@ -47,6 +47,7 @@ export default async function handler(
 
             // await SubscriptionEmail.create({})
 
+            // TO DO: Include all featured listings in email?
             const fetchLimit = 13
             const jobs = await Job.find({ jobboardId: jobboard._id, datePosted: { $gte: lastEmailDate } })
                 .select('-email')

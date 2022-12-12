@@ -10,7 +10,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
-const THIRTY_DAYS = 30 * 24 * 60 * 60
+const NINETY_DAYS = 90 * 24 * 60 * 60
 const THIRTY_MINUTES = 30 * 60
 
 const client = new MongoClient(process.env.MONGODB_URL as string);
@@ -44,7 +44,7 @@ export default async function handler(
         secret: process.env.NEXTAUTH_SECRET,
         session: {
             strategy: 'jwt',
-            maxAge: THIRTY_DAYS,
+            maxAge: NINETY_DAYS,
             updateAge: THIRTY_MINUTES
         },
         adapter: MongoDBAdapter(clientPromise),

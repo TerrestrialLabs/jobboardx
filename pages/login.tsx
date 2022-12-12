@@ -141,6 +141,11 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                                     {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
                                                 </Button>
                                             </Grid>
+
+                                            <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                                <Typography variant='caption' mr={0.5}>Not registered?</Typography>
+                                                <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
+                                            </Grid>
                                         </>
                                     )}
                                 </Grid>

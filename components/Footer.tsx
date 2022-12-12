@@ -6,9 +6,12 @@ import { useWindowSize } from '../hooks/hooks'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import { useSession } from 'next-auth/react'
 
 const Footer = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
+    const { data: session } = useSession()
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
@@ -32,7 +35,7 @@ const Footer = () => {
                     </Grid>
                     <Grid item xs={12} sm={4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
                         <Typography fontWeight='bold' mb={1}>Employers</Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/post'>Post a job</Link></Typography>
+                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href={session?.user ? '/post' : '/login'}>Post a job</Link></Typography>
                         <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/login'>Sign in</Link></Typography>
                         <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/signup'>Sign up</Link></Typography>
                     </Grid>

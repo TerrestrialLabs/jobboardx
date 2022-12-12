@@ -38,6 +38,14 @@ const Header = () => {
 
     const unsubscribePage = router.pathname === '/unsubscribe/[id]'
 
+    let buttonLink = '/post'
+    if (!session?.user) {
+        buttonLink = '/login'
+    }
+    if (postFormPage) {
+        buttonLink = '/'
+    }
+
     if (unsubscribePage) {
         return null
     }
@@ -69,8 +77,7 @@ const Header = () => {
                         <Grid xs={5} sm={8}>
                             <Link href='/'>
                                 <Typography noWrap textOverflow='ellipsis' color='#fff' variant='h1' fontSize={mobile ? 20 : 28} lineHeight={'42px'} fontWeight='bold' sx={{ cursor: 'pointer', textDecoration: 'none' }}>
-                                    {/* {jobboard.title} */}
-                                    This is a really long job board title
+                                    {jobboard.title}
                                 </Typography>
                             </Link>
                         </Grid>
@@ -96,7 +103,7 @@ const Header = () => {
 
                             {menu}
 
-                            <Button sx={{ flexShrink: 0 }} href={postFormPage ? '/' : '/post'} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>
+                            <Button sx={{ flexShrink: 0 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>
                         </Box>
                     
                 </Grid>

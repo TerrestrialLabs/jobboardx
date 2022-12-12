@@ -21,6 +21,7 @@ import { useEditor } from '../hooks/editor'
 import type { Node } from 'slate'
 import dynamic from 'next/dynamic'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import { useSession } from 'next-auth/react'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -171,7 +172,33 @@ const unselectedPostTypeStyle = {
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 
 const Post: NextPage = () => {
-    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
+    const { status } = useSession()
+
+    const router = useRouter()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/')
+        }
+    }, [status])
+
+    if (status === 'loading') {
+        return (
+            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+                <CircularProgress color='secondary' size={22} />
+            </Box>
+        )
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+                <Typography>Access Denied</Typography>
+            </Box>
+        )
+    }
 
     return (
         <Elements stripe={stripe}>
@@ -621,7 +648,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             <Typography fontWeight='bold' mb={1}>FEATURED</Typography>
                                             <Typography fontWeight='bold' mb={2} color='grey'>$99</Typography>
                                             <Typography>
-                                                One featured listing. Featured listings are highlighted in bright yellow and receive more attention for 30 days.
+                                                One featured listing for 30 days. Featured listings are highlighted and receive more attention.
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -632,7 +659,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             <Typography fontWeight='bold' mb={1}>REGULAR</Typography>
                                             <Typography fontWeight='bold' mb={2} color='grey'>$49</Typography>
                                             <Typography>
-                                                One regular listing. Jobs are posted immediately and last 30 days.
+                                                One regular listing for 30 days. Jobs are posted immediately.
                                             </Typography>
                                         </Box>
                                     </Grid>

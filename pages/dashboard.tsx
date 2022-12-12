@@ -13,8 +13,6 @@ import { useRouter } from 'next/router'
 const Contact: NextPage = () => {
     const { data: session, status } = useSession()
 
-    console.log('session: ', session)
-
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const router = useRouter()
