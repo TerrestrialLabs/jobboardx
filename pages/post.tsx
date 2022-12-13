@@ -30,8 +30,6 @@ const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
 
 export type PostForm = {
     title: string
-    company: string
-    companyUrl: string
     type: string
     location: string
     remote: boolean
@@ -77,8 +75,6 @@ const initEditorValue = [
 
 const initJobDetails = {
     title: '',
-    company: '',
-    companyUrl: '',
     type: TYPE.FULLTIME,
     location: '',
     remote: false,
@@ -92,8 +88,6 @@ const initJobDetails = {
 }
 // const initJobDetails = {
 //     title: 'Test Stripe',
-//     company: 'Test Stripe Co',
-//     companyUrl: 'https://www.example.com',
 //     type: TYPE.FULLTIME,
 //     location: '',
 //     remote: false,
@@ -259,8 +253,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 const updatedJobDetails = {
                     ...initJobDetails,
                     title: data.title,
-                    company: data.company,
-                    companyUrl: data.companyUrl,
                     type: data.type,
                     location: data.location,
                     remote: data.remote,
@@ -310,9 +302,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
         // JOB DETAILS VALIDATION
 
-        if (!isValidHttpUrl(jobDetails.companyUrl.trim())) {
-            newJobDetailsErrors['companyUrl'] = ERROR.WEBSITE_LINK
-        }
         if (!isValidHttpUrl(jobDetails.applicationLink.trim()) && !isValidEmail(jobDetails.applicationLink.trim())) {
             newJobDetailsErrors['applicationLink'] = ERROR.APPLICATION_LINK
         }
@@ -728,7 +717,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             multiple
                                             disableClearable
                                             disablePortal
-                                            renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
+                                            renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own and press Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={jobboard.skills}
                                             onChange={(e, value) => handleSkillsChange(value || '')}
                                             value={jobDetails.skills}
@@ -743,7 +732,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             multiple
                                             disableClearable
                                             disablePortal
-                                            renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select an option or add your own', style: { padding: '9px 12px 10px' }}} />}
+                                            renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select an option or type your own and press Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={PERKS}
                                             onChange={(e, value) => handlePerksChange(value || '')}
                                             value={jobDetails.perks}
