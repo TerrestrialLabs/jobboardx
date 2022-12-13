@@ -43,7 +43,7 @@ export default async function handler(
     dbConnect()
 
     if (method === 'GET') {
-        const job = await Job.findById(id).select('-email').select('-orderId')
+        const job = await Job.findById(id).select('-orderId')
         // TO DO
         // @ts-ignore
         res.status(200).json(job)

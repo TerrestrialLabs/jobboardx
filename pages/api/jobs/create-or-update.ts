@@ -3,7 +3,6 @@ import cloudinary from 'cloudinary'
 import nextConnect from 'next-connect'
 import multer from 'multer'
 import Job from '../../../models/Job'
-import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import { JobData } from '.'
@@ -11,6 +10,7 @@ import { PRICE, TYPE_MAP } from '../../../const/const'
 import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
+import { getSession } from 'next-auth/react'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -41,7 +41,6 @@ createOrUpdateJob.post(async (req, res) => {
     const jobData = JSON.parse(req.body['jobData'])
     const stripePaymentIntentId = req.body['stripePaymentIntentId']
     const mode = req.body['mode']
-    const updateToken = req.body['updateToken']
 
     let dataURI
     // @ts-ignore
@@ -53,6 +52,13 @@ createOrUpdateJob.post(async (req, res) => {
     }
 
     try {
+        const session = await getSession({ req })
+
+        // @ts-ignore
+        if (!session || !session.user || session.user.id !== jobData.employerId) {
+            throw Error('Not authenticated')
+        }
+
         let orderId
         if (mode === 'create') {
             const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
@@ -66,25 +72,7 @@ createOrUpdateJob.post(async (req, res) => {
             orderId = paymentIntent.metadata.orderId
         }
 
-        // 1. Check for valid update token 
-        if (mode === 'update') {
-            const tokenRes = await JobUpdateRequest.findById(updateToken)
-            if (!tokenRes || tokenRes.jobId !== jobData._id) {
-                throw Error('Invalid or expired update token.')
-            }
-            const hours = 24
-            const validDuration = hours * 60 * 60 * 1000
-            const currentDate = new Date()
-            const createdDate = new Date(tokenRes.createdAt)
-            const expirationDate = new Date(createdDate.getTime() + validDuration)
-            // TO DO: Expire after use
-            const expired = currentDate >= expirationDate
-            if (expired) {
-                throw Error('Invalid or expired update token.')
-            }    
-        }
-
-        // 2. Upload logo image
+        // 1. Upload logo image
         let cloudinaryRes, 
             cloudinaryUrl = jobData.companyLogo
         // New logo image has been attached to req
@@ -100,7 +88,7 @@ createOrUpdateJob.post(async (req, res) => {
         }
         jobData.companyLogo = cloudinaryUrl
 
-        // 3. Create or update job
+        // 2. Create or update job
         if (mode === 'create') {
             const job = await Job.create({
                 ...jobData,
@@ -109,14 +97,14 @@ createOrUpdateJob.post(async (req, res) => {
             })
             delete job.orderId
 
-            await sendConfirmationEmail({ host: req.headers.host, job, mode })
+            await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
             res.status(201).json(job)
         } else if (mode === 'update') {
             const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
                 .select('-orderId')
 
-            await sendConfirmationEmail({ host: req.headers.host, job, mode })
+            await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
             res.status(200).json(job)
         }
@@ -137,10 +125,11 @@ export default createOrUpdateJob
 
 type SendConfirmationEmailParams = {
     host: string | undefined
-    job: JobData & { email: string }, 
+    job: JobData & { email: string },
     mode: string
+    email: string
 }
-export const sendConfirmationEmail = async ({ host, job, mode }: SendConfirmationEmailParams) => {
+export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConfirmationEmailParams) => {
     try {
         const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
         const jobboard = await JobBoard.findOne({ domain })
@@ -148,7 +137,7 @@ export const sendConfirmationEmail = async ({ host, job, mode }: SendConfirmatio
         const startDate = job.datePosted
         const endDate = add(startDate, { days: 30 })
         const message = {
-            to: job.email,
+            to: email,
             from: `${jobboard.title} <${jobboard.email}>`,
             html: "<html></html>",
             dynamic_template_data: {

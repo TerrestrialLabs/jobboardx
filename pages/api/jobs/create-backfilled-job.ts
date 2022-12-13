@@ -63,7 +63,6 @@ export default async function handler(
             })
 
             // For some reason we get an error even though we're doing this after creating job
-            // delete job.email
             // delete job.orderId
 
             res.status(201).json(job)

@@ -21,7 +21,6 @@ const JobSchema = new mongoose.Schema({
     description: { type: String, required: true },
     salaryMin: { type: Number, required: true, default: 0 },
     salaryMax: { type: Number, required: true, default: 0 },
-    email: { type: String, required: true },
     orderId: { type: String, required: true, unique: true }
 }, { timestamps: true })
 

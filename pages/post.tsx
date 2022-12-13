@@ -55,8 +55,7 @@ const ERROR = {
     SALARY_NEGATIVE: 'Salary cannot be negative',
     WEBSITE_LINK: 'Invalid link format [https://www.example.com]',
     APPLICATION_LINK: 'Invalid link format [https://www.example.com or email@example.com]',
-    EMAIL: 'Invalid email format',
-    EMAIL_CONFIRMATION: 'Email confirmation does not match email'
+    EMAIL: 'Invalid email format'
 }
 
 const SUPPORTED_CARDS = [
@@ -109,8 +108,6 @@ const initJobDetails = {
 const initBillingAddress = {
     firstName: '',
     lastName: '',
-    email: '',
-    emailConfirmation: '',
     addressLine1: '',
     addressLine2: '',
     city: '',
@@ -121,8 +118,6 @@ const initBillingAddress = {
 // const initBillingAddress = {
 //     firstName: 'Gregory',
 //     lastName: 'A',
-//     email: 'contact@goterrestrial.io',
-//     emailConfirmation: 'contact@goterrestrial.io',
 //     addressLine1: '12 Sherwood Crescent',
 //     addressLine2: null,
 //     city: 'Dix Hills',
@@ -146,8 +141,6 @@ const initJobDetailsErrors: { [key: string]: string | null } = {
 const initBillingAddressErrors: { [key: string]: string | null } = {
     firstName: null,
     lastName: null,
-    email: null,
-    emailConfirmation: null,
     addressLine1: null,
     addressLine2: null,
     city: null,
@@ -371,16 +364,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         // BILLING ADDRESS VALIDATION
 
         if (!edit) {
-            if (billingAddress.email.trim().toLowerCase() !== billingAddress.emailConfirmation.trim().toLowerCase()) {
-                newBillingAddressErrors['emailConfirmation'] = ERROR.EMAIL_CONFIRMATION
-                isBillingAddressValid = false
-            }
-    
-            if (!isValidEmail(billingAddress.email)) {
-                newBillingAddressErrors['email'] = ERROR.EMAIL
-                isBillingAddressValid = false
-            }
-    
             for (const field in billingAddress) {
                 // TO DO: Arr of optional fields to ignore
                 // @ts-ignore
@@ -444,7 +427,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     employerId: session.user.id,
                     jobboardId: jobboard._id,
                     ...(edit ? job : {}),
-                    ...(!edit ? { email: billingAddress.email.trim().toLowerCase() } : {}),
                     ...jobDetails,
                     remote: jobDetails.remote || jobDetails.location === 'Remote',
                     title: jobDetails.title.trim(),
@@ -459,9 +441,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 formData.set('jobData', JSON.stringify(jobData))
                 formData.set('mode', edit ? 'update' : 'create')
     
-                if (edit) {
-                    formData.set('updateToken', router.query.token as string)
-                } else {
+                if (!edit) {
                     formData.set('stripePaymentIntentId', paymentResult?.paymentIntent.id as string)
                 }
     
@@ -553,11 +533,13 @@ export const PostForm = ({ edit }: PostFormProps) => {
     }
 
     const makePayment = async () => {
-        if (stripe && elements && !edit) {
+        if (stripe && elements && !edit && session?.user) {
+            const { email } = session.user
+
             const paymentIntentParams = {
                 amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
                 currency: 'USD',
-                receipt_email: billingAddress.email
+                receipt_email: email
             }
 
             // TO DO: Clean up payment intent if transaction fails
@@ -576,7 +558,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                             postal_code: billingAddress.postalCode,
                             state: billingAddress.state
                         },
-                        email: billingAddress.email,
+                        email,
                         name: `${billingAddress.firstName} ${billingAddress.lastName}`
                    }
                 }
@@ -874,22 +856,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                                 <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Last Name</Typography>
                                                 <FilledInput error={!!billingAddressErrors['lastName']} disableUnderline={!billingAddressErrors['lastName']} onChange={handleBillingAddressChange} name='lastName' value={billingAddress.lastName} autoComplete='off' placeholder='Last Name' fullWidth />
                                                 <FormHelperText error>{billingAddressErrors['lastName']}</FormHelperText>
-                                            </FormControl>
-                                        </Grid>
-
-                                        <Grid xs={12} sm={6}>
-                                            <FormControl hiddenLabel fullWidth>
-                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email Address</Typography>
-                                                <FilledInput error={!!billingAddressErrors['email']} disableUnderline={!billingAddressErrors['email']} onChange={handleBillingAddressChange} name='email' value={billingAddress.email} autoComplete='off' placeholder='Email Address' fullWidth />
-                                                <FormHelperText error>{billingAddressErrors['email']}</FormHelperText>
-                                            </FormControl>
-                                        </Grid>
-
-                                        <Grid xs={12} sm={6}>
-                                            <FormControl hiddenLabel fullWidth>
-                                                <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Confirm Email Address</Typography>
-                                                <FilledInput error={!!billingAddressErrors['emailConfirmation']} disableUnderline={!billingAddressErrors['emailConfirmation']} onChange={handleBillingAddressChange} name='emailConfirmation' value={billingAddress.emailConfirmation} autoComplete='off' placeholder='Email Address' fullWidth />
-                                                <FormHelperText error>{billingAddressErrors['emailConfirmation']}</FormHelperText>
                                             </FormControl>
                                         </Grid>
 

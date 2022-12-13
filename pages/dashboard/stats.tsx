@@ -54,7 +54,7 @@ const Stats: NextPage = () => {
             <Dashboard>
                 <>
                     <Grid xs={12} pb={4}>
-                        <Box sx={{ backgroundColor: '#fff'}} p={4}>
+                        <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
                             <Grid xs={12}>
                                 <Box>
                                     <Typography fontWeight='bold'>This month</Typography>

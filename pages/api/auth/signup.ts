@@ -2,11 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import cloudinary from 'cloudinary'
 import nextConnect from 'next-connect'
 import multer from 'multer'
-import Job from '../../../models/Job'
-import JobUpdateRequest from '../../../models/JobUpdateRequest'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
-import User, { UserType } from '../../../models/User'
+import User from '../../../models/User'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,

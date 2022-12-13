@@ -10,38 +10,25 @@ import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardCon
 import { useSession } from "next-auth/react"
 import { useRouter } from 'next/router'
 import Dashboard from '../../components/dashboard'
+import { JobData } from '../api/jobs'
+import axios from 'axios'
 
 const Jobs: NextPage = () => {
-    const { data: session, status } = useSession()
-
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const router = useRouter()
+    const [jobs, setJobs] = useState<JobData[]>([])
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
+    const fetchJobs = async () => {
+        const res = await axios.get(`${baseUrlApi}jobs/employer-jobs`)
+        setJobs(res.data)
+    }
+
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push('/')
-        }
-    }, [status])
-
-    if (status === 'loading') {
-        return (
-            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
-                <CircularProgress color='secondary' size={22} />
-            </Box>
-        )
-    }
-
-    if (status === 'unauthenticated') {
-        return (
-            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
-                <Typography>Access Denied</Typography>
-            </Box>
-        )
-    }
+        fetchJobs()
+    }, [])
 
     return (
         <div className={styles.container}>
@@ -53,10 +40,16 @@ const Jobs: NextPage = () => {
 
             <Dashboard>
                 <Grid xs={12} pb={4}>
-                    <Box sx={{ backgroundColor: '#fff'}} p={4}>
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
                         <Grid xs={12}>
                             <Box>
                                 <Typography fontWeight='bold'>Jobs</Typography>
+                            </Box>
+
+                            <Box>
+                                {jobs.map(job => (
+                                    <Box>{job.title}</Box>
+                                ))}
                             </Box>
                         </Grid>
                     </Box>

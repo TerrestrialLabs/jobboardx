@@ -1,6 +1,5 @@
 import { Box, CircularProgress, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
-import Head from 'next/head'
 import React, { useEffect } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
