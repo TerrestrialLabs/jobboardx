@@ -11,6 +11,7 @@ import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
 import { getSession } from 'next-auth/react'
+import User, { UserType } from '../../../models/User'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -58,7 +59,10 @@ createOrUpdateJob.post(async (req, res) => {
         if (!session || !session.user || session.user.id !== jobData.employerId) {
             throw Error('Not authenticated')
         }
+        
+        const employer = await User.findOne({ email: session.user.email }) as UserType
 
+        // 1. Check for payment (create job)
         let orderId
         if (mode === 'create') {
             const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
@@ -72,7 +76,7 @@ createOrUpdateJob.post(async (req, res) => {
             orderId = paymentIntent.metadata.orderId
         }
 
-        // 1. Upload logo image
+        // 2. Upload logo image
         let cloudinaryRes, 
             cloudinaryUrl = jobData.companyLogo
         // New logo image has been attached to req
@@ -88,10 +92,13 @@ createOrUpdateJob.post(async (req, res) => {
         }
         jobData.companyLogo = cloudinaryUrl
 
-        // 2. Create or update job
+        // 3. Create or update job
         if (mode === 'create') {
             const job = await Job.create({
                 ...jobData,
+                company: employer.company,
+                companyUrl: employer.website,
+                companyLogo: employer.logo,
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date(),
                 orderId
             })
@@ -101,8 +108,16 @@ createOrUpdateJob.post(async (req, res) => {
 
             res.status(201).json(job)
         } else if (mode === 'update') {
-            const job = await Job.findOneAndUpdate({ _id: jobData._id }, jobData, { new: true })
-                .select('-orderId')
+            const job = await Job.findOneAndUpdate(
+                { _id: jobData._id }, 
+                {
+                    ...jobData,
+                    company: employer.company,
+                    companyUrl: employer.website,
+                    companyLogo: employer.logo 
+                }, 
+                { new: true }
+            ).select('-orderId')
 
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 

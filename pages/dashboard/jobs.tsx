@@ -4,11 +4,8 @@ import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
-import Link from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
-import { useSession } from "next-auth/react"
-import { useRouter } from 'next/router'
 import Dashboard from '../../components/dashboard'
 import { JobData } from '../api/jobs'
 import axios from 'axios'
@@ -38,7 +35,7 @@ const Jobs: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <Dashboard>
+            <Dashboard content={(
                 <Grid xs={12} pb={4}>
                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
                         <Grid xs={12}>
@@ -54,7 +51,7 @@ const Jobs: NextPage = () => {
                         </Grid>
                     </Box>
                 </Grid>
-            </Dashboard>
+            )} />
 
         </div>
     )

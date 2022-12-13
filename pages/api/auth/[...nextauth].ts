@@ -65,10 +65,16 @@ export default async function handler(
             })
         ],
         callbacks: {
+            async jwt({ token, user }) {
+                if (user) {
+                    token.user = user
+                }
+                return Promise.resolve(token);
+            },
             session: async ({ session, token }) => {
                 if (session?.user) {
                     // @ts-ignore
-                    session.user.id = token.sub
+                    session.user = token.user
                 }
                 return session
             }

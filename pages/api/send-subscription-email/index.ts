@@ -50,7 +50,6 @@ export default async function handler(
             // TO DO: Include all featured listings in email?
             const fetchLimit = 13
             const jobs = await Job.find({ jobboardId: jobboard._id, datePosted: { $gte: lastEmailDate } })
-                .select('-email')
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1 })
                 .limit(fetchLimit)
 

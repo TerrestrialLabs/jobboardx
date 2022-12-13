@@ -4,44 +4,15 @@ import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
-import Link from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
-import { useSession } from "next-auth/react"
-import { useRouter } from 'next/router'
 import Dashboard from '../../components/dashboard'
 
 const BillingDetails: NextPage = () => {
-    const { data: session, status } = useSession()
-
-    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
-
-    const router = useRouter()
+    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push('/')
-        }
-    }, [status])
-
-    if (status === 'loading') {
-        return (
-            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
-                <CircularProgress color='secondary' size={22} />
-            </Box>
-        )
-    }
-
-    if (status === 'unauthenticated') {
-        return (
-            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
-                <Typography>Access Denied</Typography>
-            </Box>
-        )
-    }
 
     return (
         <div className={styles.container}>
@@ -51,7 +22,7 @@ const BillingDetails: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <Dashboard>
+            <Dashboard content={(
                 <Grid xs={12} pb={4}>
                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
                         <Grid xs={12}>
@@ -61,7 +32,7 @@ const BillingDetails: NextPage = () => {
                         </Grid>
                     </Box>
                 </Grid>
-            </Dashboard>
+            )} />
 
         </div>
     )

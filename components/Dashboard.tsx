@@ -4,10 +4,10 @@ import React, { useEffect } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
-import { useSession } from "next-auth/react"
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 
-const Dashboard = ({ children }: { children: JSX.Element }) => {
+const Dashboard = ({ content }: { content: JSX.Element }) => {
     const { status } = useSession()
 
     const router = useRouter()
@@ -58,13 +58,13 @@ const Dashboard = ({ children }: { children: JSX.Element }) => {
                                         </Typography>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('company-profile') ? '#000000DE' : 'grey'}>
-                                            <Link href='/dashboard/company-profile'>Company Profile</Link>
+                                        <Typography fontWeight='bold' color={router.pathname.endsWith('jobs') ? '#000000DE' : 'grey'}>
+                                            <Link href='/dashboard/jobs'>Jobs</Link>
                                         </Typography>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('jobs') ? '#000000DE' : 'grey'}>
-                                            <Link href='/dashboard/jobs'>Jobs</Link>
+                                        <Typography fontWeight='bold' color={router.pathname.endsWith('company-profile') ? '#000000DE' : 'grey'}>
+                                            <Link href='/dashboard/company-profile'>Company Profile</Link>
                                         </Typography>
                                     </Box>
                                     <Box pb={2}>
@@ -81,7 +81,7 @@ const Dashboard = ({ children }: { children: JSX.Element }) => {
                             </Grid>
 
                             <Grid container xs={9}>
-                                {children}
+                                {content}
                             </Grid>
                         </Grid>
 

@@ -16,7 +16,7 @@ export default async function handler(
     const { method } = req
 
     dbConnect()
-    
+
     if (method === 'POST') {
         try {
             const ipAddress = req.headers['x-forwarded-for']  || req.socket.remoteAddress
@@ -24,7 +24,7 @@ export default async function handler(
             await UserEvent.create({
                 jobboardId: req.body.jobboardId,
                 jobId: req.body.jobId,
-                event: 'job-view',
+                type: 'job-view',
                 ipAddress
             })
 

@@ -62,8 +62,8 @@ const Home: NextPage = () => {
   //   testingDeleteBackfilledJobs()
   // }, [])
 
-  const trackJobApplyClick = (jobId: string) => {
-    axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobId })
+  const trackJobApplyClick = ({ jobId, subtype }: { jobId: string, subtype: string }) => {
+    axios.post(`${baseUrlApi}analytics/job-apply-clicks`, { jobId, subtype })
   }
 
   // When filters panel open on mobile don't allow scroll
@@ -367,7 +367,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 type ListItemProps = JobData & {
   first: boolean
   last: boolean
-  trackJobApplyClick: (value: string) => void
+  trackJobApplyClick: ({ jobId, subtype }: { jobId: string, subtype: string }) => void
 }
 const ListItem = ({
   _id,
@@ -458,7 +458,7 @@ const ListItem = ({
           </Grid>
           <Grid>
             <Box mt={2}>
-              <Button variant='outlined' onClick={() => trackJobApplyClick(_id)} href={applicationLink}>Apply</Button>
+              <Button variant='outlined' onClick={() => trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} href={applicationLink}>Apply</Button>
             </Box>
           </Grid>
         </Grid>
@@ -572,7 +572,7 @@ const ListItemMobile = ({
       </Box>
 
       <Box mt={2} display='flex' justifyContent='space-between' alignItems='center'>
-        <Button onClick={() => trackJobApplyClick(_id)} sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
+        <Button onClick={() => trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
         <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
       </Box>
     </Box>

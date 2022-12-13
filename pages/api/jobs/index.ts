@@ -93,7 +93,7 @@ export default async function handler(
         const filters = getFilters(req.query)
 
         try {
-            const jobs = await Job.find(filters).select('-email').select('-orderId')
+            const jobs = await Job.find(filters).select('-orderId')
                 // TO DO: Remove createdAt
                 .sort({ 'backfilled': 1, 'datePosted': -1, 'createdAt': -1 })
                 .skip(pageIndex * resultsPerPage)

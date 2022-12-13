@@ -24,7 +24,8 @@ export default async function handler(
             await UserEvent.create({
                 jobboardId: req.body.jobboardId,
                 jobId: req.body.jobId,
-                event: 'job-apply-click',
+                type: 'job-apply-click',
+                subtype: req.body.subtype,
                 ipAddress
             })
             

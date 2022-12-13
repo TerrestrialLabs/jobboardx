@@ -37,11 +37,11 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     const location = getLocationString()
 
     const trackJobView = () => {
-        axios.post(`${baseUrlApi}analytics/job-view`, { jobboardId: jobboard._id, jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-views`, { jobboardId: jobboard._id, jobId: router.query.id })
     }
 
     const trackJobApplyClick = () => {
-        axios.post(`${baseUrlApi}analytics/job-apply-click`, { jobboardId: jobboard._id, jobId: router.query.id })
+        axios.post(`${baseUrlApi}analytics/job-apply-clicks`, { jobboardId: jobboard._id, jobId: router.query.id, subtype: data.applicationLink.startsWith('http') ? 'url' : 'email' })
     }
 
     useEffect(() => {

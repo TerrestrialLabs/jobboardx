@@ -118,18 +118,16 @@ const initBillingAddress = {
 // const initBillingAddress = {
 //     firstName: 'Gregory',
 //     lastName: 'A',
-//     addressLine1: '12 Sherwood Crescent',
+//     addressLine1: '12 Fake Way',
 //     addressLine2: null,
-//     city: 'Dix Hills',
+//     city: 'Fakeville',
 //     state: 'NY',
-//     postalCode: '11746',
+//     postalCode: '11215',
 //     country: 'US'
 // }
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
-    company: null,
-    companyUrl: null,
     description: null,
     location: null,
     applicationLink: null,
@@ -431,9 +429,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     remote: jobDetails.remote || jobDetails.location === 'Remote',
                     title: jobDetails.title.trim(),
                     backfilled: false,
-                    company: jobDetails.company.trim(),
-                    companyUrl: jobDetails.companyUrl.trim(),
-                    companyLogo: logoUrl ? logoUrl : '',
                     description: serialize({ children: descriptionEditorValue }),
                     applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
                 }
@@ -690,50 +685,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Salary Max. <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                             <FilledInput error={!!jobDetailsErrors['salaryMax']} disableUnderline={!jobDetailsErrors['salaryMax']}  type='number' fullWidth onChange={handleInputChange} name='salaryMax' value={jobDetails.salaryMax} autoComplete='off' required placeholder='Max' inputProps={{ min: "0", max: "10000000", step: "100" }} />
                                             <FormHelperText error>{jobDetailsErrors['salaryMax']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
-                                    <Grid xs={12} sm={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Name</Typography>
-                                            <FilledInput error={!!jobDetailsErrors['company']} disableUnderline={!jobDetailsErrors['company']}  onChange={handleInputChange} name='company' value={jobDetails.company} autoComplete='off' placeholder='Company Name' fullWidth sx={{ verticalAlign: 'center' }} />
-                                            <FormHelperText error>{jobDetailsErrors['company']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid xs={12} sm={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Website</Typography>
-                                            <FilledInput error={!!jobDetailsErrors['companyUrl']} disableUnderline={!jobDetailsErrors['companyUrl']}  onChange={handleInputChange} name='companyUrl' value={jobDetails.companyUrl} autoComplete='off' placeholder='https://' fullWidth />
-                                            <FormHelperText error>{jobDetailsErrors['companyUrl']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
-                                    <Grid xs={12}>
-                                        <FormControl hiddenLabel fullWidth sx={{ position: 'relative' }}>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Company Logo</Typography>
-                                            <FilledInput disableUnderline value={mobile ? '' : imageFileName} disabled sx={{ paddingLeft: 15, backgroundColor: 'rgba(0, 0, 0, 0.06) !important'}} />
-                                            <Button disableElevation variant="contained" component="label" style={{ position: 'absolute', marginTop: 38, left: '0.75rem' }}>
-                                                Choose file
-                                                <input onChange={handleFileInputChange} hidden accept="image/*" multiple type="file" />
-                                            </Button>
-                                            {imagePreviewSource && (
-                                                <Box display='flex' alignItems='center' sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', paddingBottom: mobile ? '8px' : '17px', height: '100px' }}>
-                                                    <img src={imagePreviewSource as string} alt='Logo preview' style={{ height: '100%' }} />
-                                                    <IconButton onClick={removeLogo} sx={{ marginLeft: 1 }}>
-                                                        <Close fontSize='small' />
-                                                    </IconButton>
-                                                </Box>
-                                            )}
-                                            {edit && logoUrl && (
-                                                <Box display='flex' alignItems='center' sx={{ backgroundColor: 'rgba(0, 0, 0, 0.06)', borderBottom: logoError ? '2px solid #ff1644' : 'none', padding: '0px 12px 17px', paddingBottom: mobile ? '8px' : '17px', height: '100px' }}>
-                                                    <img src={logoUrl} alt='Logo preview' style={{ height: '100%' }} />
-                                                    <IconButton onClick={removeLogo} sx={{ marginLeft: 1 }}>
-                                                        <Close fontSize='small' />
-                                                    </IconButton>
-                                                </Box>
-                                            )}
-                                            {imagePreviewSource && mobile && <Typography sx={{ wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
-                                            {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
                                         </FormControl>
                                     </Grid>
 
