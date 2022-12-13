@@ -7,31 +7,34 @@ import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/dashboard'
-import { JobData } from '../api/jobs'
 import axios from 'axios'
+import { ListItem } from '../../components/ListItem'
+import { JobData } from '../../models/Job'
 
 const Jobs: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const [jobs, setJobs] = useState<JobData[]>([])
+    const [data, setData] = useState<JobData[]>([])
+    const [fetched, setFetched] = useState(false)
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
-    const fetchJobs = async () => {
+    const fetchData = async () => {
         const res = await axios.get(`${baseUrlApi}jobs/employer-jobs`)
-        setJobs(res.data)
+        setData(res.data)
+        setFetched(true)
     }
 
     useEffect(() => {
-        fetchJobs()
+        fetchData()
     }, [])
 
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`${jobboard.title} | Dashboard: Company profile`}</title>
-                <meta name="description" content="Dashboard: Company profile" />
+                <title>{`${jobboard.title} | Dashboard: Jobs`}</title>
+                <meta name="description" content="Dashboard: Jobs" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
@@ -39,15 +42,33 @@ const Jobs: NextPage = () => {
                 <Grid xs={12} pb={4}>
                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
                         <Grid xs={12}>
-                            <Box>
-                                <Typography fontWeight='bold'>Jobs</Typography>
-                            </Box>
+                            {fetched && data.length > 0 && (
+                                <Grid xs={12}>
+                                    <Box>
+                                        <Typography fontWeight='bold'>{data.length} job{data.length > 1 ? 's' : ''}</Typography>
+                                    </Box>
+                                </Grid>
+                            )}
 
-                            <Box>
-                                {jobs.map(job => (
-                                    <Box>{job.title}</Box>
-                                ))}
-                            </Box>
+                            {fetched && !data.length && (
+                                <Box>
+                                    <Typography textAlign='center'>No jobs posted</Typography>
+                                </Box>
+                            )}
+
+                            {fetched && data.length > 0 && (
+                                <Box mt={2}>
+                                    {data.map((job, index) => (
+                                        <ListItem
+                                            isDashboardJob
+                                            key={job._id} 
+                                            first={index === 0} 
+                                            last={index === data.length - 1}
+                                            {...job}
+                                        />
+                                    ))}
+                                </Box>
+                            )}
                         </Grid>
                     </Box>
                 </Grid>

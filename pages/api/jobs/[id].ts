@@ -1,28 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Job from '../../../models/Job'
-
-export type JobData = {
-    _id: string
-    jobboardId: string
-    backfilled: boolean
-    createdAt: Date
-    datePosted: Date
-    title: string
-    company: string
-    companyUrl: string
-    companyLogo: string
-    type: string
-    location: string
-    remote: boolean
-    skills: string[]
-    perks: string[]
-    featured: boolean
-    applicationLink: string,
-    description: string
-    salaryMin: number
-    salaryMax: number
-}
+import Job, { JobData } from '../../../models/Job'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Job from '../../../models/Job'
+import Job, { JobData } from '../../../models/Job'
 
 type Filters = { 
     [key: string ]: 
@@ -9,28 +9,6 @@ type Filters = {
         { $gte: number } | 
         ({ title: { $regex: RegExp } } | { company: { $regex: RegExp; }; })[] |
         ({ datePosted: { $gte: Date } } | { createdAt: { $gte: Date; }; })[] 
-}
-
-export type JobData = {
-    _id: string
-    jobboardId: string
-    backfilled: boolean
-    createdAt: Date
-    datePosted: Date
-    title: string
-    company: string
-    companyUrl: string
-    companyLogo: string
-    type: string
-    location: string
-    remote: boolean
-    skills: string[]
-    perks: string[]
-    featured: boolean
-    applicationLink: string,
-    description: string
-    salaryMin: number
-    salaryMax: number
 }
 
 export const getFilters = (query: NextApiRequest['query']) => {

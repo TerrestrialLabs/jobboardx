@@ -5,7 +5,6 @@ import Head from 'next/head'
 import Image from 'next/image'
 import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import type { JobData } from './api/jobs'
 import { useRouter } from 'next/router'
 import { PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
@@ -22,6 +21,7 @@ import type { Node } from 'slate'
 import dynamic from 'next/dynamic'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { useSession } from 'next-auth/react'
+import { JobData } from '../models/Job'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {

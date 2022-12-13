@@ -5,7 +5,6 @@ import Image from 'next/image'
 import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useRouter } from 'next/router'
-import type { JobData } from '../api/jobs'
 import { format, parseISO } from 'date-fns'
 import { AccessTime, LocationOn, Paid } from '@mui/icons-material'
 import { TYPE_MAP } from '../../const/const'
@@ -16,6 +15,7 @@ import NextLink from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
 import { JobBoardData } from '../api/jobboards'
+import { JobData } from '../../models/Job'
 
 interface Props {
     data: JobData
