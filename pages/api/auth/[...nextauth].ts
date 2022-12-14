@@ -7,6 +7,7 @@ import { JobBoardData } from '../jobboards'
 import User from '../../../models/User'
 import JobBoard from '../../../models/JobBoard'
 import { NextApiRequest, NextApiResponse } from 'next'
+import axios from 'axios'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -23,6 +24,8 @@ export default async function handler(
     const local = req.headers.host?.includes('localhost')
     const domain = local ? 'www.reactdevjobs.io' : req.headers.host
 
+    let updateUser = false
+
     if (req.headers.host) {
         process.env.NEXTAUTH_URL = local ? 'http://localhost:3000' : `https://${domain}`
     }
@@ -38,6 +41,10 @@ export default async function handler(
         if (!user) {
             return res.status(401).json({ error: 'An account with this email could not be found' });
         }
+    }
+
+    if (req.url?.includes('/session?update')) {
+        updateUser = true
     }
 
     return await NextAuth(req, res, {
@@ -69,6 +76,11 @@ export default async function handler(
                 if (user) {
                     token.user = user
                 }
+                if (updateUser) {
+                    // @ts-ignore
+                    const updatedUser = await User.findOne({ _id: token.user?.id })
+                    token.user = updatedUser
+                }
                 return Promise.resolve(token);
             },
             session: async ({ session, token }) => {
@@ -76,6 +88,7 @@ export default async function handler(
                     // @ts-ignore
                     session.user = token.user
                 }
+
                 return session
             }
         },

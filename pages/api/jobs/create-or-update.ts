@@ -56,7 +56,7 @@ createOrUpdateJob.post(async (req, res) => {
 
         // @ts-ignore
         if (!session || !session.user || session.user.id !== jobData.employerId) {
-            throw Error('Not authenticated')
+            throw Error('Unauthorized')
         }
         
         const employer = await User.findOne({ email: session.user.email }) as UserType
