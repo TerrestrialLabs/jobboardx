@@ -11,7 +11,7 @@ import axios from 'axios'
 import { JobData } from '../../models/Job'
 import { useRouter } from 'next/router'
 import { AccessTime, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
-import { formatSalaryRange } from '../../utils/utils'
+import { formatSalaryRange, getTimeDifferenceString } from '../../utils/utils'
 import { TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
 
@@ -34,6 +34,14 @@ const Jobs: NextPage = () => {
     useEffect(() => {
         fetchData()
     }, [])
+
+    // const days = 31 // For last 4 days
+    // const currentDate = new Date()
+    // const thirdyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
+
+    // console.log('currentDate: ', currentDate)
+    // console.log('thirdyDaysAgoDate: ', thirdyDaysAgoDate)
+    // console.log('currentDate > thirdyDaysAgoDate: ', currentDate > thirdyDaysAgoDate)
 
     return (
         <div className={styles.container}>
@@ -119,6 +127,12 @@ export const JobItem = ({
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
+    const days = 31 // For last 4 days
+    const currentDate = new Date()
+    const thirdyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
+
+    const expired = (new Date(datePosted)) < thirdyDaysAgoDate
+
     return (
         <Box p={2} onMouseEnter={setFocused} onMouseLeave={clearFocus} sx={{ 
             backgroundColor: featured ? 'lightyellow' : '#FAF9F6',
@@ -131,7 +145,11 @@ export const JobItem = ({
             <Grid container alignItems='center'>
                 <Grid xs={9} sm={5}>
                     <Box mr={2}>
-                        <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
+                        <Box display='flex'>
+                            <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
+                            {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>}
+                            {expired && <Typography ml={1} color='error' variant='subtitle1' sx={{ fontSize: '13.5px' }}>Expired</Typography>}
+                        </Box>
                         <Typography variant='subtitle1' sx={{ fontWeight: '600' }}><Link href={`/jobs/${_id}`}>{title}</Link></Typography>
                     </Box>
                 </Grid>
