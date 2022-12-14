@@ -40,18 +40,18 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     return (
         <div className={styles.container}>
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid container justifyContent='center' pb={4}>
-                    <Grid xs={9} container>
+                <Grid container justifyContent='center' pb={mobile ? 2 : 4}>
+                    <Grid xs={12} sm={10} lg={9} container>
 
-                        <Grid xs={12} pb={mobile ? 0 : 2}>
+                        <Grid xs={12} p={2} pt={0} pb={mobile ? 0 : 2}>
                             <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                 <Typography variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Employer Dashboard</Typography>
                             </Box>
                         </Grid>
 
-                        <Grid xs={12} pt={2} display='flex'>
-                            <Grid container xs={3}>
-                                <Box mr={4} sx={{ backgroundColor: '#fff', borderRadius: 1, padding: 4, width: '100%' }}>
+                        <Grid xs={12} p={2} container>
+                            <Grid xs={12} sm={3} pr={mobile ? 0 : 4} pb={mobile ? 2 : 0}>
+                                <Box mr={mobile ? 0 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, padding: 4, paddingLeft: mobile ? 2 : 4, width: '100%' }}>
                                     <Box pb={2}>
                                         <Typography fontWeight='bold' color={router.pathname.endsWith('stats') ? '#000000DE' : 'grey'}>
                                             <Link href='/dashboard/stats'>Stats</Link>
@@ -80,7 +80,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
                                 </Box>
                             </Grid>
 
-                            <Grid container xs={9}>
+                            <Grid container xs={12} sm={9}>
                                 {content}
                             </Grid>
                         </Grid>

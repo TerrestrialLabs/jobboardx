@@ -8,17 +8,22 @@ import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/dashboard'
 import axios from 'axios'
-import { ListItem } from '../../components/ListItem'
 import { JobData } from '../../models/Job'
+import { useRouter } from 'next/router'
+import { AccessTime, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
+import { formatSalaryRange } from '../../utils/utils'
+import { TYPE_MAP } from '../../const/const'
+import Link from 'next/link'
 
 const Jobs: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const [data, setData] = useState<JobData[]>([])
     const [fetched, setFetched] = useState(false)
+    const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
 
     const windowSize = useWindowSize()
-    const mobile = !!(windowSize.width && windowSize.width < 500 )
+    const mobile = !!(windowSize.width && windowSize.width < 500)
 
     const fetchData = async () => {
         const res = await axios.get(`${baseUrlApi}jobs/employer-jobs`)
@@ -40,7 +45,7 @@ const Jobs: NextPage = () => {
 
             <Dashboard content={(
                 <Grid xs={12} pb={4}>
-                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 2 : 4} pb={mobile ? 3 : 4}>
                         <Grid xs={12}>
                             {fetched && data.length > 0 && (
                                 <Grid xs={12}>
@@ -59,11 +64,13 @@ const Jobs: NextPage = () => {
                             {fetched && data.length > 0 && (
                                 <Box mt={2}>
                                     {data.map((job, index) => (
-                                        <ListItem
-                                            isDashboardJob
+                                        <JobItem
                                             key={job._id} 
                                             first={index === 0} 
                                             last={index === data.length - 1}
+                                            isFocused={focusedIndex === index}
+                                            setFocused={() => setFocusedIndex(index)}
+                                            clearFocus={() => setFocusedIndex(null)}
                                             {...job}
                                         />
                                     ))}
@@ -83,3 +90,92 @@ export default Jobs
 export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: {} }
 }
+
+type JobItem = JobData & {
+    first: boolean
+    last: boolean
+    isFocused: boolean
+    setFocused: () => void
+    clearFocus: () => void
+}
+export const JobItem = ({
+    _id,
+    first,
+    last,
+    datePosted,
+    title,
+    type,
+    location,
+    remote,
+    featured,
+    salaryMin,
+    salaryMax,
+    isFocused,
+    setFocused,
+    clearFocus
+}: JobItem) => {
+    const router = useRouter()
+  
+    const windowSize = useWindowSize()
+    const mobile = !!(windowSize.width && windowSize.width < 500)
+
+    return (
+        <Box p={2} onMouseEnter={setFocused} onMouseLeave={clearFocus} sx={{ 
+            backgroundColor: featured ? 'lightyellow' : '#FAF9F6',
+            border: '1px solid #e8e8e8',
+            borderTopLeftRadius: first ? 4 : 0,
+            borderTopRightRadius: first ? 4 : 0,
+            borderBottomLeftRadius: last ? 4 : 0,
+            borderBottomRightRadius: last ? 4 : 0
+        }}>
+            <Grid container alignItems='center'>
+                <Grid xs={12} sm={5}>
+                    <Box mr={2}>
+                        <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
+                        <Typography variant='subtitle1' sx={{ fontWeight: '600' }}><Link href={`/jobs/${_id}`}>{title}</Link></Typography>
+                    </Box>
+                </Grid>
+
+                <Grid xs={12} sm={6}>
+                    <Box mt={1} mr={2} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
+                        <Box mb={0.25} display='flex' alignItems='center'>
+                            <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
+                            <Typography variant='subtitle2' mr={2}>{remote ? 'Remote' : location}</Typography>
+                        </Box>
+        
+                        <Box mb={0.25} display='flex' alignItems='center'>
+                            <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
+                            <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type] || type || 'N/A'}</Typography>
+                        </Box>
+        
+                        <Box display='flex' alignItems='center'>
+                            <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
+                            <Typography variant='subtitle2'>{formatSalaryRange(salaryMin, salaryMax)}</Typography>
+                        </Box>
+                    </Box>
+                </Grid>
+
+                {isFocused && (
+                    <Grid xs={1} container>
+                        <Box display='flex' alignItems='center'>
+                            <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
+                            <Link href={''}><Delete sx={{ cursor: 'pointer' }} /></Link>
+                        </Box>
+                    </Grid>
+                )}
+
+                {mobile && (
+                    <Grid xs={12} container display='flex' pt={2}>
+                        <Box mr={0.75}>
+                            <Typography><Link href={`/jobs/${_id}/edit`}>Edit</Link></Typography>
+                        </Box>
+                        <Typography>|</Typography>
+                        <Box ml={0.75}>
+                            <Typography><Link href=''>Delete</Link></Typography>
+                        </Box>
+                    </Grid>
+                )}
+            </Grid>
+        </Box>
+    )
+ }

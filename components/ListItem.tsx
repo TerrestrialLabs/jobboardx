@@ -11,7 +11,7 @@ type ListItemProps = JobData & {
   first: boolean
   last: boolean
   trackJobApplyClick?: ({ jobId, subtype }: { jobId: string, subtype: string }) => void
-  isDashboardJob?: boolean
+  noLogo?: boolean
 }
 export const ListItem = ({
   _id,
@@ -30,8 +30,7 @@ export const ListItem = ({
   applicationLink,
   salaryMin,
   salaryMax,
-  trackJobApplyClick,
-  isDashboardJob
+  trackJobApplyClick
 }: ListItemProps) => {
   const router = useRouter()
 
@@ -52,24 +51,21 @@ export const ListItem = ({
     }}>
       <Grid container alignItems='center'>
         <Grid xs={5} container alignItems='center'>
-          {!isDashboardJob && (
             <Grid xs={2}>
               <Box mr={2} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
                 {companyLogo && <img style={{ borderRadius: '50%' }} src={companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
                 {!companyLogo && <Typography fontSize={20}>{company.slice(0, 1).toUpperCase()}</Typography>}
               </Box>
             </Grid>
-          )}
 
-          <Grid xs={isDashboardJob ? 12 : 10}>
+          <Grid xs={10}>
             <Box mr={2}>
-              {isDashboardJob && <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>}
               <Typography variant='subtitle1' sx={{ fontWeight: '600' }}>{title}</Typography>
-              {!isDashboardJob && <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{company}</Typography>}
+              <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{company}</Typography>
             </Box>
           </Grid>
         </Grid>
-        <Grid xs={isDashboardJob ? 7 : 5} container>
+        <Grid xs={5} container>
           <Box display='flex' flexDirection='column'>
             <Grid xs container>
               {skills.slice(0, 3).map(skill => <Grid key={skill} sx={{
@@ -99,19 +95,17 @@ export const ListItem = ({
             </Box>
           </Box>
         </Grid>
-        {!isDashboardJob && (
-            <Grid xs={2} container direction='column' alignItems='flex-end'>
-                <Grid>
-                    {/* TO DO: Phase out createdAt when all jobs have datePosted */}
-                    <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
-                </Grid>
-                <Grid>
-                    <Box mt={2}>
-                    <Button variant='outlined' onClick={() => trackJobApplyClick && trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} href={applicationLink}>Apply</Button>
-                    </Box>
-                </Grid>
-            </Grid>
-        )}
+        <Grid xs={2} container direction='column' alignItems='flex-end'>
+          <Grid>
+            {/* TO DO: Phase out createdAt when all jobs have datePosted */}
+            <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
+          </Grid>
+          <Grid>
+            <Box mt={2}>
+              <Button variant='outlined' onClick={() => trackJobApplyClick && trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} href={applicationLink}>Apply</Button>
+            </Box>
+          </Grid>
+        </Grid>
       </Grid>
     </Box>
   )
@@ -135,8 +129,7 @@ export const ListItemMobile = ({
   applicationLink,
   salaryMin,
   salaryMax,
-  trackJobApplyClick,
-  isDashboardJob
+  trackJobApplyClick
 }: ListItemProps) => {
   const router = useRouter()
 
@@ -221,12 +214,11 @@ export const ListItemMobile = ({
           </Grid>)}
         </Grid>
       </Box>
-      {!isDashboardJob && (
-        <Box mt={2} display='flex' justifyContent='space-between' alignItems='center'>
-            <Button onClick={() => trackJobApplyClick && trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
-            <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
-        </Box>
-      )}
+
+      <Box mt={2} display='flex' justifyContent='space-between' alignItems='center'>
+        <Button onClick={() => trackJobApplyClick && trackJobApplyClick({ jobId: _id, subtype: applicationLink.startsWith('http') ? 'url' : 'email' })} sx={{ width: '100px' }} variant='outlined' href={applicationLink}>Apply</Button>
+        <Typography variant='caption'>{getTimeDifferenceString(datePosted || createdAt)}</Typography>
+      </Box>
     </Box>
   )
 }

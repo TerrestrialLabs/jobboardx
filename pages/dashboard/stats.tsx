@@ -43,28 +43,28 @@ const Stats: NextPage = () => {
 
             <Dashboard content={(
                 <>
-                    <Grid xs={12} pb={4}>
-                        <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={4}>
+                    <Grid xs={12} pb={mobile ? 2 : 4}>
+                        <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 2 : 4}>
                             <Grid xs={12}>
                                 <Box>
                                     <Typography fontWeight='bold'>This month</Typography>
                                 </Box>
                             </Grid>
 
-                            <Grid xs={12} display='flex'>
-                                <Grid pr={4} xs={4}>
+                            <Grid xs={12} container>
+                                <Grid pr={4} xs={6} sm={4}>
                                     <Box pt={2} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: '1px solid #e7e7e7' }}>
                                         <Box mb={0.75}><Typography>Job views</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.views : 0}</Typography></Box>
                                     </Box>
                                 </Grid>
-                                <Grid xs={4}>
+                                <Grid xs={6} sm={4}>
                                     <Box pt={2} pr={4} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: '1px solid #e7e7e7' }}>
                                         <Box><Typography mb={0.75}>Applications via link</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.urlApplyClicks : 0}</Typography></Box>
                                     </Box>
                                 </Grid>
-                                <Grid pt={2} pl={4} xs={4}>
+                                <Grid pt={2} pl={4} xs={6} sm={4}>
                                     <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                         <Box><Typography mb={0.75}>Applications via email</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.emailApplyClicks : 0}</Typography></Box>
@@ -75,14 +75,14 @@ const Stats: NextPage = () => {
                     </Grid>
 
                     <Grid xs={12}>
-                        <Box sx={{ backgroundColor: '#fff', width: '100%'}} p={4}>
+                        <Box sx={{ backgroundColor: '#fff', width: '100%'}} p={mobile ? 2 : 4}>
                             <Grid xs={12}>
                                 <Box>
                                     <Typography fontWeight='bold'>Total</Typography>
                                 </Box>
                             </Grid>
 
-                            <Grid xs={12} display='flex'>
+                            <Grid xs={12} container>
                                 <Grid xs={4} pr={4}>
                                     <Box pt={2} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: '1px solid #e7e7e7' }}>
                                         <Box mb={0.75}><Typography>Jobs posted</Typography></Box>
