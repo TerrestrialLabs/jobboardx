@@ -83,7 +83,7 @@ const Stats: NextPage = () => {
                             </Grid>
 
                             <Grid xs={12} container>
-                                <Grid xs={12} sm={4} pr={4}>
+                                <Grid xs={12} sm={4} pr={mobile ? 0 : 4}>
                                     <Box pt={2} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: mobile ? 0 : '1px solid #e7e7e7' }}>
                                         <Box mb={0.75}><Typography>Jobs posted</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.jobs : 0}</Typography></Box>
