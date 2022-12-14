@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FilledInput, FormControl, FormHelperText, IconButton, Modal, Typography, useTheme } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
@@ -10,10 +10,12 @@ import Dashboard from '../../components/dashboard'
 import axios from 'axios'
 import { JobData } from '../../models/Job'
 import { useRouter } from 'next/router'
-import { AccessTime, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
+import { AccessTime, Close, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
 import { formatSalaryRange, getTimeDifferenceString } from '../../utils/utils'
 import { TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { format, parseISO } from 'date-fns'
 
 const Jobs: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
@@ -21,6 +23,8 @@ const Jobs: NextPage = () => {
     const [data, setData] = useState<JobData[]>([])
     const [fetched, setFetched] = useState(false)
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+    const [jobToDelete, setJobToDelete] = useState<JobData | null>(null)
+    const [deleting, setDeleting] = useState(false)
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
@@ -35,13 +39,19 @@ const Jobs: NextPage = () => {
         fetchData()
     }, [])
 
-    // const days = 31 // For last 4 days
-    // const currentDate = new Date()
-    // const thirdyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
-
-    // console.log('currentDate: ', currentDate)
-    // console.log('thirdyDaysAgoDate: ', thirdyDaysAgoDate)
-    // console.log('currentDate > thirdyDaysAgoDate: ', currentDate > thirdyDaysAgoDate)
+    const deleteJob = async () => {
+        setDeleting(true)
+        try {
+            if (jobToDelete) {
+                await axios.delete(`${baseUrlApi}jobs/${jobToDelete._id}`)
+                await fetchData()
+                setJobToDelete(null)
+            }
+        } catch (err) {
+            alert('Failed to delete job')
+        }
+        setDeleting(false)
+    }
 
     return (
         <div className={styles.container}>
@@ -79,6 +89,7 @@ const Jobs: NextPage = () => {
                                             isFocused={focusedIndex === index}
                                             setFocused={() => setFocusedIndex(index)}
                                             clearFocus={() => setFocusedIndex(null)}
+                                            deleteJob={() => setJobToDelete(job)}
                                             {...job}
                                         />
                                     ))}
@@ -89,6 +100,7 @@ const Jobs: NextPage = () => {
                 </Grid>
             )} />
 
+            {jobToDelete && <DeleteModal id={jobToDelete._id} confirmDelete={deleteJob} datePosted={jobToDelete.datePosted} deleting={deleting} title={jobToDelete.title} close={() => setJobToDelete(null)} />}
         </div>
     )
 }
@@ -99,12 +111,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: {} }
 }
 
-type JobItem = JobData & {
+type JobItemProps = JobData & {
     first: boolean
     last: boolean
     isFocused: boolean
     setFocused: () => void
     clearFocus: () => void
+    deleteJob: () => void
 }
 export const JobItem = ({
     _id,
@@ -120,8 +133,9 @@ export const JobItem = ({
     salaryMax,
     isFocused,
     setFocused,
-    clearFocus
-}: JobItem) => {
+    clearFocus,
+    deleteJob
+}: JobItemProps) => {
     const router = useRouter()
   
     const windowSize = useWindowSize()
@@ -158,7 +172,7 @@ export const JobItem = ({
                     <Grid xs={3} container justifyContent='flex-end'>
                         <Box display='flex' alignItems='center' justifyContent='flex-end' color='grey'>
                             <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
-                            <Link href={''}><Delete sx={{ cursor: 'pointer' }} /></Link>
+                            <Delete onClick={deleteJob} sx={{ cursor: 'pointer' }} />
                         </Box>
                     </Grid>
                 )}
@@ -186,11 +200,96 @@ export const JobItem = ({
                     <Grid xs={1} container>
                         <Box display='flex' alignItems='center'>
                             <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
-                            <Link href={''}><Delete sx={{ cursor: 'pointer' }} /></Link>
+                            <Delete onClick={deleteJob} sx={{ cursor: 'pointer' }} />
                         </Box>
                     </Grid>
                 )}
             </Grid>
         </Box>
     )
- }
+}
+
+type DeleteModalProps = {
+    id: string
+    datePosted: Date
+    title: string
+    close: () => void
+    confirmDelete: () => void
+    deleting: boolean
+}
+export const DeleteModal = ({
+    id,
+    datePosted,
+    title,
+    close,
+    confirmDelete,
+    deleting
+}: DeleteModalProps) => {
+    const router = useRouter()
+  
+    const windowSize = useWindowSize()
+    const mobile = !!(windowSize.width && windowSize.width < 500)
+
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  
+    return (
+        <Dialog
+            fullScreen={fullScreen}
+            open
+            onClose={close}
+            aria-labelledby="responsive-dialog-title"
+        >
+            <DialogTitle>
+                <Typography fontSize='20px'>Delete job</Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={close}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                >
+                    <Close />
+                </IconButton>
+            </DialogTitle>
+
+            <DialogContent>
+                <DialogContentText>
+                    Are you sure you want to delete this job?
+                    This action is permanent and cannot be undone.
+                </DialogContentText>
+
+                <Box p={mobile ? 2 : 4} mt={2} sx={{ borderRadius: 1, border: '1px solid #e7e7e7' }}>
+                    <Grid container>
+                        <Grid xs={3}>
+                            <Box mb={0.5}><Typography>Title:</Typography></Box>
+                            <Box mb={0.5}><Typography>Posted:</Typography></Box>
+                            <Box><Typography>Job ID:</Typography></Box>
+                        </Grid>
+                        <Grid xs={9}>
+                            <Box mb={0.5}><Typography fontWeight='bold'>{title}</Typography></Box>
+                            <Box mb={0.5}>
+                                <Typography fontWeight='bold'>
+                                    {format(parseISO(datePosted.toString()), 'MMM. d, yyyy')}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ overflow: 'hidden' }}><Typography fontWeight='bold'>{id}</Typography></Box>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </DialogContent>
+
+            <DialogActions sx={{ paddingRight: 3, paddingBottom: 2 }}>
+                <Button disabled={deleting} onClick={close}>
+                    Cancel
+                </Button>
+                <Button disabled={deleting} disableElevation variant='contained' color='error' onClick={confirmDelete}>
+                    {deleting ? <CircularProgress color='secondary' size={22} /> : 'Delete'}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    )
+}

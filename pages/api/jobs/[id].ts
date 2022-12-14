@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
+import { getSession } from 'next-auth/react'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
@@ -11,7 +12,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobData>
+    res: NextApiResponse<JobData | boolean>
 ) {
     const { 
         method,
@@ -25,5 +26,22 @@ export default async function handler(
         // TO DO
         // @ts-ignore
         res.status(200).json(job)
+    }
+
+    if (method === 'DELETE') {
+        try {
+            const session = await getSession({ req })
+            const job = await Job.findById(id)
+            // @ts-ignore
+            if (session && session?.user?.id && job.employerId === session.user.id) {
+                await Job.deleteOne({ _id: job._id })
+                res.status(200).json(true)
+            } else {
+                throw Error('Unauthorized')
+            }
+        } catch (err) {
+        // @ts-ignore
+        res.status(500).json(getErrorMessage(err))
+        }
     }
 }
