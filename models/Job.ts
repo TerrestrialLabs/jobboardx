@@ -28,6 +28,7 @@ export default mongoose.models.Job || mongoose.model('Job', JobSchema)
 
 export type JobData = {
     _id: string
+    employerId?: string
     jobboardId: string
     backfilled: boolean
     createdAt: Date

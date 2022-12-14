@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, Divider, FilledInput, FormControl, FormHelperText, Grid, IconButton, Link, Modal, Typography } from '@mui/material'
+import { Box, Button, Grid, Link, Typography } from '@mui/material'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -26,7 +26,6 @@ interface Props {
 
 const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
-    const [requestUpdateModalOpen, setRequestUpdateModalOpen] = useState(false)
 
     const router = useRouter()
 
@@ -47,15 +46,6 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
     useEffect(() => {
         trackJobView()
     }, [router.query.id])
-
-    // When request update panel open on mobile don't allow scroll
-    useEffect(() => {
-        if (requestUpdateModalOpen && mobile) {
-          document.body.style.overflow = 'hidden'
-        } else {
-          document.body.style.overflow = 'auto'
-        }
-    }, [requestUpdateModalOpen])
 
     const fetchCompanyJobsCount = async () => {
         const res = await axios.get(`${baseUrlApi}jobs/count`, { params: { jobboardId: jobboard._id, search: data.company } })

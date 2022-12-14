@@ -243,6 +243,9 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const invalidJobDetails = Object.keys(jobDetailsErrors).some(field => jobDetailsErrors[field])
     const invalidBillingAddress = Object.keys(billingAddressErrors).some(field => billingAddressErrors[field])
 
+    // @ts-ignore
+    const accessDenied = !job?.employerId || session?.user?.id !== job.employerId
+
     const loadJob = async () => {
         setJobLoading(true)
         try {
@@ -561,6 +564,14 @@ export const PostForm = ({ edit }: PostFormProps) => {
                 }
             }
         }
+    }
+
+    if (accessDenied) {
+        return (
+            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+                <Typography>Access Denied</Typography>
+            </Box>
+        )
     }
 
   return (
