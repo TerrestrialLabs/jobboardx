@@ -129,12 +129,21 @@ export const JobItem = ({
             borderBottomRightRadius: last ? 4 : 0
         }}>
             <Grid container alignItems='center'>
-                <Grid xs={12} sm={5}>
+                <Grid xs={9} sm={5}>
                     <Box mr={2}>
                         <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
                         <Typography variant='subtitle1' sx={{ fontWeight: '600' }}><Link href={`/jobs/${_id}`}>{title}</Link></Typography>
                     </Box>
                 </Grid>
+
+                {mobile && (
+                    <Grid xs={3} container justifyContent='flex-end'>
+                        <Box display='flex' alignItems='center' justifyContent='flex-end' color='grey'>
+                            <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
+                            <Link href={''}><Delete sx={{ cursor: 'pointer' }} /></Link>
+                        </Box>
+                    </Grid>
+                )}
 
                 <Grid xs={12} sm={6}>
                     <Box mt={1} mr={2} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
@@ -155,23 +164,11 @@ export const JobItem = ({
                     </Box>
                 </Grid>
 
-                {isFocused && (
+                {!mobile && isFocused && (
                     <Grid xs={1} container>
                         <Box display='flex' alignItems='center'>
                             <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
                             <Link href={''}><Delete sx={{ cursor: 'pointer' }} /></Link>
-                        </Box>
-                    </Grid>
-                )}
-
-                {mobile && (
-                    <Grid xs={12} container display='flex' pt={2}>
-                        <Box mr={0.75}>
-                            <Typography><Link href={`/jobs/${_id}/edit`}>Edit</Link></Typography>
-                        </Box>
-                        <Typography>|</Typography>
-                        <Box ml={0.75}>
-                            <Typography><Link href=''>Delete</Link></Typography>
                         </Box>
                     </Grid>
                 )}

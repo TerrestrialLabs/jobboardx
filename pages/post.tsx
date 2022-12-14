@@ -1,6 +1,6 @@
 import { Alert, Autocomplete, Box, Button, Checkbox, CircularProgress, createFilterOptions, Divider, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
@@ -411,7 +411,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     
                 const jobData = { 
                     // @ts-ignore
-                    employerId: session.user.id,
+                    ...(!edit ? { employerId: session.user.id } : {}),
                     jobboardId: jobboard._id,
                     ...(edit ? job : {}),
                     ...jobDetails,
@@ -964,6 +964,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
 }
 
 export default Post
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    return { props: { } }
+}
 
 // @ts-ignore
 const StripeInput = ({ component: Component, inputRef, ...props }) => {

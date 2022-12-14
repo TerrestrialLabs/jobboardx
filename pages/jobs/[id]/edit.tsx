@@ -1,4 +1,4 @@
-import { NextPage } from "next"
+import { GetServerSideProps, NextPage } from "next"
 import { PostForm } from "../../post"
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
@@ -55,3 +55,7 @@ const Edit: NextPage = () => {
 }
 
 export default Edit
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    return { props: { } }
+}

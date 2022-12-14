@@ -36,7 +36,8 @@ type TextEditorProps = {
 const TextEditor = ({ editor, error, slateValue, setSlateValue }: TextEditorProps) => {
     const [showHoverState, setShowHoverState] = useState(false)
 
-    const showPlaceholder = slateValue.length === 1 && slateValue[0].children[0].text && !slateValue[0].children[0].text.length
+    // @ts-ignore
+    const showPlaceholder = slateValue.length === 1 && !slateValue[0].text && slateValue[0].children[0].text && !slateValue[0].children[0].text.length
 
     const renderLeaf = useCallback((props: any) => <SlateLeaf {...props} />, [])
     const renderElement = useCallback((props: any) => <SlateElement {...props} />, [])
