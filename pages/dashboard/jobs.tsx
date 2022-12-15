@@ -233,6 +233,26 @@ export const DeleteModal = ({
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   
+    const dialogActions = mobile ? (
+        <DialogActions sx={{ padding: 3, display: 'flex', flexDirection: 'column' }}>
+            <Button sx={{ marginBottom: 2 }} fullWidth disabled={deleting} disableElevation variant='contained' color='error' onClick={confirmDelete}>
+                {deleting ? <CircularProgress color='secondary' size={22} /> : 'Delete'}
+            </Button>
+            <Button fullWidth disabled={deleting} onClick={close}>
+                Cancel
+            </Button>
+        </DialogActions>
+    ) : (
+        <DialogActions sx={{ paddingRight: 3, paddingBottom: 2 }}>
+            <Button disabled={deleting} onClick={close}>
+                Cancel
+            </Button>
+            <Button disabled={deleting} disableElevation variant='contained' color='error' onClick={confirmDelete}>
+                {deleting ? <CircularProgress color='secondary' size={22} /> : 'Delete'}
+            </Button>
+        </DialogActions>
+    )
+
     return (
         <Dialog
             fullScreen={fullScreen}
@@ -282,14 +302,7 @@ export const DeleteModal = ({
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{ paddingRight: 3, paddingBottom: 2 }}>
-                <Button disabled={deleting} onClick={close}>
-                    Cancel
-                </Button>
-                <Button disabled={deleting} disableElevation variant='contained' color='error' onClick={confirmDelete}>
-                    {deleting ? <CircularProgress color='secondary' size={22} /> : 'Delete'}
-                </Button>
-            </DialogActions>
+            {dialogActions}
         </Dialog>
     )
 }

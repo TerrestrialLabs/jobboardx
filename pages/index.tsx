@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, CircularProgress, createFilterOptions, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FilledInput, FormControl, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import { AccessTime, Close, LocationOn, Paid } from '@mui/icons-material'
 import type { GetServerSideProps, NextPage } from 'next'
@@ -378,42 +378,65 @@ const FiltersPanel = ({ open, filters, handleFilterInputChange, handleFilterSele
     return null
   }
 
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
+
+  const close = () => setFiltersOpen(false)
+
   return (
-    <Box sx={{ paddingTop: '58px', position: 'fixed', height: '100vh', backgroundColor: '#fff', zIndex: 2, top: 0 }}>
-      <Box sx={{ position: 'relative' }}>
-        <IconButton onClick={() => setFiltersOpen(false)} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem' }}>
-          <Close />
-        </IconButton>
+    <Dialog
+        fullScreen={fullScreen}
+        open
+        onClose={close}
+        aria-labelledby="responsive-dialog-title"
+    >
+        <DialogTitle>
+            <Typography fontSize='20px' fontWeight='bold'>Search filters</Typography>
+            <IconButton
+                aria-label="close"
+                onClick={close}
+                sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: (theme) => theme.palette.grey[500],
+                }}
+            >
+                <Close />
+            </IconButton>
+        </DialogTitle>
+          <Grid container justifyContent='center'>
+            <Grid p={3} pt={0} xs={12} container>
+              <Grid mb={2} xs={12} sx={{ display: 'flex' }}>
+                <FormControl hiddenLabel fullWidth>
+                  <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>
+                  <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='type' value={filters.type} variant='filled' disableUnderline>
+                    <MenuItem value={'any'}>Any</MenuItem>
+                    <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
+                    <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
+                    <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
 
-        <Grid container justifyContent='center' paddingTop='1.5rem' paddingBottom='1rem'>
-          <Grid xs={11} container>
-            <Typography fontWeight='bold' fontSize={20} mb={2}>
-              Search filters
-            </Typography>
-
-            <Grid mb={2} xs={12} sx={{ display: 'flex' }}>
-              <FormControl hiddenLabel fullWidth>
-                <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Job Type</Typography>
-                <Select sx={{ height: 45 }} onChange={handleFilterSelectChange} name='type' value={filters.type} variant='filled' disableUnderline>
-                  <MenuItem value={'any'}>Any</MenuItem>
-                  <MenuItem value={TYPE.FULLTIME}>{TYPE_MAP.fulltime}</MenuItem>
-                  <MenuItem value={TYPE.PARTTIME}>{TYPE_MAP.parttime}</MenuItem>
-                  <MenuItem value={TYPE.CONTRACT}>{TYPE_MAP.contract}</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid mb={4} xs={12} sx={{ display: 'flex' }}>
-              <SalaryField mobile onChange={handleFilterSelectChange} value={filters.salaryMin} />
-            </Grid>
-
-            <Grid xs={12} sx={{ display: 'flex' }}>
-              <Button sx={{ height: '45px' }} fullWidth onClick={search} variant='contained' color='primary' disableElevation>Search</Button>
+              <Grid mb={4} xs={12} sx={{ display: 'flex' }}>
+                <SalaryField mobile onChange={handleFilterSelectChange} value={filters.salaryMin} />
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      </Box>
-    </Box>
+        <DialogContent>
+          
+        </DialogContent>
+
+        <DialogActions sx={{ padding: 3, display: 'flex', flexDirection: 'column' }}>
+            <Button sx={{ marginBottom: 2 }} fullWidth disableElevation variant='contained' color='primary' onClick={search}>
+                Search
+            </Button>
+            <Button fullWidth disableElevation color='primary' onClick={close}>
+                Close
+            </Button>
+        </DialogActions>
+    </Dialog>
   )
 }
 
