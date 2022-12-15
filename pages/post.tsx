@@ -6,7 +6,7 @@ import Image from 'next/image'
 import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import { useRouter } from 'next/router'
-import { PERKS, PRICE, SKILLS, TYPE, TYPE_MAP } from '../const/const'
+import { PERKS, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import { TextEditorPlaceholder } from '../components/post/TextEditor'
@@ -527,7 +527,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             const { email } = session.user
 
             const paymentIntentParams = {
-                amount: PRICE[jobDetails.featured ? 'featured' : 'regular'] * 100,
+                amount: (jobDetails.featured ? jobboard.priceFeatured : jobboard.priceRegular) * 100,
                 currency: 'USD',
                 receipt_email: email
             }

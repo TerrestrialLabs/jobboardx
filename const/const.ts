@@ -1,10 +1,5 @@
 // TO DO: Break up into separate files
 
-export const PRICE: { [key: string]: number } = {
-    regular: 49,
-    featured: 99
-}
-
 export const TYPE = {
     FULLTIME: 'fulltime',
     PARTTIME: 'parttime',

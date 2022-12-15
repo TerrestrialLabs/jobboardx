@@ -5,7 +5,7 @@ import multer from 'multer'
 import Job, { JobData } from '../../../models/Job'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
-import { PRICE, TYPE_MAP } from '../../../const/const'
+import { TYPE_MAP } from '../../../const/const'
 import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
@@ -146,7 +146,7 @@ export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConf
                     companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
                     url: `https://${jobboard.domain}/jobs/${job._id}`
                 },
-                price: job.featured ? PRICE.featured : PRICE.regular,
+                price: job.featured ? jobboard.priceFeatured : jobboard.priceRegular,
                 startDate: format(startDate, 'MMM. d, yyyy'),
                 endDate: format(endDate, 'MMM. d, yyyy')
             },

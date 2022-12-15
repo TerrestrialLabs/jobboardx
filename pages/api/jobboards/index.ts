@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import JobBoard from '../../../models/JobBoard'
+import { getSession } from 'next-auth/react'
 
 export type JobBoardData = {
     _id: string
@@ -13,6 +14,8 @@ export type JobBoardData = {
     homeSubtitle: string
     heroImage: string
     skills: string[]
+    priceFeatured: number
+    priceRegular: number
 }
 
 function getErrorMessage(error: unknown) {
@@ -42,6 +45,13 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
+            const session = await getSession({ req })
+            // TO DO: Only jobboard creator admin should be able to update this
+            // @ts-ignore
+            if (!session?.user || session?.user?.role !== 'admin') {
+                throw Error('Unauthorized')
+            }
+
             const jobboard = await JobBoard.create(req.body)
             res.status(201).json(jobboard)
         } catch(err) {
