@@ -374,12 +374,12 @@ type FiltersPanelProps = {
   search: () => void
 }
 const FiltersPanel = ({ open, filters, handleFilterInputChange, handleFilterSelectChange, setFiltersOpen, search }: FiltersPanelProps) => {
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
+  
   if (!open) {
     return null
   }
-
-  const theme = useTheme()
-  const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
 
   const close = () => setFiltersOpen(false)
 
