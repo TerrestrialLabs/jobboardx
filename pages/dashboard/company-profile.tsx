@@ -47,8 +47,6 @@ const CompanyProfile: NextPage = () => {
 
     const showErrorMessage = Object.keys(errors).some(field => errors[field])
 
-    const user = session?.user as UserType
-
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
@@ -152,7 +150,7 @@ const CompanyProfile: NextPage = () => {
                     ...session.user,
                     company: form.company.trim(),
                     website: form.website.trim(),
-                    logo: logoUrl ? logoUrl : '',
+                    logo: logoUrl ? logoUrl : ''
                 }
 
                 formData.set('employerData', JSON.stringify(employerData))

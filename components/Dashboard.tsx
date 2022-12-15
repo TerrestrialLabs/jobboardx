@@ -68,7 +68,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
                                         </Typography>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('billing') ? '#000000DE' : 'grey'}>
+                                        <Typography fontWeight='bold' color={router.pathname.endsWith('billing-details') ? '#000000DE' : 'grey'}>
                                             <Link href='/dashboard/billing-details'>Billing Details</Link>
                                         </Typography>
                                     </Box>
