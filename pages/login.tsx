@@ -92,6 +92,13 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         setLoading(false)
     }
 
+    const handleKeyDown = (event: { key: string; preventDefault: () => void }) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            login()
+        }
+    }
+
     return (
         <div className={styles.container}>
             <Head>
@@ -131,7 +138,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                             <Grid xs={12}>
                                                 <FormControl hiddenLabel fullWidth>
                                                     <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
-                                                    <FilledInput error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
+                                                    <FilledInput onKeyDown={handleKeyDown} error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
                                                     <FormHelperText error>{errors['email']}</FormHelperText>
                                                 </FormControl>
                                             </Grid>
