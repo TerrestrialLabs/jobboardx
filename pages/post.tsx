@@ -234,7 +234,9 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [jobDetailsErrors, setJobDetailsErrors] = useState(initJobDetailsErrors)
     const [billingAddressErrors, setBillingAddressErrors] = useState(initBillingAddressErrors)
 
-    useUnsavedChangesHandler(true)
+    const [unsavedChanges, setUnsavedChanges] = useState(false)
+
+    useUnsavedChangesHandler(unsavedChanges)
 
     const editor = useEditor()
 
@@ -305,15 +307,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
             loadJob()
         }
     }, [router.query.id])
-
-    const setDescriptionValue = (value: { type: string, children: { text: string; }[] }[]) => {
-        // Hack to fix bug of remaining node being ul or nl when deleting all text
-        if (value.length === 1 && value[0]?.type === 'list-item') {
-            setDescriptionEditorValue(initEditorValue)
-        } else {
-            setDescriptionEditorValue(value)
-        }
-    }
 
     const validate = () => {
         let isJobDetailsValid = true
@@ -482,17 +475,27 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }
 
+    const handlePostTypeChange = (featured: boolean) => {
+        if (!edit) {
+            setJobDetails({ ...jobDetails, featured })
+            setUnsavedChanges(true)
+        }
+    }
+
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value })
+        setUnsavedChanges(true)
     }
 
     const handleSelectChange = (e: SelectChangeEvent<string>) => {
         setJobDetails({ ...jobDetails, [e.target.name]: e.target.value })
+        setUnsavedChanges(true)
     }
 
     const handleAutocompleteChange = (value: string) => {
         setJobDetails({ ...jobDetails, location: value, remote: value === 'Remote' })
+        setUnsavedChanges(true)
     }
 
     const handleLocationTextChange = (text: string) => {
@@ -501,19 +504,23 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     const handleSkillsChange = (value: string[]) => {
         setJobDetails({ ...jobDetails, skills: value })
+        setUnsavedChanges(true)
     }
 
     const handlePerksChange = (value: string[]) => {
         setJobDetails({ ...jobDetails, perks: value })
+        setUnsavedChanges(true)
     }
 
     const handleBillingAddressChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setBillingAddress({ ...billingAddress, [e.target.name]: e.target.value })
+        setUnsavedChanges(true)
     }
 
     const handleBillingAddressSelectChange = (e: SelectChangeEvent<string>) => {
         setBillingAddress({ ...billingAddress, [e.target.name]: e.target.value })
+        setUnsavedChanges(true)
     }
 
     const setEditorValueFromExistingJob = (nodes: Node | Node[]) => {
@@ -523,6 +530,17 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
     const handleCheckboxChange = (value: boolean) => {
         setJobDetails({ ...jobDetails, remote: value })
+        setUnsavedChanges(true)
+    }
+
+    const handleDescriptionChange = (value: { type: string, children: { text: string; }[] }[]) => {
+        // Hack to fix bug of remaining node being ul or nl when deleting all text
+        if (value.length === 1 && value[0]?.type === 'list-item') {
+            setDescriptionEditorValue(initEditorValue)
+        } else {
+            setDescriptionEditorValue(value)
+        }
+        setUnsavedChanges(true)
     }
 
     const makePayment = async () => {
@@ -617,7 +635,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                             <Box display='flex' flexDirection={mobile ? 'column' : 'row'} justifyContent='center'>
                                 {(!edit || (edit && jobDetails.featured)) && (
                                     <Grid xs={12} sm={6} mb={mobile ? 2 : 0}>
-                                        <Box onClick={() => !edit && setJobDetails({ ...jobDetails, featured: true })} mr={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                        <Box onClick={() => handlePostTypeChange(true)} mr={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
                                             <Typography fontWeight='bold' mb={1}>FEATURED</Typography>
                                             <Typography fontWeight='bold' mb={2} color='grey'>$99</Typography>
                                             <Typography>
@@ -628,7 +646,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                 )}
                                 {(!edit || (edit && !jobDetails.featured)) && (
                                     <Grid xs={12} sm={6}>
-                                        <Box onClick={() => !edit && setJobDetails({ ...jobDetails, featured: false })} ml={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(!jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
+                                        <Box onClick={() => handlePostTypeChange(false)} ml={mobile ? 0 : 2} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%', cursor: edit ? 'normal' : 'pointer', ...(!jobDetails.featured ? selectedPostTypeStyle : unselectedPostTypeStyle) }}>
                                             <Typography fontWeight='bold' mb={1}>REGULAR</Typography>
                                             <Typography fontWeight='bold' mb={2} color='grey'>$49</Typography>
                                             <Typography>
@@ -721,7 +739,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                     <Grid xs={12}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Job Description</Typography>
-                                            {(!edit || job) && <TextEditor editor={editor} error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={setDescriptionValue} />}
+                                            {(!edit || job) && <TextEditor editor={editor} error={!!jobDetailsErrors['description']} slateValue={descriptionEditorValue} setSlateValue={handleDescriptionChange} />}
                                             {edit && !job && <TextEditorPlaceholder />}
                                             <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['description']}</FormHelperText>
                                         </FormControl>

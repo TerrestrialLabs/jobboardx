@@ -4,8 +4,7 @@ import { useRouter } from 'next/router'
 export function useUnsavedChangesHandler(unsavedChanges: boolean) {
     const router = useRouter()
     
-    const warningText =
-    'You have unsaved changes - are you sure you wish to leave this page?'
+    const warningText = 'Are you sure you wish to leave this page? All unsaved changes will be lost.'
 
     useEffect(() => {
         const handleWindowClose = (e: { preventDefault: () => void; returnValue: string }) => {
