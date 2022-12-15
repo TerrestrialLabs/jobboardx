@@ -90,6 +90,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         }
 
         setErrors(newErrors)
+        setLogoError(false)
 
         return isValid
     }
@@ -268,6 +269,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                             )}
                                             {imagePreviewSource && mobile && <Typography sx={{ wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.06)', padding: '0px 12px 17px', color: 'rgb(0, 0, 0, 0.38)' }}>{imageFileName}</Typography>}
                                             {logoError && <FormHelperText error>{'File too big, please select an image 10MB or less'}</FormHelperText>}
+                                            <FormHelperText>Optional</FormHelperText>
                                         </FormControl>
                                     </Grid>
 
