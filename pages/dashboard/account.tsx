@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
-import Dashboard from '../../components/dashboard'
+import Dashboard from '../../components/Dashboard'
 import { useSession } from 'next-auth/react'
 import { UserType } from '../../models/User'
 import { Close } from '@mui/icons-material'
@@ -105,7 +105,7 @@ const Account: NextPage = () => {
                     ...session.user,
                     email: form.email.trim()
                 }
-                
+
                 formData.set('employerData', JSON.stringify(employerData))
 
                 await axios.put(`${baseUrlApi}auth/update`, formData, { 

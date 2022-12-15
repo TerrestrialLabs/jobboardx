@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
-import Dashboard from '../../components/dashboard'
+import Dashboard from '../../components/Dashboard'
 
 const BillingDetails: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
