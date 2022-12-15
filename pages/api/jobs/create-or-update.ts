@@ -42,20 +42,20 @@ createOrUpdateJob.post(async (req, res) => {
     const stripePaymentIntentId = req.body['stripePaymentIntentId']
     const mode = req.body['mode']
 
-    let dataURI
-    // @ts-ignore
-    if (req.file) {
-        // @ts-ignore
-        const b64 = Buffer.from(req.file.buffer).toString("base64");
-        // @ts-ignore
-        dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-    }
+    // let dataURI
+    // // @ts-ignore
+    // if (req.file) {
+    //     // @ts-ignore
+    //     const b64 = Buffer.from(req.file.buffer).toString("base64");
+    //     // @ts-ignore
+    //     dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    // }
 
     try {
         const session = await getSession({ req })
 
         // @ts-ignore
-        if (!session || !session.user || session.user.id !== jobData.employerId) {
+        if (!session || !session.user || session.user._id !== jobData.employerId) {
             throw Error('Unauthorized')
         }
         
@@ -75,23 +75,23 @@ createOrUpdateJob.post(async (req, res) => {
             orderId = paymentIntent.metadata.orderId
         }
 
-        // 2. Upload logo image
-        let cloudinaryRes, 
-            cloudinaryUrl = jobData.companyLogo
-        // New logo image has been attached to req
-        if (dataURI) {
-            cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { 
-                if (error) {
-                    throw Error('Failed to upload logo, please try again.')
-                }
-            })
-        }
-        if (cloudinaryRes) {
-            cloudinaryUrl = cloudinaryRes.url
-        }
-        jobData.companyLogo = cloudinaryUrl
+        // // 2. Upload logo image
+        // let cloudinaryRes, 
+        //     cloudinaryUrl = jobData.companyLogo
+        // // New logo image has been attached to req
+        // if (dataURI) {
+        //     cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { 
+        //         if (error) {
+        //             throw Error('Failed to upload logo, please try again.')
+        //         }
+        //     })
+        // }
+        // if (cloudinaryRes) {
+        //     cloudinaryUrl = cloudinaryRes.url
+        // }
+        // jobData.companyLogo = cloudinaryUrl
 
-        // 3. Create or update job
+        // 2. Create or update job
         if (mode === 'create') {
             const job = await Job.create({
                 ...jobData,

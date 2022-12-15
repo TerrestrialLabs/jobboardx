@@ -47,16 +47,16 @@ signUp.put(async (req, res) => {
 
     try {
         const session = await getSession({ req })
-
         // @ts-ignore
-        if (employerData._id !== session?.user.id) {
+        if (!session?.user || employerData._id !== session?.user._id) {
             throw Error('Unauthorized')
         }
 
         // TO DO
         // 1. Check if account exists (unique email, company)
         const user = await User.findOne({ email: employerData.email, company: employerData.company })
-        if (user) {
+        // @ts-ignore
+        if (user && user._id.toString() !== session?.user._id) {
             throw Error('A company with this name or email address already exists.')
         }
 
@@ -70,26 +70,21 @@ signUp.put(async (req, res) => {
                     throw Error('Failed to upload logo, please try again.')
                 }
             })
-        }
-        if (cloudinaryRes) {
-            cloudinaryUrl = cloudinaryRes.url
+            if (cloudinaryRes) {
+                cloudinaryUrl = cloudinaryRes.url
+            }
         }
         employerData.logo = cloudinaryUrl
 
         // 3. Create account
         const employer = await User.findOneAndUpdate(
             // @ts-ignore
-            { _id: session?.user.id }, 
+            { _id: session?.user._id }, 
             {
                 ...employerData,
                 role: 'employer'
             }, 
             { new: true })
-
-        // const local = req.headers.host?.includes('localhost')
-        // const domain = local ? 'www.reactdevjobs.io' : req.headers.host
-        // const url = local ? 'http://localhost:3000' : `https://${domain}`
-        // await axios.get(`${url}/api/auth/session?update`)
 
         res.status(201).json(employer)
 

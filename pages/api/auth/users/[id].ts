@@ -25,7 +25,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (!session?.user || session.user.id !== id) {
+            if (!session?.user || session.user._id !== id) {
                 throw Error('Unauthorized')
             }
             const user = await User.findOne({ _id: id }).exec()

@@ -38,9 +38,9 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (session && session?.user?.id) {
+            if (session && session?.user?._id) {
                 // @ts-ignore
-                const jobIds = await Job.find({ employerId: session.user.id }).distinct('_id')
+                const jobIds = await Job.find({ employerId: session.user._id }).distinct('_id')
                 const events = await UserEvent.find({ jobId: {$in: jobIds }})
                 
                 res.status(200).json({

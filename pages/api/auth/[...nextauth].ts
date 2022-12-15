@@ -4,7 +4,7 @@ import EmailProvider from 'next-auth/providers/email'
 import { MongoClient } from 'mongodb'
 import sgMail from '@sendgrid/mail'
 import { JobBoardData } from '../jobboards'
-import User from '../../../models/User'
+import User, { UserType } from '../../../models/User'
 import JobBoard from '../../../models/JobBoard'
 import { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios'
@@ -24,7 +24,7 @@ export default async function handler(
     const local = req.headers.host?.includes('localhost')
     const domain = local ? 'www.reactdevjobs.io' : req.headers.host
 
-    let updateUser = false
+    let updateSession = false
 
     if (req.headers.host) {
         process.env.NEXTAUTH_URL = local ? 'http://localhost:3000' : `https://${domain}`
@@ -44,7 +44,7 @@ export default async function handler(
     }
 
     if (req.url?.includes('/session?update')) {
-        updateUser = true
+        updateSession = true
     }
 
     return await NextAuth(req, res, {
@@ -74,11 +74,14 @@ export default async function handler(
         callbacks: {
             async jwt({ token, user }) {
                 if (user) {
-                    token.user = user
-                }
-                if (updateUser) {
+                    // Id attribute doesn't have underscore for some reason
+                    token.user = { _id: user.id, ...user }
                     // @ts-ignore
-                    const updatedUser = await User.findOne({ _id: token.user?.id })
+                    delete token.user.id
+                }
+                if (updateSession) {
+                    // @ts-ignore
+                    const updatedUser = await User.findOne({ _id: token.user?._id })
                     token.user = updatedUser
                 }
                 return Promise.resolve(token);

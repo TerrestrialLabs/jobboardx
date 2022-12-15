@@ -33,7 +33,7 @@ export default async function handler(
             const session = await getSession({ req })
             const job = await Job.findById(id)
             // @ts-ignore
-            if (session && session?.user?.id && job.employerId === session.user.id) {
+            if (session && session?.user?._id && job.employerId === session.user._id) {
                 await Job.deleteOne({ _id: job._id })
                 res.status(200).json(true)
             } else {

@@ -22,8 +22,8 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            // const jobs = await Job.find({ employerId: session?.user?.id }).exec()
-            const jobs = await Job.find({ backfilled: false }).sort({ 'datePosted': -1 }).exec()
+            const jobs = await Job.find({ employerId: session?.user?._id }).exec()
+            // const jobs = await Job.find({ backfilled: false }).sort({ 'datePosted': -1 }).exec()
             res.status(200).json(jobs)
         } catch (err) {
             // TO DO

@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 export type UserType = {
+    _id: string,
     company: string,
     email: string,
     website: string,

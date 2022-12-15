@@ -150,15 +150,11 @@ const CompanyProfile: NextPage = () => {
 
                 const employerData = {
                     ...session.user,
-                    // @ts-ignore
-                    _id: session.user.id,
                     company: form.company.trim(),
                     website: form.website.trim(),
                     logo: logoUrl ? logoUrl : '',
                 }
-                // @ts-ignore
-                delete employerData.id
-    
+
                 formData.set('employerData', JSON.stringify(employerData))
     
                 await axios.put(`${baseUrlApi}auth/update`, formData, { 

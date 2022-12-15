@@ -244,7 +244,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const invalidBillingAddress = Object.keys(billingAddressErrors).some(field => billingAddressErrors[field])
 
     // @ts-ignore
-    const accessDenied = !job?.employerId || session?.user?.id !== job.employerId
+    const accessDenied = !job?.employerId || session?.user?._id !== job.employerId
 
     const loadJob = async () => {
         setJobLoading(true)
@@ -414,7 +414,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     
                 const jobData = { 
                     // @ts-ignore
-                    ...(!edit ? { employerId: session.user.id } : {}),
+                    ...(!edit ? { employerId: session.user._id } : {}),
                     jobboardId: jobboard._id,
                     ...(edit ? job : {}),
                     ...jobDetails,
