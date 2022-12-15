@@ -51,20 +51,19 @@ export const ListItem = ({
     }}>
       <Grid container alignItems='center'>
         <Grid xs={5} container alignItems='center'>
-            <Grid xs={2}>
-              <Box mr={2} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
-                {companyLogo && <img style={{ borderRadius: '50%' }} src={companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
-                {!companyLogo && <Typography fontSize={20}>{company.slice(0, 1).toUpperCase()}</Typography>}
-              </Box>
-            </Grid>
+          <Box display='flex'>
+            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60px', width: '60px', backgroundColor: '#e8f3fd', flexShrink: 0, flexGrow: 0 }}>
+              {companyLogo && <img style={{ borderRadius: '50%' }} src={companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
+              {!companyLogo && <Typography fontSize={20}>{company.slice(0, 1).toUpperCase()}</Typography>}
+            </Box>
 
-          <Grid xs={10}>
-            <Box mr={2}>
+            <Box ml={2} mr={2}>
               <Typography variant='subtitle1' sx={{ fontWeight: '600' }}>{title}</Typography>
               <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{company}</Typography>
             </Box>
-          </Grid>
+          </Box>
         </Grid>
+
         <Grid xs={5} container>
           <Box display='flex' flexDirection='column'>
             <Grid xs container>
@@ -82,19 +81,25 @@ export const ListItem = ({
                 {skill}
               </Grid>)}
             </Grid>
-
-            <Box mt={1} display='flex' alignItems='center' color='grey'>
+            <Box mt={1} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
+              <Box mb={0.25} display='flex' alignItems='center'>
                 <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
                 <Typography variant='subtitle2' mr={2}>{remote ? 'Remote' : location}</Typography>
+              </Box>
 
+              <Box mb={0.25} display='flex' alignItems='center'>
                 <AccessTime fontSize='small' style={{marginRight: '0.25rem'}} />
                 <Typography variant='subtitle2' mr={2}>{TYPE_MAP[type] || type || 'N/A'}</Typography>
+              </Box>
 
+              <Box display='flex' alignItems='center'>
                 <Paid fontSize='small' style={{marginRight: '0.25rem'}} />
                 <Typography variant='subtitle2'>{formatSalaryRange(salaryMin, salaryMax)}</Typography>
+              </Box>
             </Box>
           </Box>
         </Grid>
+
         <Grid xs={2} container direction='column' alignItems='flex-end'>
           <Grid>
             {/* TO DO: Phase out createdAt when all jobs have datePosted */}
