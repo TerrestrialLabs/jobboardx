@@ -2,11 +2,13 @@ import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHel
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -39,6 +41,11 @@ const initState = {
 const CreateBoardForm: NextPage = () => {
     const { baseUrlApi } = useContext(JobBoardContext) as JobBoardContextValue
     
+    const { data: session, status } = useSession()
+    const [signedIn, setSignedIn] = useState(false)
+
+    const router = useRouter()
+
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrors)
@@ -48,6 +55,38 @@ const CreateBoardForm: NextPage = () => {
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
+
+    // @ts-ignore
+    const accessDenied = status === 'unauthenticated' || session?.user?.role !== 'admin'
+
+    useEffect(() => {
+        if (session?.user) {
+            setSignedIn(true)
+        }
+    }, [session?.user])
+
+    useEffect(() => {
+        if (accessDenied) {
+            router.push('/')
+        }
+    }, [status])
+
+    // Logout
+    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+        return (
+            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+                <CircularProgress color='secondary' size={22} />
+            </Box>
+        )
+    }
+    
+    if (accessDenied) {
+        return (
+            <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+                <Typography>Access Denied</Typography>
+            </Box>
+        )
+    }
 
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
