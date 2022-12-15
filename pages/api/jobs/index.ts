@@ -24,6 +24,7 @@ export const getFilters = (query: NextApiRequest['query']) => {
     // @ts-ignore
     const filters: Filters = {
         jobboardId: query.jobboardId as string,
+        ...(query.employerId ? { employerId: query.employerId } : {}),
         ...(query.type ? { type: query.type } : {}),
         ...(query.location 
             ? ((query.location as string).toLowerCase() === 'remote' ? { remote: true } : { location: query.location }) 
