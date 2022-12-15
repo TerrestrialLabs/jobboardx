@@ -160,8 +160,15 @@ const Post: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const { data: session, status } = useSession()
+    const [signedIn, setSignedIn] = useState(false)
 
     const router = useRouter()
+
+    useEffect(() => {
+        if (session?.user) {
+            setSignedIn(true)
+        }
+    }, [session?.user])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -169,7 +176,7 @@ const Post: NextPage = () => {
         }
     }, [status])
 
-    if (status === 'loading') {
+    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
@@ -244,7 +251,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const invalidBillingAddress = Object.keys(billingAddressErrors).some(field => billingAddressErrors[field])
 
     // @ts-ignore
-    const accessDenied = (edit && session?.user?._id !== job.employerId)
+    const accessDenied = (edit && !!job && session?.user?._id !== job.employerId)
 
     useEffect(() => {
         // @ts-ignore

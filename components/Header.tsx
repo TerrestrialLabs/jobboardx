@@ -26,7 +26,7 @@ const Header = () => {
 
     const logout = () => {
         handleAccountMenuClose()
-        signOut()
+        signOut({ redirect: false })
     }
 
     const windowSize = useWindowSize()

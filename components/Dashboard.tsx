@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
@@ -8,7 +8,9 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 
 const Dashboard = ({ content }: { content: JSX.Element }) => {
-    const { status } = useSession()
+    const { data: session, status } = useSession()
+    // TO DO: Hack to prevent flashing unauthorized message when logging out
+    const [signedIn, setSignedIn] = useState(false)
 
     const router = useRouter()
 
@@ -16,12 +18,19 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     useEffect(() => {
+        if (session?.user) {
+            setSignedIn(true)
+        }
+    }, [session?.user])
+
+    useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/')
         }
     }, [status])
 
-    if (status === 'loading') {
+    // Session is loading or user just logged out
+    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />

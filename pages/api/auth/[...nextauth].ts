@@ -97,7 +97,7 @@ export default async function handler(
         },
         pages: {
             signIn: '/login',
-            signOut: '/',
+            // signOut: '/',
             error: '/login-error'
         }
     })

@@ -3,7 +3,7 @@ import { PostForm } from "../../post"
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import Head from 'next/head'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../../../context/JobBoardContext'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
@@ -15,9 +15,16 @@ const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 const Edit: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
-    const { status } = useSession()
+    const { data: session, status } = useSession()
+    const [signedIn, setSignedIn] = useState(false)
 
     const router = useRouter()
+
+    useEffect(() => {
+        if (session?.user) {
+            setSignedIn(true)
+        }
+    }, [session?.user])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -25,7 +32,7 @@ const Edit: NextPage = () => {
         }
     }, [status])
 
-    if (status === 'loading') {
+    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
