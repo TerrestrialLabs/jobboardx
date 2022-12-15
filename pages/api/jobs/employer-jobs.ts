@@ -12,7 +12,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobData[]>
+    res: NextApiResponse<JobData[] | boolean>
 ) {
     const { method } = req
 
@@ -22,11 +22,27 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            const jobs = await Job.find({ employerId: session?.user?._id }).exec()
-            // const jobs = await Job.find({ backfilled: false }).sort({ 'datePosted': -1 }).exec()
+            const jobs = await Job.find({ employerId: session?.user?._id }).sort({ 'datePosted': -1 }).exec()
             res.status(200).json(jobs)
         } catch (err) {
             // TO DO
+            // @ts-ignore
+            res.status(500).json(getErrorMessage(err))
+        }
+    }
+
+    if (method === 'PUT') {
+        try {
+            const session = await getSession({ req })
+            // @ts-ignore
+            if (!session?.user) {
+                throw Error('Unauthorized')
+            }
+            // @ts-ignore
+            await Job.updateMany({ employerId: session?.user?._id }, { $set: req.body }).exec()
+
+            res.status(200).json(true)
+        } catch (err) {
             // @ts-ignore
             res.status(500).json(getErrorMessage(err))
         }

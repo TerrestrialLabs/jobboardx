@@ -161,6 +161,14 @@ const CompanyProfile: NextPage = () => {
 
                 await axios.get(`${baseUrlApi}auth/session?update`)
 
+                // TO DO: Update existing jobs
+                // Don't need to await this
+                axios.put(`${baseUrlApi}jobs/employer-jobs`, {
+                    company: employerData.company,
+                    companyUrl: employerData.website,
+                    companyLogo: employerData.logo
+                })
+
                 setSubmitted(true)
                 reloadSession()
             }
