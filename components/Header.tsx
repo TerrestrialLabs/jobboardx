@@ -6,7 +6,7 @@ import { useContext, useState } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { useWindowSize } from '../hooks/hooks'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
 const Header = () => {
     const router = useRouter()
@@ -22,11 +22,6 @@ const Header = () => {
     }
     const handleAccountMenuClose = () => {
         setAnchorEl(null)
-    }
-
-    const logout = () => {
-        handleAccountMenuClose()
-        signOut({ redirect: false })
     }
 
     const windowSize = useWindowSize()
@@ -63,7 +58,7 @@ const Header = () => {
         >
             <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>
             {session && <MenuItem onClick={handleAccountMenuClose}><Link href='/dashboard'>Dashboard</Link></MenuItem>}
-            {session && <MenuItem onClick={logout}>Logout</MenuItem>}
+            {session && <MenuItem onClick={handleAccountMenuClose}><Link href='/logout'>Logout</Link></MenuItem>}
 
             {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/login'>Log in</Link></MenuItem>}
             {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/signup'>Sign up</Link></MenuItem>}

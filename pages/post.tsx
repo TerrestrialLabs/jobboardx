@@ -22,6 +22,7 @@ import dynamic from 'next/dynamic'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { useSession } from 'next-auth/react'
 import { JobData } from '../models/Job'
+import { useUnsavedChangesHandler } from '../hooks/unsavedChanges'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -232,6 +233,8 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [loading, setLoading] = useState(false)
     const [jobDetailsErrors, setJobDetailsErrors] = useState(initJobDetailsErrors)
     const [billingAddressErrors, setBillingAddressErrors] = useState(initBillingAddressErrors)
+
+    useUnsavedChangesHandler(true)
 
     const editor = useEditor()
 
