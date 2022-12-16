@@ -17,6 +17,9 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
+    // @ts-ignore
+    const accessDenied = status === 'unauthenticated' || session?.user?.role !== 'employer'
+
     useEffect(() => {
         if (session?.user) {
             setSignedIn(true)
@@ -24,7 +27,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     }, [session?.user])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (accessDenied) {
             router.push('/')
         }
     }, [status])
@@ -38,8 +41,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
         )
     }
 
-    // @ts-ignore
-    if (status === 'unauthenticated' || session?.user?.role !== 'employer') {
+    if (accessDenied) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <Typography>Access Denied</Typography>
