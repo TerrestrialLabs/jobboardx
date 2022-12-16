@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import { format, parseISO } from 'date-fns'
 import { AccessTime, LocationOn, Paid } from '@mui/icons-material'
 import { TYPE_MAP } from '../../const/const'
-import { formatSalaryRange } from '../../utils/utils'
+import { formatSalaryRange, isExpired } from '../../utils/utils'
 import axios from 'axios'
 import ReactHtmlParser from 'react-html-parser'
 import NextLink from 'next/link'
@@ -31,6 +31,8 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
 
     const windowSize = useWindowSize()
     const mobile = !windowSize.width || windowSize.width < 500
+
+    const expired = isExpired(data.datePosted)
 
     const description = ReactHtmlParser(data.description)
     const location = getLocationString()
@@ -110,13 +112,13 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
                                             </Box>
                                         </Box>
                                     </Grid>
-                                    {mobile && (
-                                    <Box display='flex' justifyContent='center' mt={2}>
-                                        <Grid item xs={12}>
-                                            <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
-                                                Apply
-                                            </Button>
-                                        </Grid>
+                                    {mobile && !expired && (
+                                        <Box display='flex' justifyContent='center' mt={2}>
+                                            <Grid item xs={12}>
+                                                <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
+                                                    Apply
+                                                </Button>
+                                            </Grid>
                                         </Box>
                                     )}
                                 </Box>
@@ -181,21 +183,23 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
                                         </Grid>
                                     )}
 
-                                    <Grid item xs={12} p={0} mt={6}>
-                                        <Box display='flex' justifyContent='center'>
-                                            <Grid item xs={12} sm={6}>
-                                                <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
-                                                    Apply
-                                                </Button>
-                                            </Grid>
-                                        </Box>
-                                    </Grid>
+                                    {!expired && (
+                                        <Grid item xs={12} p={0} mt={6}>
+                                            <Box display='flex' justifyContent='center'>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary'>
+                                                        Apply
+                                                    </Button>
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
+                                    )}
                                 </Box>
                             </Box>
                         </Grid>
 
                         <Grid item xs={12} sm={4}>
-                            <CompanyBox trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
+                            <CompanyBox expired={expired} trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
                         </Grid>
                     </Grid>
                 </Grid>
@@ -211,10 +215,11 @@ export default JobDetail;
 type CompanyBoxProps = {
     companyJobsCount: number
     data: JobData
+    expired: boolean
     mobile: boolean
     trackJobApplyClick: () => void
 }
-const CompanyBox = ({ companyJobsCount, data, mobile, trackJobApplyClick }: CompanyBoxProps) => {
+const CompanyBox = ({ companyJobsCount, data, expired, mobile, trackJobApplyClick }: CompanyBoxProps) => {
     return (
         <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
             <Box display='flex' flexDirection='column' alignItems='center'>
@@ -236,7 +241,7 @@ const CompanyBox = ({ companyJobsCount, data, mobile, trackJobApplyClick }: Comp
                     <Typography variant='caption'>Visit company website</Typography>
                 </Link>
             )}
-            {!mobile && (
+            {!mobile && !expired && (
                 <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
                     Apply
                 </Button>

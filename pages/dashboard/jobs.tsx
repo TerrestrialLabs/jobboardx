@@ -11,7 +11,7 @@ import axios from 'axios'
 import { JobData } from '../../models/Job'
 import { useRouter } from 'next/router'
 import { AccessTime, Close, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
-import { formatSalaryRange, getTimeDifferenceString } from '../../utils/utils'
+import { formatSalaryRange, getTimeDifferenceString, isExpired } from '../../utils/utils'
 import { TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -141,11 +141,7 @@ export const JobItem = ({
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
-    const days = 31 // For last 4 days
-    const currentDate = new Date()
-    const thirdyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
-
-    const expired = (new Date(datePosted)) < thirdyDaysAgoDate
+    const expired = isExpired(datePosted)
 
     return (
         <Box p={2} onMouseEnter={setFocused} onMouseLeave={clearFocus} sx={{ 

@@ -13,3 +13,10 @@ export const getTimeDifferenceString = (date: Date, abbreviate?: boolean) => {
     }
     return difference === 0 ? 'New' : `${difference} day${difference === 1 ? '' : 's'} ago`
 }
+
+export const isExpired = (datePosted: Date) => {
+    const days = 31
+    const currentDate = new Date()
+    const thirtyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
+    return (new Date(datePosted)) < thirtyDaysAgoDate
+}
