@@ -15,6 +15,10 @@ const Header = () => {
 
     const { data: session } = useSession()
 
+    // TO DO: Enum for role type
+    // @ts-ignore
+    const isEmployer = session?.user?.role === 'employer'
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const accountMenuOpen = Boolean(anchorEl)
     const handleAccountButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -57,7 +61,7 @@ const Header = () => {
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
             <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>
-            {session?.user && <MenuItem onClick={handleAccountMenuClose}><Link href='/dashboard'>Dashboard</Link></MenuItem>}
+            {session?.user && isEmployer && <MenuItem onClick={handleAccountMenuClose}><Link href='/dashboard'>Dashboard</Link></MenuItem>}
             {session?.user && <MenuItem onClick={handleAccountMenuClose}><Link href='/logout'>Logout</Link></MenuItem>}
 
             {(!session || !session.user) && <MenuItem onClick={handleAccountMenuClose}><Link href='/login'>Log in</Link></MenuItem>}
