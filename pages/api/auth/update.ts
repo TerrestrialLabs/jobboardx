@@ -76,18 +76,17 @@ signUp.put(async (req, res) => {
         }
         userData.employer.logo = cloudinaryUrl
 
-        // 3. Create account
+        // 3. Update account
         const employer = await User.findOneAndUpdate(
             // @ts-ignore
             { _id: session?.user._id }, 
             {
                 ...userData,
-                role: ROLE.EMPLOYER,
-                admin: null
+                role: ROLE.EMPLOYER
             }, 
             { new: true })
 
-        res.status(201).json(employer)
+        res.status(200).json(employer)
 
     } catch(err) {
         // TO DO

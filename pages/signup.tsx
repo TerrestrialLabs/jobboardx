@@ -39,7 +39,7 @@ interface Props {
     csrfToken: string
 }
 
-const Login: NextPage<Props> = ({ csrfToken }) => {
+const EmployerSignUp: NextPage<Props> = ({ csrfToken }) => {
     const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
@@ -156,9 +156,9 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
             const formData = logo ? logo : new FormData()
 
             const userData = { 
+                jobboardId: jobboard._id,
                 email: form.email.trim().toLowerCase(),
                 employer: {
-                    jobboardId: jobboard._id,
                     company: form.company.trim(),
                     website: form.website.trim(),
                     logo: logoUrl ? logoUrl : ''
@@ -197,8 +197,8 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`${jobboard.title} | Sign in`}</title>
-                <meta name="description" content="Sign in" />
+                <title>{`${jobboard.title} | Sign up`}</title>
+                <meta name="description" content="Sign up" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
@@ -291,7 +291,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
     )
 }
 
-export default Login
+export default EmployerSignUp
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
     const csrfToken = await getCsrfToken(context)

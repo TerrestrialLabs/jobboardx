@@ -112,52 +112,40 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
 
                 {!submitted && (               
                     <Grid p={mobile ? 2 : 12} container justifyContent='center'>
-
-                            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
-                                <Grid container>
-                                    <Grid xs={12}>
-                                        <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>{submitted ? 'Check your email' : 'Employer Sign In'}</Typography></Box>
-                                    </Grid>
-
-                                    {submitted && (
-                                        <Box>
-                                            <Typography textAlign='center'>A sign in link has been sent to your email address.</Typography>
-                                        </Box>
-                                    )}
-
-                                    {!submitted && (
-                                        <>
-                                            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-
-                                            {showErrorMessage && (
-                                                <Grid xs={12}>
-                                                    <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
-                                                </Grid>
-                                            )}
-
-                                            <Grid xs={12}>
-                                                <FormControl hiddenLabel fullWidth>
-                                                    <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
-                                                    <FilledInput onKeyDown={handleKeyDown} error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
-                                                    <FormHelperText error>{errors['email']}</FormHelperText>
-                                                </FormControl>
-                                            </Grid>
-
-                                            <Grid xs={12} sm={12} pt={2} display='flex' justifyContent='center'>
-                                                <Button onClick={login} fullWidth={mobile} disabled={loading} variant='contained' disableElevation color='primary' sx={{ minWidth: '100%' }}>
-                                                    {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
-                                                </Button>
-                                            </Grid>
-
-                                            <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                                <Typography variant='caption' mr={0.5}>Not registered?</Typography>
-                                                <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
-                                            </Grid>
-                                        </>
-                                    )}
+                        <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
+                            <Grid container>
+                                <Grid xs={12}>
+                                    <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
                                 </Grid>
-                            </Box>
 
+                                <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
+                                {showErrorMessage && (
+                                    <Grid xs={12}>
+                                        <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
+                                    </Grid>
+                                )}
+
+                                <Grid xs={12}>
+                                    <FormControl hiddenLabel fullWidth>
+                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Email address</Typography>
+                                        <FilledInput onKeyDown={handleKeyDown} error={!!errors['email']} disableUnderline={!errors['email']} onChange={handleInputChange} name='email' value={form.email} autoComplete='off' inputProps={{ label: 'Email address' }} required placeholder='you@example.com' fullWidth />
+                                        <FormHelperText error>{errors['email']}</FormHelperText>
+                                    </FormControl>
+                                </Grid>
+
+                                <Grid xs={12} sm={12} pt={2} display='flex' justifyContent='center'>
+                                    <Button onClick={login} fullWidth={mobile} disabled={loading} variant='contained' disableElevation color='primary' sx={{ minWidth: '100%' }}>
+                                        {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
+                                    </Button>
+                                </Grid>
+
+                                <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                    <Typography variant='caption' mr={0.5}>Not registered?</Typography>
+                                    <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
+                                </Grid>
+                            </Grid>
+                        </Box>
                     </Grid>
                 )}
 

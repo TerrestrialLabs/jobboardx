@@ -68,10 +68,13 @@ signUp.post(async (req, res) => {
         userData.employer.logo = cloudinaryUrl
 
         // 3. Create account
+        console.log({
+            ...userData,
+            role: ROLE.EMPLOYER
+        })
         const employer = await User.create({
             ...userData,
-            role: ROLE.EMPLOYER,
-            admin: null
+            role: ROLE.EMPLOYER
         })
 
         // await sendConfirmationEmail({ host: req.headers.host, job, mode })

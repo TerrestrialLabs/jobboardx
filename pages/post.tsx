@@ -6,7 +6,7 @@ import Image from 'next/image'
 import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import { useRouter } from 'next/router'
-import { PERKS, TYPE, TYPE_MAP } from '../const/const'
+import { PERKS, ROLE, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
 import cities from '../data/world_cities.json'
 import { TextEditorPlaceholder } from '../components/post/TextEditor'
@@ -168,6 +168,9 @@ const Post: NextPage = () => {
 
     const router = useRouter()
 
+    // @ts-ignore
+    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.EMPLOYER)
+
     useEffect(() => {
         if (session?.user) {
             setSignedIn(true)
@@ -175,7 +178,7 @@ const Post: NextPage = () => {
     }, [session?.user])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (accessDenied) {
             router.push('/')
         }
     }, [status])
@@ -188,7 +191,7 @@ const Post: NextPage = () => {
         )
     }
 
-    if (status === 'unauthenticated') {
+    if (accessDenied) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <Typography>Access Denied</Typography>

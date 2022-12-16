@@ -8,6 +8,7 @@ import { JobBoardContext, JobBoardContextValue } from '../../../context/JobBoard
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { Box, CircularProgress, Typography } from '@mui/material'
+import { ROLE } from "../../../const/const"
 
 // TO DO: We don't need stripe but can't conditionally use hooks in PostForm
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
@@ -20,6 +21,9 @@ const Edit: NextPage = () => {
 
     const router = useRouter()
 
+    // @ts-ignore
+    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.EMPLOYER)
+
     useEffect(() => {
         if (session?.user) {
             setSignedIn(true)
@@ -27,7 +31,7 @@ const Edit: NextPage = () => {
     }, [session?.user])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (accessDenied) {
             router.push('/')
         }
     }, [status])
@@ -40,7 +44,7 @@ const Edit: NextPage = () => {
         )
     }
 
-    if (status === 'unauthenticated') {
+    if (accessDenied) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <Typography>Access Denied</Typography>

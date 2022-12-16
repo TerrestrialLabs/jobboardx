@@ -12,27 +12,26 @@ const BillingAddressSchema = new mongoose.Schema({
 }, { _id : false })
 
 const EmployerSchema = new mongoose.Schema({
-    jobboardId: { type: String, required: true },
-    company: { type: String, required: true, unique: true },
+    company: { type: String, required: true, index: true, unique: true, sparse: true },
     website: { type: String, required: true },
     logo: { type: String },
     billingAddress: { type: BillingAddressSchema, default: null }
 }, { _id : false })
 
-const AdminSchema = new mongoose.Schema({
-    jobboardId: { type: String, required: true },
-}, { _id : false })
-
 const UserSchema = new mongoose.Schema({
+    jobboardId: { type: String, required: isJobboardIdRequired },
     email: { type: String, required: true, unique: true },
     // TO DO: Enum
     role: { type: String, required: true },
-    employer: { type: EmployerSchema, default: null },
-    admin: { type: AdminSchema, default: null }
+    employer: { type: EmployerSchema }
 }, { timestamps: true })
 
+function isJobboardIdRequired() {
+    // @ts-ignore
+    return this.role !== 'superadmin'
+}
+
 export type EmployerType = {
-    jobboardId: string
     company: string
     website: string
     logo: string
@@ -48,16 +47,11 @@ export type EmployerType = {
     } | null
 }
 
-export type AdminType = {
-    jobboardId: string
-}
-
 export type UserType = {
     _id: string
     email: string
     role: string
     employer: EmployerType | null
-    admin: AdminType | null
 }
 
 export type Employer = UserType & {
@@ -65,3 +59,5 @@ export type Employer = UserType & {
 }
 
 export default mongoose.models.User || mongoose.model('User', UserSchema)
+
+// mongoose.models.User.collection.dropIndexes()
