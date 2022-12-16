@@ -40,7 +40,7 @@ export default async function handler(
             const session = await getSession({ req })
             // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
-            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
+            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
                 throw Error('Unauthorized')
             }
             // Hardcode default job board for local development

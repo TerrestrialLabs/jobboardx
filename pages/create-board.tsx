@@ -58,7 +58,7 @@ const CreateBoardForm: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN)
+    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
 
     useEffect(() => {
         if (session?.user) {
