@@ -7,6 +7,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { useWindowSize } from '../hooks/hooks'
 import { useSession } from 'next-auth/react'
+import { ROLE } from '../const/const'
 
 const Header = () => {
     const router = useRouter()
@@ -15,9 +16,8 @@ const Header = () => {
 
     const { data: session } = useSession()
 
-    // TO DO: Enum for role type
     // @ts-ignore
-    const isEmployer = session?.user?.role === 'employer'
+    const isEmployer = session?.user && session?.user?.role === ROLE.EMPLOYER
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const accountMenuOpen = Boolean(anchorEl)

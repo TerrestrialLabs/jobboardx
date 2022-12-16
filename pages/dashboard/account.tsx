@@ -101,12 +101,12 @@ const Account: NextPage = () => {
         try {
             if (session?.user) {
                 const formData = new FormData()
-                const employerData = {
+                const userData = {
                     ...session.user,
                     email: form.email.trim()
                 }
 
-                formData.set('employerData', JSON.stringify(employerData))
+                formData.set('userData', JSON.stringify(userData))
 
                 await axios.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }

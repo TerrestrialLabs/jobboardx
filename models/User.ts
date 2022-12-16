@@ -11,36 +11,57 @@ const BillingAddressSchema = new mongoose.Schema({
     postalCode: { type: String, required: true }
 }, { _id : false })
 
-const UserSchema = new mongoose.Schema({
-    company: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    website: { type: String, required: true },
+const EmployerSchema = new mongoose.Schema({
     jobboardId: { type: String, required: true },
+    company: { type: String, required: true, unique: true },
+    website: { type: String, required: true },
     logo: { type: String },
+    billingAddress: { type: BillingAddressSchema, default: null }
+}, { _id : false })
+
+const AdminSchema = new mongoose.Schema({
+    jobboardId: { type: String, required: true },
+}, { _id : false })
+
+const UserSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
     // TO DO: Enum
     role: { type: String, required: true },
-    billingAddress: { type: BillingAddressSchema, default: null }
+    employer: { type: EmployerSchema, default: null },
+    admin: { type: AdminSchema, default: null }
 }, { timestamps: true })
 
-export type UserType = {
-    _id: string,
-    company: string,
-    email: string,
-    website: string,
-    jobboardId: string,
+export type EmployerType = {
+    jobboardId: string
+    company: string
+    website: string
     logo: string
-    // TO DO: Enum
-    role: string,
     billingAddress: {
-        firstName: string,
-        lastName: string,
-        addressLine1: string,
-        addressLine2: string,
-        city: string,
-        state: string,
-        country: string,
+        firstName: string
+        lastName: string
+        addressLine1: string
+        addressLine2: string
+        city: string
+        state: string
+        country: string
         postalCode: string
     } | null
+}
+
+export type AdminType = {
+    jobboardId: string
+}
+
+export type UserType = {
+    _id: string
+    email: string
+    role: string
+    employer: EmployerType | null
+    admin: AdminType | null
+}
+
+export type Employer = UserType & {
+    employer: EmployerType
 }
 
 export default mongoose.models.User || mongoose.model('User', UserSchema)

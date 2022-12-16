@@ -155,22 +155,25 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         try {
             const formData = logo ? logo : new FormData()
 
-            const employerData = { 
-                jobboardId: jobboard._id,
+            const userData = { 
                 email: form.email.trim().toLowerCase(),
-                company: form.company.trim(),
-                website: form.website.trim(),
-                logo: logoUrl ? logoUrl : '',
+                employer: {
+                    jobboardId: jobboard._id,
+                    company: form.company.trim(),
+                    website: form.website.trim(),
+                    logo: logoUrl ? logoUrl : ''
+                }
             }
 
-            formData.set('employerData', JSON.stringify(employerData))
+            formData.set('userData', JSON.stringify(userData))
 
-            const res = await axios.post(`${baseUrlApi}auth/signup`, formData, { 
+            const res = await axios.post(`${baseUrlApi}auth/employer-signup`, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
             
             if (res.status === 201) {
                 await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
+                setSubmitted(true)
             }
         } catch (err) {
             if (axios.isAxiosError(err)) {

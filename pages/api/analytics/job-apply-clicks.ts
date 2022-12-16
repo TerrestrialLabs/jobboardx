@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import UserEvent from '../../../models/UserEvent'
 import { getSession } from 'next-auth/react'
+import { ROLE } from '../../../const/const'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
@@ -21,8 +22,9 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const session = await getSession({ req })
+            const user = session?.user
             // @ts-ignore
-            if (!session?.user || (session?.user.role !== 'employer' && session?.user.role !== 'admin')) {
+            if (!user || (user?.role !== ROLE.EMPLOYER && user?.role !== ROLE.ADMIN && user?.role !== ROLE.SUPERADMIN)) {
                 const ipAddress = req.headers['x-forwarded-for']  || req.socket.remoteAddress
 
                 await UserEvent.create({

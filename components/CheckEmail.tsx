@@ -11,7 +11,7 @@ const CheckEmail = ({ signup }: { signup?: boolean }) => {
             <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 6} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
                 <Box mb={4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Check your email</Typography></Box>
                 <Box>
-                    <Typography textAlign='center'>A {signup ? 'verification' : 'sign in'} link has been sent to your email address if your account exists.</Typography>
+                    <Typography textAlign='center'>A {signup ? 'verification' : 'sign in'} link has been sent to your email address{signup ? '' : ' if your account exists'}.</Typography>
                 </Box>
             </Box>
         </Grid>

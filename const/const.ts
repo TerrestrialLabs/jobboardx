@@ -1,5 +1,11 @@
 // TO DO: Break up into separate files
 
+export enum ROLE {
+    EMPLOYER = 'employer',
+    ADMIN = 'admin',
+    SUPERADMIN = 'superadmin'
+}
+
 export const TYPE = {
     FULLTIME: 'fulltime',
     PARTTIME: 'parttime',

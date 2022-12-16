@@ -7,6 +7,7 @@ import sgMail from '@sendgrid/mail'
 import User from '../../../models/User'
 import { getSession } from 'next-auth/react'
 import axios from 'axios'
+import { ROLE } from '../../../const/const'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -34,7 +35,7 @@ export const signUp = nextConnect<NextApiRequest, NextApiResponse>()
 signUp.use(singleUpload)
 
 signUp.put(async (req, res) => {
-    const employerData = JSON.parse(req.body['employerData'])
+    const userData = JSON.parse(req.body['userData'])
 
     let dataURI
     // @ts-ignore
@@ -48,13 +49,12 @@ signUp.put(async (req, res) => {
     try {
         const session = await getSession({ req })
         // @ts-ignore
-        if (!session?.user || employerData._id !== session?.user._id) {
+        if (!session?.user || userData._id !== session?.user._id) {
             throw Error('Unauthorized')
         }
 
-        // TO DO
         // 1. Check if account exists (unique email, company)
-        const user = await User.findOne({ email: employerData.email, company: employerData.company })
+        const user = await User.findOne({ email: userData.email, 'employer.company': userData.employer.company })
         // @ts-ignore
         if (user && user._id.toString() !== session?.user._id) {
             throw Error('A company with this name or email address already exists.')
@@ -62,7 +62,7 @@ signUp.put(async (req, res) => {
 
         // 2. Upload logo image
         let cloudinaryRes, 
-            cloudinaryUrl = employerData.logo
+            cloudinaryUrl = userData.employer.logo
         // New logo image has been attached to req
         if (dataURI) {
             cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { 
@@ -74,15 +74,16 @@ signUp.put(async (req, res) => {
                 cloudinaryUrl = cloudinaryRes.url
             }
         }
-        employerData.logo = cloudinaryUrl
+        userData.employer.logo = cloudinaryUrl
 
         // 3. Create account
         const employer = await User.findOneAndUpdate(
             // @ts-ignore
             { _id: session?.user._id }, 
             {
-                ...employerData,
-                role: 'employer'
+                ...userData,
+                role: ROLE.EMPLOYER,
+                admin: null
             }, 
             { new: true })
 

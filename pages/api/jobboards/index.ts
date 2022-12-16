@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import JobBoard from '../../../models/JobBoard'
 import { getSession } from 'next-auth/react'
+import { ROLE } from '../../../const/const'
 
 export type JobBoardData = {
     _id: string
@@ -48,7 +49,7 @@ export default async function handler(
             const session = await getSession({ req })
             // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
-            if (!session?.user || session?.user?.role !== 'admin') {
+            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
                 throw Error('Unauthorized')
             }
 

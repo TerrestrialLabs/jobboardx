@@ -5,6 +5,7 @@ import multer from 'multer'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import User from '../../../models/User'
+import { ROLE } from '../../../const/const'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -32,7 +33,7 @@ export const signUp = nextConnect<NextApiRequest, NextApiResponse>()
 signUp.use(singleUpload)
 
 signUp.post(async (req, res) => {
-    const employerData = JSON.parse(req.body['employerData'])
+    const userData = JSON.parse(req.body['userData'])
 
     let dataURI
     // @ts-ignore
@@ -44,16 +45,15 @@ signUp.post(async (req, res) => {
     }
 
     try {
-        // TO DO
         // 1. Check if account exists (unique email, company)
-        const user = await User.findOne({ email: employerData.email, company: employerData.company })
+        const user = await User.findOne({ email: userData.email, 'employer.company': userData.employer.company })
         if (user) {
             throw Error('A company with this name or email address already exists.')
         }
 
         // 2. Upload logo image
         let cloudinaryRes, 
-            cloudinaryUrl = employerData.logo
+            cloudinaryUrl = userData.employer.logo
         // New logo image has been attached to req
         if (dataURI) {
             cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { 
@@ -65,13 +65,13 @@ signUp.post(async (req, res) => {
         if (cloudinaryRes) {
             cloudinaryUrl = cloudinaryRes.url
         }
-        employerData.logo = cloudinaryUrl
+        userData.employer.logo = cloudinaryUrl
 
         // 3. Create account
-
         const employer = await User.create({
-            ...employerData,
-            role: 'employer'
+            ...userData,
+            role: ROLE.EMPLOYER,
+            admin: null
         })
 
         // await sendConfirmationEmail({ host: req.headers.host, job, mode })

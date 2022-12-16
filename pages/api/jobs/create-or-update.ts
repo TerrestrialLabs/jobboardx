@@ -10,7 +10,7 @@ import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
 import { getSession } from 'next-auth/react'
-import User, { UserType } from '../../../models/User'
+import User, { Employer, UserType } from '../../../models/User'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -50,7 +50,7 @@ createOrUpdateJob.post(async (req, res) => {
             throw Error('Unauthorized')
         }
         
-        const employer = await User.findOne({ email: session.user.email }) as UserType
+        const user = await User.findOne({ email: session.user.email }) as Employer
 
         // 1. Check for payment (create job)
         let orderId
@@ -70,9 +70,9 @@ createOrUpdateJob.post(async (req, res) => {
         if (mode === 'create') {
             const job = await Job.create({
                 ...jobData,
-                company: employer.company,
-                companyUrl: employer.website,
-                companyLogo: employer.logo,
+                company: user.employer.company,
+                companyUrl: user.employer.website,
+                companyLogo: user.employer.logo,
                 datePosted: req.body.datePosted ? req.body.datePosted : new Date(),
                 orderId
             })
@@ -86,9 +86,9 @@ createOrUpdateJob.post(async (req, res) => {
                 { _id: jobData._id }, 
                 {
                     ...jobData,
-                    company: employer.company,
-                    companyUrl: employer.website,
-                    companyLogo: employer.logo 
+                    company: user.employer.company,
+                    companyUrl: user.employer.website,
+                    companyLogo: user.employer.logo 
                 }, 
                 { new: true }
             ).select('-orderId')

@@ -8,7 +8,7 @@ import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
 import { useSession } from 'next-auth/react'
-import { UserType } from '../../models/User'
+import { Employer, UserType } from '../../models/User'
 import { Close } from '@mui/icons-material'
 import axios from 'axios'
 
@@ -52,12 +52,12 @@ const CompanyProfile: NextPage = () => {
 
     useEffect(() => {
         if (session?.user && !formLoaded) {
-            // @ts-ignore
-            const { company, logo, website } = session.user
-            setLogoUrl(logo)
+
+            const { employer } = session.user as Employer
+            setLogoUrl(employer.logo)
             setForm({
-                company,
-                website
+                company: employer.company,
+                website: employer.website
             })
             setFormLoaded(true)
         }
@@ -147,14 +147,17 @@ const CompanyProfile: NextPage = () => {
             if (session?.user) {
                 const formData = logo ? logo : new FormData()
 
-                const employerData = {
+                const userData = {
                     ...session.user,
-                    company: form.company.trim(),
-                    website: form.website.trim(),
-                    logo: logoUrl ? logoUrl : ''
+                    employer: {
+                        ...(session.user as Employer).employer,
+                        company: form.company.trim(),
+                        website: form.website.trim(),
+                        logo: logoUrl ? logoUrl : ''
+                    }
                 }
 
-                formData.set('employerData', JSON.stringify(employerData))
+                formData.set('userData', JSON.stringify(userData))
     
                 await axios.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
@@ -165,9 +168,9 @@ const CompanyProfile: NextPage = () => {
                 // TO DO: Update existing jobs
                 // Don't need to await this
                 axios.put(`${baseUrlApi}jobs/employer-jobs`, {
-                    company: employerData.company,
-                    companyUrl: employerData.website,
-                    companyLogo: employerData.logo
+                    company: userData.employer.company,
+                    companyUrl: userData.employer.website,
+                    companyLogo: userData.employer.logo
                 })
 
                 setSubmitted(true)

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import { ROLE } from '../const/const'
 
 const Dashboard = ({ content }: { content: JSX.Element }) => {
     const { data: session, status } = useSession()
@@ -18,7 +19,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || session?.user?.role !== 'employer'
+    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.EMPLOYER)
 
     useEffect(() => {
         if (session?.user) {

@@ -23,6 +23,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { useSession } from 'next-auth/react'
 import { JobData } from '../models/Job'
 import { useUnsavedChangesHandler } from '../hooks/unsavedChanges'
+import { Employer } from '../models/User'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -157,6 +158,8 @@ const unselectedPostTypeStyle = {
 
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
 
+const OPTIONAL_FIELDS = ['addressLine2']
+
 const Post: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
@@ -259,11 +262,12 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const accessDenied = (edit && !!job && session?.user?._id !== job.employerId)
 
     useEffect(() => {
-        // @ts-ignore
-        if (session?.user && session?.user.billingAddress) {
-            // @ts-ignore
-            setBillingAddress(session?.user.billingAddress)
-            setEditBillingAddress(false)
+        if (session?.user) {
+            const user = session?.user as Employer
+            if (user.employer.billingAddress) {
+                setBillingAddress(user.employer.billingAddress)
+                setEditBillingAddress(false)
+            }
         }
     }, [session?.user])
 
@@ -369,7 +373,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             for (const field in billingAddress) {
                 // TO DO: Arr of optional fields to ignore
                 // @ts-ignore
-                if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim() && field !== 'addressLine2')) {
+                if ((typeof billingAddress[field] === 'string' && !billingAddress[field].trim() && !OPTIONAL_FIELDS.includes(field))) {
                     newBillingAddressErrors[field] = ERROR.EMPTY
                     isBillingAddressValid = false
                 }
@@ -451,11 +455,14 @@ export const PostForm = ({ edit }: PostFormProps) => {
 
                 if (editBillingAddress) {
                     const formData = new FormData()
-                    const employerData = {
+                    const userData = {
                         ...session.user,
-                        billingAddress
+                        employer: {
+                            ...(session.user as Employer).employer,
+                            billingAddress
+                        }
                     }
-                    formData.set('employerData', JSON.stringify(employerData))
+                    formData.set('userData', JSON.stringify(userData))
                     await axios.put(`${baseUrlApi}auth/update`, formData, { 
                         headers: { 'Content-Type': 'multipart/form-data' }
                     })

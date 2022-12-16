@@ -10,6 +10,7 @@ import Dashboard from '../../components/Dashboard'
 import { useSession } from 'next-auth/react'
 import axios from 'axios'
 import countryCodes from '../../data/country_codes.json'
+import { Employer } from '../../models/User'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -39,6 +40,8 @@ const initState = {
     country: 'US'
 }
 
+const OPTIONAL_FIELDS = ['addressLine2']
+
 const BillingDetails: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
@@ -57,8 +60,7 @@ const BillingDetails: NextPage = () => {
 
     useEffect(() => {
         if (session?.user && !formLoaded) {
-            // @ts-ignore
-            const { billingAddress } = session.user
+            const { billingAddress } = (session.user as Employer).employer
             setForm(billingAddress ?? initState)
             setFormLoaded(true)
         }
@@ -79,7 +81,7 @@ const BillingDetails: NextPage = () => {
 
         for (const field in form) {
             // @ts-ignore
-            if ((typeof form[field] === 'string' && !form[field].trim())) {
+            if ((typeof form[field] === 'string' && !form[field].trim() && !OPTIONAL_FIELDS.includes(field))) {
                 newErrors[field] = ERROR.EMPTY
                 isValid = false
             }
@@ -105,21 +107,25 @@ const BillingDetails: NextPage = () => {
             if (session?.user) {
                 const formData = new FormData()
 
-                const employerData = {
+                const userData = {
                     ...session.user,
-                    billingAddress: {
-                        firstName: form.firstName.trim(),
-                        lastName: form.lastName.trim(),
-                        addressLine1: form.addressLine1.trim(),
-                        addressLine2: form.addressLine2.trim(),
-                        city: form.city.trim(),
-                        state: form.state.trim(),
-                        postalCode: form.postalCode.trim(),
-                        country: form.country.trim()
+                    employer: {
+                        ...(session.user as Employer).employer,
+                        billingAddress: {
+                            firstName: form.firstName.trim(),
+                            lastName: form.lastName.trim(),
+                            addressLine1: form.addressLine1.trim(),
+                            addressLine2: form.addressLine2.trim(),
+                            city: form.city.trim(),
+                            state: form.state.trim(),
+                            postalCode: form.postalCode.trim(),
+                            country: form.country.trim()
+                        }
                     }
+
                 }
 
-                formData.set('employerData', JSON.stringify(employerData))
+                formData.set('userData', JSON.stringify(userData))
     
                 await axios.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
