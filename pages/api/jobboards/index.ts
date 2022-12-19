@@ -14,6 +14,7 @@ export type JobBoardData = {
     homeTitle: string
     homeSubtitle: string
     heroImage: string
+    logoImage: string
     skills: string[]
     priceFeatured: number
     priceRegular: number
@@ -47,13 +48,13 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const session = await getSession({ req })
-            // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
             if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
                 throw Error('Unauthorized')
             }
 
-            const jobboard = await JobBoard.create(req.body)
+            const jobboard = await JobBoard.create({ ...req.body, email: session.user.email })
+
             res.status(201).json(jobboard)
         } catch(err) {
             // @ts-ignore

@@ -37,13 +37,13 @@ const initState = {
     homeSubtitle: '',
     heroImage: 'https://media.istockphoto.com/id/1252581438/photo/retro-starburst-sunburst-background-pattern-and-vintage-color-palette-of-orange-red-beige.jpg?b=1&s=170667a&w=0&k=20&c=_PzHPg3EOXvmH5nwHrOtVYK8pFjI_-2G-8A5jKQCPEE=',
     logoImage: '',
-    skills: [],
+    skills: [] as string[],
     priceRegular: 49,
     priceFeatured: 99
 }
 
-const CreateBoardForm: NextPage = () => {
-    const { baseUrlApi } = useContext(JobBoardContext) as JobBoardContextValue
+const JobBoard: NextPage = () => {
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const { data: session, status } = useSession()
     const [signedIn, setSignedIn] = useState(false)
@@ -62,6 +62,22 @@ const CreateBoardForm: NextPage = () => {
 
     // @ts-ignore
     const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
+
+    useEffect(() => {
+        setForm({
+            ...initState,
+            title: jobboard.title,
+            domain: jobboard.domain,
+            company: jobboard.company,
+            homeTitle: jobboard.homeTitle,
+            homeSubtitle: jobboard.homeSubtitle,
+            heroImage: jobboard.heroImage,
+            logoImage: jobboard.logoImage,
+            skills: jobboard.skills,
+            priceRegular: jobboard.priceRegular,
+            priceFeatured: jobboard.priceFeatured
+        })
+    }, [jobboard])
 
     useEffect(() => {
         if (session?.user) {
@@ -136,18 +152,10 @@ const CreateBoardForm: NextPage = () => {
         return isValid
     }
 
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
-    }
-
     return (
         <div className={styles.container}>
             <Head>
-                <title>Job Board | Create</title>
+                <title>Job Board | Update</title>
                 <meta name="description" content="Contact" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -156,8 +164,7 @@ const CreateBoardForm: NextPage = () => {
                 <Grid container justifyContent='center' pb={mobile ? 2 : 4}>
                     <Grid xs={12} sm={10} lg={8} p={2} pt={0} pb={mobile ? 0 : 2}>
                         <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                            <Typography mb={2} variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Create Job Board</Typography>
-                            <Typography variant='h2' fontSize={16} color='grey'>Create a niche job board with backfilled jobs and a custom domain.</Typography>
+                            <Typography variant='h1' fontWeight='bold' fontSize={mobile ? 22 : 30}>Update Job Board</Typography>
                         </Box>
                     </Grid>
 
@@ -273,4 +280,4 @@ const CreateBoardForm: NextPage = () => {
     )
 }
 
-export default CreateBoardForm
+export default JobBoard

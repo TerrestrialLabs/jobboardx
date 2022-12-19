@@ -9,6 +9,7 @@ const JobBoardSchema = new mongoose.Schema({
     homeTitle: { type: String, required: true },
     homeSubtitle: { type: String, required: true },
     heroImage: { type: String },
+    logoImage: { type: String },
     skills: { type: [String], default: [] },
     priceRegular: { type: Number, required: true },
     priceFeatured: { type: Number, required: true }
