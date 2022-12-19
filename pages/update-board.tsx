@@ -10,7 +10,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { ROLE } from '../const/const'
-import { scrapeJobs } from '../scraper'
+// import { scrapeJobs } from '../scraper'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',

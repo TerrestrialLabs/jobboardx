@@ -3,7 +3,7 @@ const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
 
-export async function scrapeJobs(domain) {
+async function scrapeJobs(domain) {
     const jobboard = await axios.get(`https://${domain}/api/jobboards/current`)
 
     const browser = await puppeteer.launch()
