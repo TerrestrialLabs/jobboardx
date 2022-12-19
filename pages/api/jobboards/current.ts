@@ -28,7 +28,7 @@ export default async function handler(
             // Hardcode default job board for local development
             // TO DO: Save default domain in env var
             const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-            const jobboard = await JobBoard.findOne({ domain }).select('-email')
+            const jobboard = await JobBoard.findOne({ domain }).select('-email').select('-searchQuery')
             // @ts-ignore
             res.status(200).json(jobboard)
         } catch (err) {
