@@ -26,6 +26,7 @@ export const getFilters = (query: NextApiRequest['query']) => {
         jobboardId: query.jobboardId as string,
         ...(query.employerId ? { employerId: query.employerId } : {}),
         ...(query.type ? { type: query.type } : {}),
+        ...(query.company ? { company: query.company } : {}),
         ...(query.location 
             ? ((query.location as string).toLowerCase() === 'remote' ? { remote: true } : { location: query.location }) 
             : {}),

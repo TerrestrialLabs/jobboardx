@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
+import cloudinary from 'cloudinary'
+
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
@@ -19,8 +26,9 @@ export default async function handler(
 
     if (method === 'POST') {
         try {
-            const existingJob = await Job.findOne({ applicationLink: req.body.applicationLink, backfilled: true }).exec()
-            const clientCompany = await Job.findOne({ company: req.body.company, backfilled: false })
+            const job = req.body.jobData
+            const existingJob = await Job.findOne({ applicationLink: job.applicationLink, backfilled: true }).exec()
+            const clientCompany = await Job.findOne({ company: job.company, backfilled: false })
             // We've already scraped this job
             if (existingJob) {
                 throw Error('This job already exists')
@@ -30,20 +38,27 @@ export default async function handler(
                 throw Error('This company already exists')
             }
 
-            if (!req.body.applicationLink.startsWith('https://www.simplyhired.com')) {
+            if (!job.applicationLink.startsWith('https://www.simplyhired.com')) {
                 throw Error('Invalid request')
             }
 
-            const job = await Job.create({
-                ...req.body,
+            // Upload logo
+            let logo
+            var dataURI = 'data:image/jpeg;base64,' + req.body.image
+            if (dataURI) {
+                logo = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { console.log(result, error) })
+            }
+            
+            const newJob = await Job.create({
+                ...job,
+                companyLogo: logo?.url ? logo.url : '',
                 backfilled: true,
-                datePosted: req.body.datePosted ? req.body.datePosted : new Date()
+                datePosted: job.datePosted ? job.datePosted : new Date()
             })
-
             // For some reason we get an error even though we're doing this after creating job
             // delete job.orderId
 
-            res.status(201).json(job)
+            res.status(201).json(newJob)
         } catch(err) {
             // TO DO
             // @ts-ignore

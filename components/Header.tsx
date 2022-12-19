@@ -18,6 +18,8 @@ const Header = () => {
 
     // @ts-ignore
     const isEmployer = session?.user && session?.user?.role === ROLE.EMPLOYER
+    // @ts-ignore
+    const isAdmin = session?.user && (session?.user?.role === ROLE.ADMIN || session?.user?.role === ROLE.SUPERADMIN)
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const accountMenuOpen = Boolean(anchorEl)
@@ -60,7 +62,7 @@ const Header = () => {
             }}
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
-            <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>
+            <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>{isAdmin ? 'Admin' : 'Employers'}</Typography></Box>
             {session?.user && isEmployer && <MenuItem onClick={handleAccountMenuClose}><Link href='/dashboard'>Dashboard</Link></MenuItem>}
             {session?.user && <MenuItem onClick={handleAccountMenuClose}><Link href='/logout'>Logout</Link></MenuItem>}
 

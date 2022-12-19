@@ -119,58 +119,99 @@ async function scrapeJobs(domain) {
     // Remove jobs that are missing important data
     const jobsToSave = jobs
         .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
+        .filter(job => !!job.companyLogo)
         .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
+
 
     const jobsWithLogo = await Promise.all(
         jobsToSave.map(async job => {
-            if (job.companyLogo) {
-                const response = await fetch(job.companyLogo)
-                const blob = await response.blob()
-                const arrayBuffer = await blob.arrayBuffer()
-                const buffer = Buffer.from(arrayBuffer)
-                const base64data = buffer.toString('base64');
-                const uploadRes = await uploadToCloudinary(base64data)
+            const response = await fetch(job.companyLogo)
+            const blob = await response.blob()
+            const arrayBuffer = await blob.arrayBuffer()
+            const buffer = Buffer.from(arrayBuffer)
+            const base64data = buffer.toString('base64');
 
-                if (uploadRes) {
-                    return {
-                        ...job,
-                        companyLogo: uploadRes
-                    }
-                }
+            return {
+                jobData: {
+                    ...job,
+                    email: 'no-reply@example.com',
+                    orderId: uuid.v4(),
+                    jobboardId: jobboard.data._id
+                },
+                image: base64data
             }
-            return job
         })
     )
 
-    // Write to database
-    for (let i = 0; i < jobsWithLogo.length; i++) {
+    for (let i = 0; i < 1; i++) { 
+    // for (let i = 0; i < jobsWithLogo.length; i++) { 
         try {
-            const body = {
-                ...jobsWithLogo[i],
-                email: 'no-reply@example.com',
-                orderId: uuid.v4(),
-                jobboardId: jobboard.data._id
-            }
-            const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, body)
-            console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
+            // const res = await axios.post(`https://${domain}/api/jobs/backfill`, jobsWithLogo[i])
+            const res = await axios.post(`http://localhost:3000/api/jobs/backfill`, jobsWithLogo[i])
             console.log(res.data)
         } catch (err) {
             console.log(err)
         }
     }
 
-    async function uploadToCloudinary (image) {
-        try {
-            const response = await fetch(`https://${domain}/api/jobs/upload-image-backfill`, {
-                method: 'POST',
-                body: image
-            })
-            const data = await response.json()
-            return data
-        } catch (err) {
-            throw err
-        }
-    }
+
+    
+
+
+
+
+
+
+    // const jobsWithLogo = await Promise.all(
+    //     jobsToSave.map(async job => {
+    //         if (job.companyLogo) {
+    //             const response = await fetch(job.companyLogo)
+    //             const blob = await response.blob()
+    //             const arrayBuffer = await blob.arrayBuffer()
+    //             const buffer = Buffer.from(arrayBuffer)
+    //             const base64data = buffer.toString('base64');
+    //             const uploadRes = await uploadToCloudinary(base64data)
+
+    //             if (uploadRes) {
+    //                 return {
+    //                     ...job,
+    //                     companyLogo: uploadRes
+    //                 }
+    //             }
+    //         }
+    //         return job
+    //     })
+    // )
+
+    // Write to database
+    // for (let i = 0; i < jobsWithLogo.length; i++) {
+    //     try {
+    //         const body = {
+    //             ...jobsWithLogo[i],
+    //             email: 'no-reply@example.com',
+    //             orderId: uuid.v4(),
+    //             jobboardId: jobboard.data._id
+    //         }
+    //         const res = await axios.post(`https://${domain}/api/jobs/create-backfilled-job`, body)
+    //         console.log(`Saved ${i+1} job${i === 0 ? '' : 's'} to the database`)
+    //         console.log(res.data)
+    //     } catch (err) {
+    //         console.log(err)
+    //     }
+    // }
+
+    // async function uploadToCloudinary (image) {
+    //     try {
+    //         const response = await fetch(`https://${domain}/api/jobs/upload-image-backfill`, {
+    //             method: 'POST',
+    //             body: image
+    //         })
+    //         const data = await response.json()
+    //         return data
+    //     } catch (err) {
+    //         throw err
+    //     }
+    // }
 }
 
 scrapeJobs('www.reactdevjobs.io')
