@@ -4,6 +4,7 @@ import Job from '../../../models/Job'
 import JobBoard from '../../../models/JobBoard'
 import type { JobBoardData } from './index'
 import { getSession } from 'next-auth/react'
+import { ROLE } from '../../../const/const'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 

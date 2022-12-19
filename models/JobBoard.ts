@@ -12,7 +12,8 @@ const JobBoardSchema = new mongoose.Schema({
     logoImage: { type: String },
     skills: { type: [String], default: [] },
     priceRegular: { type: Number, required: true },
-    priceFeatured: { type: Number, required: true }
+    priceFeatured: { type: Number, required: true },
+    searchQuery: { type: String, required: true }
 }, { timestamps: true })
 
 export default mongoose.models.JobBoard || mongoose.model('JobBoard', JobBoardSchema)

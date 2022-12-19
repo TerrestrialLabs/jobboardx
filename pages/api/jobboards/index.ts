@@ -18,6 +18,7 @@ export type JobBoardData = {
     skills: string[]
     priceFeatured: number
     priceRegular: number
+    searchQuery: string
 }
 
 function getErrorMessage(error: unknown) {

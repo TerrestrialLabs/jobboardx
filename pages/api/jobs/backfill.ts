@@ -27,6 +27,11 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const job = req.body.jobData
+
+            if (!job.applicationLink.startsWith('https://www.simplyhired.com')) {
+                throw Error('Invalid request')
+            }
+
             const existingJob = await Job.findOne({ applicationLink: job.applicationLink, backfilled: true }).exec()
             const clientCompany = await Job.findOne({ company: job.company, backfilled: false })
             // We've already scraped this job
@@ -36,10 +41,6 @@ export default async function handler(
             // Fail if scraped job company has a real job posting
             if (clientCompany) {
                 throw Error('This company already exists')
-            }
-
-            if (!job.applicationLink.startsWith('https://www.simplyhired.com')) {
-                throw Error('Invalid request')
             }
 
             // Upload logo

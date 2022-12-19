@@ -27,7 +27,8 @@ const initErrors: { [key: string]: string } = {
     logoImage: '',
     skills: '',
     priceRegular: '',
-    priceFeatured: ''
+    priceFeatured: '',
+    searchQuery: ''
 }
 
 const initState = {
@@ -40,7 +41,8 @@ const initState = {
     logoImage: '',
     skills: [] as string[],
     priceRegular: 49,
-    priceFeatured: 99
+    priceFeatured: 99,
+    searchQuery: ''
 }
 
 const JobBoard: NextPage = () => {
@@ -98,9 +100,10 @@ const JobBoard: NextPage = () => {
             logoImage: jobboard.logoImage,
             skills: jobboard.skills,
             priceRegular: jobboard.priceRegular,
-            priceFeatured: jobboard.priceFeatured
+            priceFeatured: jobboard.priceFeatured,
+            searchQuery: jobboard.searchQuery
         })
-    }, [jobboard])
+    }, [])
 
     useEffect(() => {
         if (session?.user) {
@@ -145,11 +148,11 @@ const JobBoard: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}jobboards`, form)
-            if (res.status === 201) {
+            const res = await axios.put(`${baseUrlApi}jobboards/current`, form)
+            if (res.status === 200) {
                 setErrors(initErrors)
                 setSubmitted(true)
-                setForm(initState)
+                scrollTo(0, 0)
             }
         } catch (err) {
             console.log(err)
@@ -219,7 +222,7 @@ const JobBoard: NextPage = () => {
                                     </Grid> */}
 
                                     <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                        <Button fullWidth={mobile} disabled={backfillingJobs} onClick={backfillJobs} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                        <Button fullWidth={mobile} disabled={true} onClick={backfillJobs} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
                                             {backfillingJobs ? <CircularProgress color='secondary' size={22} /> : 'Backfill jobs'}
                                         </Button>
                                     </Grid>
@@ -238,7 +241,7 @@ const JobBoard: NextPage = () => {
 
                                     {submitted && (
                                         <Grid xs={12}>
-                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">Your job board has been created.</Alert>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">Your job board has been updated.</Alert>
                                         </Grid>
                                     )}
 
@@ -320,6 +323,14 @@ const JobBoard: NextPage = () => {
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Featured Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                             <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
                                             <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Backfill Search Query</Typography>
+                                            <FilledInput error={!!errors['searchQuery']} disableUnderline={!errors['searchQuery']} onChange={handleInputChange} name='searchQuery' value={form.searchQuery} autoComplete='off' inputProps={{ label: 'Backfill Search Query' }} required placeholder='Backfill Search Query' fullWidth />
+                                            <FormHelperText error>{errors['searchQuery']}</FormHelperText>
                                         </FormControl>
                                     </Grid>
 

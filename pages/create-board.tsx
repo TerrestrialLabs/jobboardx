@@ -26,7 +26,8 @@ const initErrors: { [key: string]: string } = {
     logoImage: '',
     skills: '',
     priceRegular: '',
-    priceFeatured: ''
+    priceFeatured: '',
+    searchQuery: ''
 }
 
 const initState = {
@@ -39,7 +40,8 @@ const initState = {
     logoImage: '',
     skills: [],
     priceRegular: 49,
-    priceFeatured: 99
+    priceFeatured: 99,
+    searchQuery: ''
 }
 
 const CreateBoardForm: NextPage = () => {
@@ -111,6 +113,7 @@ const CreateBoardForm: NextPage = () => {
                 setErrors(initErrors)
                 setSubmitted(true)
                 setForm(initState)
+                scrollTo(0, 0)
             }
         } catch (err) {
             console.log(err)
@@ -255,6 +258,14 @@ const CreateBoardForm: NextPage = () => {
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Featured Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                             <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
                                             <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12} sm={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Backfill Search Query</Typography>
+                                            <FilledInput error={!!errors['searchQuery']} disableUnderline={!errors['searchQuery']} onChange={handleInputChange} name='searchQuery' value={form.searchQuery} autoComplete='off' inputProps={{ label: 'Backfill Search Query' }} required placeholder='Backfill Search Query' fullWidth />
+                                            <FormHelperText error>{errors['searchQuery']}</FormHelperText>
                                         </FormControl>
                                     </Grid>
 

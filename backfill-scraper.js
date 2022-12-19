@@ -3,24 +3,20 @@ const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
 
-async function scrapeJobs(domain) {
-    const jobboard = await axios.get(`https://${domain}/api/jobboards/current`)
+async function scrapeJobs(jobboard) {
+    console.log("JOB BOARD: ", jobboard)
 
-    const searchQueries = {
-        'www.reactdevjobs.io': 'react developer'
-    }
-    const query = searchQueries[domain]
-
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage()
     let jobs = []
     let pageNum = 1
     let endOfResults = false
     const numJobsToScrape = 30
 
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+
     while (endOfResults === false) {
         if (jobs.length < numJobsToScrape) {
-            await page.goto(`https://www.simplyhired.com/search?q=${query}&pn=${pageNum}`)
+            await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
 
             const results = await page.evaluate(() => {
                 let jobList = []
@@ -168,7 +164,7 @@ async function scrapeJobs(domain) {
                     ...job,
                     email: 'no-reply@example.com',
                     orderId: uuid.v4(),
-                    jobboardId: jobboard.data._id
+                    jobboardId: jobboard._id
                 },
                 image: base64data
             }
@@ -178,11 +174,11 @@ async function scrapeJobs(domain) {
     let error = false
     for (let i = 0; i < jobsWithLogo.length; i++) { 
         try {
-            const res = await axios.post(`https://${domain}/api/jobs/backfill`, jobsWithLogo[i])
-            console.log(true)
+            const res = await axios.post(`https://${jobboard.domain}/api/jobs/backfill`, jobsWithLogo[i])
+            console.log(`Job saved: ${res.data.title}`)
         } catch (err) {
             error = true
-            console.log(err)
+            console.log(`Job ${i}: Error`)
         }
     }
 
@@ -191,4 +187,13 @@ async function scrapeJobs(domain) {
     }
 }
 
-scrapeJobs('www.reactdevjobs.io')
+async function scrapeJobsForAllBoards() {
+    // TO DO: Replace with www.jobboardx.io
+    const domain = 'www.reactdevjobs.io'
+    const { data: jobboards } = await axios.get(`https://${domain}/api/jobboards`)
+    jobboards.forEach(board => {
+        scrapeJobs(board)
+    })
+}
+
+scrapeJobsForAllBoards()
