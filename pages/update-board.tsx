@@ -10,6 +10,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { ROLE } from '../const/const'
+import { scrapeJobs } from '../scraper'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -54,14 +55,36 @@ const JobBoard: NextPage = () => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState(initErrors)
     const [submitted, setSubmitted] = useState(false)
-
     const showErrorMessage = Object.keys(errors).some(field => errors[field])
+
+    const [searchTerm, setSearchTerm] = useState('')
+    const [backfillingJobs, setBackfillingJobs] = useState(false)
+    const [backfillError, setBackfillError] = useState(false)
+    const [backfillSuccess, setBackfillSuccess] = useState(false)
+    const [numBackfilled, setNumBackfilled] = useState(0)
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
     const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
+
+    const backfillJobs = async () => {
+        // setBackfillError(false)
+        // setBackfillingJobs(true)
+        // try {
+        //     const res = await scrapeJobs()
+        //     console.log("RES: ", res)
+        //     setBackfillSuccess(true)
+        // } catch (err) {
+        //     console.log(err)
+        // }
+        // setBackfillingJobs(false)
+    }
+
+    const handleSearchTermChange = (value: string) => {
+        setSearchTerm(value)
+    }
 
     useEffect(() => {
         setForm({
@@ -169,6 +192,41 @@ const JobBoard: NextPage = () => {
                     </Grid>
 
                     <Grid xs={12} sm={10} lg={8} p={2} container>
+                        <Grid xs={12} sm={12} pb={mobile ? 2 : 4}>
+                            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                                <Grid container spacing={2}>
+                                    {backfillError && (
+                                        <Grid xs={12}>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">An error occurred.</Alert>
+                                        </Grid>
+                                    )}
+
+                                    {backfillSuccess && (
+                                        <Grid xs={12}>
+                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">{numBackfilled} jobs have been backfilled.</Alert>
+                                        </Grid>
+                                    )}
+
+                                    <Grid xs={12}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Search Term</Typography>
+                                            <FilledInput disableUnderline onChange={e => handleSearchTermChange(e.target.value)} name='searchTerm' value={searchTerm} autoComplete='off' inputProps={{ label: 'Search term' }} required placeholder='Search term' fullWidth />
+                                        </FormControl>
+                                    </Grid>
+
+                                    {/* <Grid xs={12}>
+                                        <Typography textAlign='center'>14 total backfilled jobs</Typography>
+                                    </Grid> */}
+
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Button fullWidth={mobile} disabled={backfillingJobs} onClick={backfillJobs} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
+                                            {backfillingJobs ? <CircularProgress color='secondary' size={22} /> : 'Backfill jobs'}
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Grid>
+
                         <Grid xs={12} sm={12} pb={mobile ? 2 : 4}>
                             <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                 <Grid container spacing={2}>
