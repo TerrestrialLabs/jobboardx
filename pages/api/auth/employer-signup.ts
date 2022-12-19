@@ -56,7 +56,7 @@ signUp.post(async (req, res) => {
             cloudinaryUrl = userData.employer.logo
         // New logo image has been attached to req
         if (dataURI) {
-            cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'react-dev-jobs' }, (error, result) => { 
+            cloudinaryRes = await cloudinary.v2.uploader.upload(dataURI, { folder: 'logos' }, (error, result) => { 
                 if (error) {
                     throw Error('Failed to upload logo, please try again.')
                 }
