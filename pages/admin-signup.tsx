@@ -2,7 +2,7 @@ import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHel
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
@@ -10,6 +10,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { getCsrfToken, signIn } from 'next-auth/react'
 import { Close } from '@mui/icons-material'
 import CheckEmail from '../components/CheckEmail'
+import { useRouter } from 'next/router'
 
 // TO DO: Import from const
 const ERROR = {
@@ -45,6 +46,13 @@ const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
+
+    const router = useRouter()
+
+    // TO DO
+    useEffect(() => {
+        router.push('/')
+    }, [])
 
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
@@ -121,6 +129,11 @@ const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
             event.preventDefault();
             signUp()
         }
+    }
+
+    // TO DO
+    if (true) {
+        return null
     }
     
     return (

@@ -25,6 +25,11 @@ export default async function handler(
 
     if (method === 'POST') {
         try {
+            // TO DO: Temporarily disable
+            if (true) {
+                throw Error('Unauthorized')
+            }
+            
             const user = await User.findOne({ email: req.body.email })
             if (user) {
                 throw Error('A user with this email address already exists.')
