@@ -47,42 +47,45 @@ const Companies: NextPage<Props> = ({ data }) => {
             <Box pb={4} pt={2}>
 
               <Grid container spacing={2}>
-                {data.map((employer, index) => (
-                  <Grid xs={12} md={4} pt={1}>
-                    <Box p={mobile ? 2 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%' }}>
-                      <Grid pt={0} pb={0} xs={12} display='flex' flexDirection='column' justifyContent='space-between' sx={{ height: '100%' }}>
+                {data.map((employer, index) => {
+                  const hasWebsite = employer.employer.website && employer.employer.website !== 'N/A'
+                  return (
+                    <Grid xs={12} md={4} pt={1}>
+                      <Box p={mobile ? 2 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%' }}>
+                        <Grid pt={0} pb={0} xs={12} display='flex' flexDirection='column' justifyContent='space-between' sx={{ height: '100%' }}>
 
-                        <Box>
-                          <Grid pt={0} xs={12} justifyContent='center' display='flex'>
-                            <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60px', width: '60px', backgroundColor: '#e8f3fd', flexShrink: 0, flexGrow: 0 }}>
-                              {employer.employer.logo && <img style={{ borderRadius: '50%' }} src={employer.employer.logo} alt="Company logo" width={'100%'} height={'100%'} />}
-                              {!employer.employer.logo && <Typography fontSize={20}>{employer.employer.company.slice(0, 1).toUpperCase()}</Typography>}
-                            </Box>
-                          </Grid>
+                          <Box>
+                            <Grid pt={0} xs={12} justifyContent='center' display='flex'>
+                              <Box sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60px', width: '60px', backgroundColor: '#e8f3fd', flexShrink: 0, flexGrow: 0 }}>
+                                {employer.employer.logo && <img style={{ borderRadius: '50%' }} src={employer.employer.logo} alt="Company logo" width={'100%'} height={'100%'} />}
+                                {!employer.employer.logo && <Typography fontSize={20}>{employer.employer.company.slice(0, 1).toUpperCase()}</Typography>}
+                              </Box>
+                            </Grid>
 
-                          <Grid mr={0} xs={12} justifyContent='center'>
-                            <Typography textAlign='center' fontWeight='bold'>{employer.employer.company}</Typography>
-                          </Grid>
-                        </Box>
-                        
-                        <Box>
-                          {/* {employer.employer.website && employer.employer.website !== 'N/A' && ( */}
-                           <Grid pt={0} pb={0} mr={0} xs={12} justifyContent='center' display='flex'>
-                            <Link href={'employer.employer.website'} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
-                                <Typography textAlign='center' variant='caption'>Visit company website</Typography>
-                            </Link>
-                          </Grid>
-                        {/* )} */}
+                            <Grid mr={0} xs={12} justifyContent='center'>
+                              <Typography textAlign='center' fontWeight='bold'>{employer.employer.company}</Typography>
+                            </Grid>
+                          </Box>
+                          
+                          <Box>
+                            {hasWebsite && (
+                              <Grid pt={0} pb={0} mr={0} xs={12} justifyContent='center' display='flex'>
+                                <Link href={employer.employer.website} sx={{ textDecoration: 'none' }} rel='noopener noreferrer' target='_blank'>
+                                  <Typography textAlign='center' variant='caption'>Visit company website</Typography>
+                                </Link>
+                              </Grid>
+                            )}
 
-                          <Grid pb={0} pt={mobile ? 1 : 0} xs={12} mt={mobile ? 1 : 2} display='flex' justifyContent='center' alignItems='flex-end'>
-                            <Button variant='outlined'>View jobs</Button>
-                          </Grid>
-                        </Box>
+                            <Grid pb={0} pt={mobile ? 1 : 0} xs={12} mt={mobile ? 1 : 2} display='flex' justifyContent='center' alignItems='flex-end'>
+                              <Button variant='outlined'>View jobs</Button>
+                            </Grid>
+                          </Box>
 
-                      </Grid>
-                    </Box>
-                  </Grid>
-                ))}
+                        </Grid>
+                      </Box>
+                    </Grid>
+                  )}
+                )}
               </Grid>
 
               {!data.length && <Typography textAlign='center'>No employers found</Typography>}
