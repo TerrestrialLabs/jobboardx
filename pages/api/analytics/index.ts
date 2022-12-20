@@ -3,6 +3,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import UserEvent from '../../../models/UserEvent'
 import { getSession } from 'next-auth/react'
 import Job from '../../../models/Job'
+import { ROLE } from '../../../const/const'
 
 export type UserEventType = {
     jobboardId: string
@@ -38,7 +39,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (session && session?.user?._id) {
+            if (session && session?.user?.role === ROLE.EMPLOYER) {
                 // @ts-ignore
                 const jobIds = await Job.find({ employerId: session.user._id }).distinct('_id')
                 const events = await UserEvent.find({ jobId: {$in: jobIds }})

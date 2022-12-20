@@ -16,9 +16,12 @@ import { TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { format, parseISO } from 'date-fns'
+import { useSession } from 'next-auth/react'
 
 const Jobs: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+
+    const { status } = useSession()
 
     const [data, setData] = useState<JobData[]>([])
     const [fetched, setFetched] = useState(false)
@@ -36,8 +39,10 @@ const Jobs: NextPage = () => {
     }
 
     useEffect(() => {
-        fetchData()
-    }, [])
+        if (status === 'authenticated') {
+            fetchData()
+        }
+    }, [status])
 
     const deleteJob = async () => {
         setDeleting(true)
