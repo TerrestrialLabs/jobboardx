@@ -50,7 +50,7 @@ const Companies: NextPage<Props> = ({ data }) => {
                 {data.map((employer, index) => {
                   const hasWebsite = employer.employer.website && employer.employer.website !== 'N/A'
                   return (
-                    <Grid xs={12} md={4} pt={1}>
+                    <Grid key={index} xs={12} md={4} pt={1}>
                       <Box p={mobile ? 2 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, height: '100%' }}>
                         <Grid pt={0} pb={0} xs={12} display='flex' flexDirection='column' justifyContent='space-between' sx={{ height: '100%' }}>
 
