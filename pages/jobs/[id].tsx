@@ -64,14 +64,6 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
         fetchCompanyJobsCount()
     }, [])
 
-    useEffect(() => {
-        const updateBoard = async () => {
-            // TO DO: DELETE
-            const updatedJobboardRes = await axios.put(`${baseUrlApi}jobboards/current`, {})
-        }
-        updateBoard()
-    }, [])
-
     function getLocationString() { 
         if (data.location.toLowerCase() === 'remote') {
             return 'Remote'

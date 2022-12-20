@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
+import BackfilledEmployer from '../../../models/BackfilledEmployer'
+import { ROLE } from '../../../const/const'
 
 type Filters = { 
     [key: string ]: 
@@ -63,7 +65,6 @@ export default async function handler(
 
     dbConnect()
 
-    // TO DO: We don't want description or email fields
     if (method === 'GET') {
         const resultsPerPage = 10
         const pageIndex = req.query.pageIndex ? parseInt(req.query.pageIndex as string) : 0
@@ -73,7 +74,7 @@ export default async function handler(
         const filters = getFilters(req.query)
 
         try {
-            const jobs = await Job.find(filters).select('-orderId')
+            const jobs = await Job.find(filters).select('-orderId').select('-description')
                 // TO DO: Remove createdAt
                 .sort({ 'backfilled': 1, 'datePosted': -1, 'createdAt': -1 })
                 .skip(pageIndex * resultsPerPage)

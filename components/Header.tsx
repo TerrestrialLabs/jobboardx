@@ -1,10 +1,10 @@
-import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import { Box, Button, Drawer, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { AccountCircle, GridView, Key, Logout, PersonAddAlt } from '@mui/icons-material'
+import { AccountCircle, Close, GridView, Key, Logout, Menu as MenuIcon, PersonAddAlt, Work } from '@mui/icons-material'
 import { useWindowSize } from '../hooks/hooks'
 import { useSession } from 'next-auth/react'
 import { ROLE } from '../const/const'
@@ -15,6 +15,8 @@ const Header = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const { data: session } = useSession()
+
+    const [drawerOpen, setDrawerOpen] = useState(false)
 
     // @ts-ignore
     const isEmployer = session?.user && session?.user?.role === ROLE.EMPLOYER
@@ -51,6 +53,16 @@ const Header = () => {
         return null
     }
 
+    const toggleDrawer = (event: { type: string; key: string }, value: boolean) => {
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return
+          }
+        setDrawerOpen(value)
+    }
+
+    // @ts-ignore
+    const closeDrawer = (e) => toggleDrawer(e, false)
+
     const menu = (
         <Menu
             id='account-menu'
@@ -59,17 +71,29 @@ const Header = () => {
             onClose={handleAccountMenuClose}
             MenuListProps={{
                 'aria-labelledby': 'account-button',
+                sx: { width: '170px' }
             }}
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
-            <Box p='6px 16px' mb='0.5rem' sx={{ width: '170px', borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>{isAdmin ? 'Admin' : 'Employers'}</Typography></Box>
+            {!session?.user && <Box p='6px 16px' mb='0.5rem' sx={{ borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>{isAdmin ? 'Admin' : 'Employers'}</Typography></Box>}
 
             {session?.user && isEmployer && (
                 <MenuItem onClick={handleAccountMenuClose}>
                     <Link href='/dashboard'>
                         <Box display='flex'>
-                            <GridView />
-                            <Typography ml={1}>Dashboard</Typography>
+                            <GridView fontSize='small' />
+                            <Typography fontSize='14px' ml={1}>Dashboard</Typography>
+                        </Box>
+                    </Link>
+                </MenuItem>
+            )}
+
+            {session?.user && isEmployer && mobile && (
+                <MenuItem onClick={handleAccountMenuClose}>
+                    <Link href='/post'>
+                        <Box display='flex'>
+                            <Work fontSize='small' />
+                            <Typography fontSize='14px' ml={1}>Post a job</Typography>
                         </Box>
                     </Link>
                 </MenuItem>
@@ -79,8 +103,8 @@ const Header = () => {
                 <MenuItem onClick={handleAccountMenuClose}>
                     <Link href='/logout'>
                         <Box display='flex'>
-                            <Logout />
-                            <Typography ml={1}>Logout</Typography>
+                            <Logout fontSize='small' />
+                            <Typography fontSize='14px' ml={1}>Logout</Typography>
                         </Box>
                     </Link>
                 </MenuItem>
@@ -90,8 +114,8 @@ const Header = () => {
                 <MenuItem onClick={handleAccountMenuClose}>
                     <Link href='/login'>
                         <Box display='flex'>
-                            <Key />
-                            <Typography ml={1}>Log in</Typography>
+                            <Key fontSize='small' />
+                            <Typography fontSize='14px' ml={1}>Log in</Typography>
                         </Box>
                     </Link>
                 </MenuItem>
@@ -100,8 +124,8 @@ const Header = () => {
             {(!session || !session.user) && (<MenuItem onClick={handleAccountMenuClose}>
                 <Link href='/signup'>
                     <Box display='flex'>
-                        <PersonAddAlt />
-                        <Typography ml={1}>Sign up</Typography>
+                        <PersonAddAlt fontSize='small' />
+                        <Typography fontSize='14px' ml={1}>Sign up</Typography>
                     </Box>
                 </Link>
             </MenuItem>)}
@@ -113,36 +137,78 @@ const Header = () => {
             <Grid container justifyContent='center'>
                 <Grid xs={11} sm={9} display='flex' justifyContent='space-between' alignContent='center'>
                     
-                        <Grid xs={5} sm={8}>
+                        <Box>
                             <Link href='/'>
                                 <Typography noWrap textOverflow='ellipsis' color='#fff' variant='h1' fontSize={mobile ? 20 : 28} lineHeight={'42px'} fontWeight='bold' sx={{ cursor: 'pointer', textDecoration: 'none' }}>
                                     {jobboard.title}
                                 </Typography>
                             </Link>
-                        </Grid>
+                        </Box>
 
-                        {/* {!mobile && (
-                            <Box>
-                                <Button sx={{ color: '#fff', marginRight: 2 }} variant='text'>Jobs</Button>
-                                <Button sx={{ color: '#fff' }} variant='text'>Blog</Button>
-                            </Box>
-                        )} */}
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            {!mobile && (
+                                <Box mr={3} display='flex' flexDirection='row' alignItems='center'>
+                                    <Button href='/' sx={{ color: '#fff', marginRight: 1 }} variant='text'>Jobs</Button>
+                                    <Button href='/companies' sx={{ color: '#fff' }} variant='text'>Companies</Button>
+                                </Box>
+                            )}
 
-                        <Box>
                             <IconButton 
                                 id='account-button' 
                                 aria-controls={accountMenuOpen ? 'basic-menu' : undefined}
                                 aria-haspopup="true"
                                 aria-expanded={accountMenuOpen ? 'true' : undefined}
                                 onClick={handleAccountButtonClick}
-                                sx={{ backgroundColor: '#fff', padding: 0, marginRight: 2, "&:hover": { backgroundColor: "#fff" } }}
+                                sx={{ backgroundColor: '#fff', padding: 0, "&:hover": { backgroundColor: "#fff" } }}
                             >
                                 <AccountCircle fontSize='large' color='secondary' />
                             </IconButton>
 
                             {menu}
 
-                            <Button sx={{ flexShrink: 0 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>
+                            {!mobile && <Button sx={{ flexShrink: 0, marginLeft: 2 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>}
+
+                            {mobile && (
+                                <Box ml={3}>
+                                    <IconButton 
+                                        sx={{ padding: 0 }}
+                                        edge="start"
+                                        color="inherit"
+                                        aria-label="open drawer"
+                                        // @ts-ignore
+                                        onClick={(e) => toggleDrawer(e, true)}
+                                    >   
+                                        <MenuIcon fontSize='large' />
+                                    </IconButton>
+                                </Box>
+                            )}
+
+                            {mobile && (
+                                <Drawer
+                                    anchor='right'
+                                    variant='temporary'
+                                    open={drawerOpen}
+                                    // @ts-ignore
+                                    onClose={closeDrawer}
+                                    >
+                                        <Box pl={8} pr={8} sx={{ height: '100%', backgroundColor: '#000' }}>
+                                            <Box pt={4} display='flex' justifyContent='center'>
+                                                <IconButton onClick={closeDrawer}>
+                                                    <Close color='primary' />
+                                                </IconButton>
+                                            </Box>
+
+                                            <Box pt={3} display='flex' flexDirection='column'>
+                                                <Typography textAlign='center' mb={1} color='#fff' fontWeight='bold'>{jobboard.title}</Typography>
+                                                <Button sx={{ color: '#fff' }} href='/' variant='text'>Jobs</Button>
+                                                <Button sx={{ color: '#fff' }} href='/companies' variant='text'>Companies</Button>
+                                                <Button sx={{ color: '#fff' }} href='/terms' variant='text'>Terms of Service</Button>
+                                                <Button sx={{ color: '#fff' }} href='/privacy' variant='text'>Privacy Policy</Button>
+                                                <Button sx={{ color: '#fff' }} href='/contact' variant='text'>Contact</Button>
+                                            </Box>
+                                        </Box>
+                                    </Drawer>
+                            )}
                         </Box>
                     
                 </Grid>

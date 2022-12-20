@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
 import cloudinary from 'cloudinary'
+import BackfilledEmployer from '../../../models/BackfilledEmployer'
+import { ROLE } from '../../../const/const'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -58,6 +60,21 @@ export default async function handler(
             })
             // For some reason we get an error even though we're doing this after creating job
             // delete job.orderId
+
+            // Create backfilled placeholder company
+            const backfilledEmployer = await BackfilledEmployer.findOne({ 'employer.company': job.company })
+            if (!backfilledEmployer) {
+                await BackfilledEmployer.create({
+                    jobboardId: job.jobboardId,
+                    email: 'no-reply@example.com',
+                    role: ROLE.EMPLOYER,
+                    employer: {
+                        company: job.company,
+                        website: job.companyUrl,
+                        logo: job.companyLogo
+                    }
+                })
+            }
 
             res.status(201).json(newJob)
         } catch(err) {

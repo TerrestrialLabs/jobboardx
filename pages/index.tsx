@@ -53,28 +53,9 @@ const Home: NextPage = () => {
 
   const resultsPerPage = 10
 
-  // TO DO: Testing
-  // const testingDeleteBackfilledJobs = async () => {
-  //   await axios.delete(`${baseUrlApi}jobs`)
-  // }
-
-  // TO DO: DANGEROUS!!!
-  // useEffect(() => {
-  //   testingDeleteBackfilledJobs()
-  // }, [])
-
   const trackJobApplyClick = ({ jobId, subtype }: { jobId: string, subtype: string }) => {
     axios.post(`${baseUrlApi}analytics/job-apply-clicks`, { jobId, subtype })
   }
-
-  // When filters panel open on mobile don't allow scroll
-  useEffect(() => {
-    if (filtersOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-  }, [filtersOpen])
 
   useEffect(() => {
     if (router.isReady && !jobs.length && loading && !!window) {
@@ -207,7 +188,7 @@ const Home: NextPage = () => {
           <Grid xs={12} sm={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
-              <Box sx={{ zIndex: 1 }}>
+              <Box p={2} sx={{ zIndex: 1 }}>
                 <Typography mb={2} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>{jobboard.homeTitle}</Typography>
                 <Typography textAlign='center' color='#fff' variant='h2' fontSize={mobile ? '26px' : '32px'}>{jobboard.homeSubtitle}</Typography>
               </Box>
