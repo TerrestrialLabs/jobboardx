@@ -186,9 +186,9 @@ const Home: NextPage = () => {
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center'>
           <Grid xs={12} sm={9}>
-            <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(300px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
-              <Box p={2} sx={{ zIndex: 1 }}>
+              <Box p={2} pb={mobile ? '60px' : '50px'} sx={{ zIndex: 1 }}>
                 <Typography mb={2} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>{jobboard.homeTitle}</Typography>
                 <Typography textAlign='center' color='#fff' variant='h2' fontSize={mobile ? '26px' : '32px'}>{jobboard.homeSubtitle}</Typography>
               </Box>
@@ -267,9 +267,6 @@ const Home: NextPage = () => {
                           />
                         </FormControl>
                       </Grid>
-                      <Grid xs={2} sx={{ display: 'flex', alignItems: 'flex-end'}}>
-                        <Button sx={{ height: '45px' }} fullWidth onClick={() => searchJobs(filters)} variant='contained' color='primary' disableElevation>Search</Button>
-                      </Grid>
                     </Box>
 
                     <Box mt={2}>
@@ -287,6 +284,9 @@ const Home: NextPage = () => {
                         </Grid>
                         <Grid xs={5} sx={{ display: 'flex', alignItems: 'flex-end'}}>
                           <SalaryField onChange={handleFilterSelectChange} value={filters.salaryMin} />
+                        </Grid>
+                        <Grid xs={2} sx={{ display: 'flex', alignItems: 'flex-end'}}>
+                          <Button sx={{ height: '45px' }} fullWidth onClick={() => searchJobs(filters)} variant='contained' color='primary' disableElevation>Search</Button>
                         </Grid>
                       </Grid>
                     </Box>
