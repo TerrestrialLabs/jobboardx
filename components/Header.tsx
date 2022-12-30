@@ -6,15 +6,15 @@ import { useContext, useState } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { AccountCircle, Close, GridView, Key, Logout, Menu as MenuIcon, PersonAddAlt, Work } from '@mui/icons-material'
 import { useWindowSize } from '../hooks/hooks'
-import { useSession } from 'next-auth/react'
 import { ROLE } from '../const/const'
+import { useSession } from '../context/SessionContext'
 
 const Header = () => {
     const router = useRouter()
 
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session } = useSession()
+    const session = useSession()
 
     const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -38,8 +38,8 @@ const Header = () => {
     const postPage = router.pathname === '/post'
     const editJobPage = router.pathname === '/jobs/edit/[token]'
     const postFormPage = postPage || editJobPage
-
     const unsubscribePage = router.pathname === '/unsubscribe/[id]'
+    const verifyPage = router.pathname === '/verify'
 
     let buttonLink = '/post'
     if (!session?.user) {
@@ -49,7 +49,7 @@ const Header = () => {
         buttonLink = '/'
     }
 
-    if (unsubscribePage) {
+    if (unsubscribePage || verifyPage) {
         return null
     }
 

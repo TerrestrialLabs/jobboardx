@@ -9,7 +9,7 @@ import { TYPE_MAP } from '../../../const/const'
 import { add, format } from 'date-fns'
 import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 import User, { Employer, UserType } from '../../../models/User'
 
 cloudinary.v2.config({
@@ -50,6 +50,7 @@ createOrUpdateJob.post(async (req, res) => {
             throw Error('Unauthorized')
         }
         
+        // @ts-ignore
         const user = await User.findOne({ email: session.user.email }) as Employer
 
         // 1. Check for payment (create job)
@@ -78,6 +79,7 @@ createOrUpdateJob.post(async (req, res) => {
             })
             delete job.orderId
 
+            // @ts-ignore
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
             res.status(201).json(job)
@@ -93,6 +95,7 @@ createOrUpdateJob.post(async (req, res) => {
                 { new: true }
             ).select('-orderId')
 
+            // @ts-ignore
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
             res.status(200).json(job)

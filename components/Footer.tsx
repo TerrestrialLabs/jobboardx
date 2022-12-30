@@ -6,21 +6,23 @@ import { useWindowSize } from '../hooks/hooks'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { useSession } from 'next-auth/react'
+import { useSession } from '../context/SessionContext'
 
 const Footer = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session } = useSession()
+    const session = useSession()
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
     const router = useRouter()
 
+    // TO DO: Return from route functions
     const unsubscribePage = router.pathname === '/unsubscribe/[id]'
+    const verifyPage = router.pathname === '/verify'
 
-    if (unsubscribePage) {
+    if (unsubscribePage || verifyPage) {
         return null
     }
     

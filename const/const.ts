@@ -1,5 +1,11 @@
 // TO DO: Break up into separate files
 
+export enum AUTH_STATUS {
+    LOADING = 'loading',
+    AUTHENTICATED = 'authenticated',
+    UNAUTHENTICATED = 'unauthenticated'
+}
+
 export enum ROLE {
     EMPLOYER = 'employer',
     ADMIN = 'admin',

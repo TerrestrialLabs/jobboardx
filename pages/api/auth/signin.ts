@@ -1,121 +1,96 @@
-import NextAuth from 'next-auth'
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
-import EmailProvider from 'next-auth/providers/email'
-import { MongoClient } from 'mongodb'
-import sgMail from '@sendgrid/mail'
-import { JobBoardData } from '../jobboards'
-import User, { UserType } from '../../../models/User'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import dbConnect from '../../../mongodb/dbconnect'
+import User from '../../../models/User'
+import { ROLE } from '../../../const/const'
 import JobBoard from '../../../models/JobBoard'
-import { NextApiRequest, NextApiResponse } from 'next'
-import axios from 'axios'
+import { JobBoardData } from '../jobboards'
+import sgMail from '@sendgrid/mail'
+import { v4 as uuidv4 } from 'uuid'
+import VerificationToken from '../../../models/VerificationToken'
+import { add } from 'date-fns'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
+dbConnect()
+
+// Session
 const NINETY_DAYS = 90 * 24 * 60 * 60
 const THIRTY_MINUTES = 30 * 60
 
-const client = new MongoClient(process.env.MONGODB_URL as string);
-const clientPromise = client.connect();
+function getErrorMessage(error: unknown) {
+    if (error instanceof Error) { 
+        return error.message
+    }
+    return String(error)
+}
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const local = req.headers.host?.includes('localhost')
-    const domain = local ? 'www.reactdevjobs.io' : req.headers.host
+    const { 
+        method
+    } = req
 
-    let updateSession = false
+    dbConnect()
 
-    if (req.headers.host) {
-        process.env.NEXTAUTH_URL = local ? 'http://localhost:3000' : `https://${domain}`
-    }
+    try {
+        const local = req.headers.host?.includes('localhost')
+        const domain = local ? 'www.reactdevjobs.io' : req.headers.host
+        const baseUrl = local ? 'http://localhost:3000/' : `https://${domain}/`
 
-    const jobboard = await JobBoard.findOne({ domain })
-
-    if (!jobboard) {
-        throw new Error('Sign in email could not be sent')
-    }
-
-    if (req.body.email) {
-        const user = await User.findOne({ email: req.body.email })
-        if (!user) {
-            return res.status(401).json({ error: 'An account with this email could not be found' });
+        const jobboard = await JobBoard.findOne({ domain })
+    
+        if (!jobboard) {
+            throw new Error('Sign in failed')
         }
-    }
 
-    if (req.url?.includes('/session?update')) {
-        updateSession = true
-    }
-
-    return await NextAuth(req, res, {
-        secret: process.env.NEXTAUTH_SECRET,
-        session: {
-            strategy: 'jwt',
-            maxAge: NINETY_DAYS,
-            updateAge: THIRTY_MINUTES
-        },
-        adapter: MongoDBAdapter(clientPromise),
-        providers: [
-            EmailProvider({
-                server: {
-                    host: process.env.SENDGRID_SERVER_HOST,
-                    port: parseInt((local ? process.env.SENDGRID_PORT_LOCAL : process.env.SENDGRID_PORT_SSL) as string),
-                    auth: {
-                        user: process.env.SENDGRID_USERNAME,
-                        pass: process.env.SENDGRID_API_KEY
-                    }
-                },
-                from: `${jobboard.title} <${jobboard.email}>`,
-                sendVerificationRequest({ identifier, url, provider }) {
-                    customSendVerificationRequest({ identifier, url, provider, jobboard })
-                },
-            })
-        ],
-        callbacks: {
-            async jwt({ token, user }) {
-                if (user) {
-                    // Id attribute doesn't have underscore for some reason
-                    token.user = { _id: user.id, ...user }
-                    // @ts-ignore
-                    delete token.user.id
-                }
-                if (updateSession) {
-                    // @ts-ignore
-                    const updatedUser = await User.findOne({ _id: token.user?._id })
-                    token.user = updatedUser
-                }
-                return Promise.resolve(token);
-            },
-            session: async ({ session, token }) => {
-                if (session?.user) {
-                    // @ts-ignore
-                    session.user = token.user
-                }
-
-                return session
+        if (req.body.email) {
+            const user = await User.findOne({ email: req.body.email })
+            if (!user) {
+                return res.status(401).json({ error: 'An account with this email could not be found' });
             }
-        },
-        pages: {
-            signIn: '/login',
-            // signOut: '/',
-            error: '/login-error'
+
+            const token = uuidv4()
+            const callbackUrl = `${baseUrl}dashboard/stats`
+            const query = `?callbackUrl=${encodeURIComponent(callbackUrl)}&token=${token}&email=${user.email}`
+            const url = `${baseUrl}verify${query}`
+
+            const verificationToken = await VerificationToken.create({
+                identifier: user.email,
+                token,
+                expires: add(new Date(), { hours: 24 })
+            })
+            if (!verificationToken) {
+                throw Error('Sign in failed')
+            }
+
+            sendVerificationRequest({
+                to: req.body.email,
+                from: `${jobboard.title} <${jobboard.email}>`,
+                url,
+                jobboard
+            })
         }
-    })
+    
+        res.status(200).json(true)
+    } catch (err) {
+        console.log('err: ', err)
+    }
 }
 
-type CustomSendVerificationRequestParams = { 
-    identifier: string
+type SendVerificationRequestParams = { 
+    to: string
+    from: string
     url: string
-    provider: any
     jobboard: JobBoardData
 }
-async function customSendVerificationRequest(params: CustomSendVerificationRequestParams) {
-    const { identifier, url, provider, jobboard } = params
-    const { host } = new URL(url)
+async function sendVerificationRequest(params: SendVerificationRequestParams) {
+    const { to, from, url, jobboard } = params
 
     const message = {
-        to: identifier,
-        from: provider.from,
+        to,
+        from,
         html: "<html></html>",
         dynamic_template_data: {
             subject: `Sign in to ${jobboard.title}`,
@@ -525,4 +500,4 @@ function html(params: { url: string, host: string, jobboard: JobBoardData }) {
 // Email Text body (fallback for email clients that don't render HTML)
 function text({ url, host, jobboard }: { url: string; host: string, jobboard: JobBoardData }) {
 return `Sign in to ${jobboard.title}\n${url}\n\n`
-}  
+} 

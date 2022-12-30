@@ -7,7 +7,6 @@ import styles from '../styles/Home.module.css'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { getCsrfToken, signIn } from 'next-auth/react'
 import { Close } from '@mui/icons-material'
 import CheckEmail from '../components/CheckEmail'
 import { useRouter } from 'next/router'
@@ -30,11 +29,7 @@ const initState = {
     emailConfirmation: ''
 }
 
-interface Props {
-    csrfToken: string
-}
-
-const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
+const AdminSignUp: NextPage = () => {
     const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
@@ -105,7 +100,7 @@ const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
             const res = await axios.post(`${baseUrlApi}auth/admin-signup`, { email: form.email.trim().toLowerCase() })
             
             if (res.status === 201) {
-                await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
+                await axios.post(`${baseUrlApi}auth/signin`, { email: form.email })
                 setSubmitted(true)
             }
         } catch (err) {
@@ -156,8 +151,6 @@ const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
                                         <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Admin Sign Up</Typography></Box>
                                     </Grid>
 
-                                    <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-
                                     {showErrorMessage && (
                                         <Grid xs={12}>
                                             <Alert sx={{ marginBottom: 2}} severity="error">Please fix the following errors and resubmit.</Alert>
@@ -201,7 +194,5 @@ const AdminSignUp: NextPage<Props> = ({ csrfToken }) => {
 export default AdminSignUp
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const csrfToken = await getCsrfToken(context)
-
-    return { props: { csrfToken } }
+    return { props: {} }
 }

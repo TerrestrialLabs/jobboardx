@@ -1,19 +1,18 @@
 import { Box, CircularProgress } from '@mui/material'
 import type { GetServerSideProps, NextPage } from 'next'
 import React, { useEffect } from 'react'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from '../context/SessionContext'
 import { useRouter } from 'next/router'
 
 const Logout: NextPage = () => { 
     const router = useRouter()
-    const { data: session } = useSession()
+    const { logout, user } = useSession()
 
     useEffect(() => {
-        if (session?.user) {
-            signOut()
-        } else {
-            router.push('/')
+        if (user) {
+            logout()
         }
+        router.push('/')
     }, [])
 
     return (

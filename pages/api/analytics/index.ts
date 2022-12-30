@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import UserEvent from '../../../models/UserEvent'
-import { getSession } from 'next-auth/react'
 import Job from '../../../models/Job'
 import { ROLE } from '../../../const/const'
+import { getSession } from '../../../api/getSession'
 
 export type UserEventType = {
     jobboardId: string

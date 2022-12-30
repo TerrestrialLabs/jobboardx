@@ -4,14 +4,12 @@ import React, { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { useWindowSize } from '../hooks/hooks'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { ROLE } from '../const/const'
+import { AUTH_STATUS, ROLE } from '../const/const'
+import { useSession } from '../context/SessionContext'
 
 const Dashboard = ({ content }: { content: JSX.Element }) => {
-    const { data: session, status } = useSession()
-    // TO DO: Hack to prevent flashing unauthorized message when logging out
-    const [signedIn, setSignedIn] = useState(false)
+    const { status, user } = useSession()
 
     const router = useRouter()
 
@@ -19,13 +17,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.EMPLOYER)
-
-    useEffect(() => {
-        if (session?.user) {
-            setSignedIn(true)
-        }
-    }, [session?.user])
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (user && user?.role !== ROLE.EMPLOYER)
 
     useEffect(() => {
         if (accessDenied) {
@@ -33,8 +25,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
         }
     }, [status])
 
-    // Session is loading or user just logged out
-    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+    if (status === AUTH_STATUS.LOADING) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
@@ -63,7 +54,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
                         </Grid>
 
                         <Grid xs={12} p={mobile ? 2 : 0} container>
-                            <Grid xs={12} sm={3} pr={mobile ? 0 : 4} pb={mobile ? 2 : 0}>
+                            <Grid xs={12} md={3} pr={mobile ? 0 : 4} pb={mobile ? 2 : 0}>
                                 <Box mr={mobile ? 0 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, padding: 4, paddingLeft: mobile ? 2 : 4, width: '100%' }}>
                                     <Box pb={2}>
                                         <Typography fontWeight='bold' color={router.pathname.endsWith('stats') ? '#000000DE' : 'grey'}>
@@ -93,7 +84,7 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
                                 </Box>
                             </Grid>
 
-                            <Grid container xs={12} sm={9}>
+                            <Grid container xs={12} md={9}>
                                 {content}
                             </Grid>
                         </Grid>

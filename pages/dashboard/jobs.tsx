@@ -16,7 +16,7 @@ import { TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { format, parseISO } from 'date-fns'
-import { useSession } from 'next-auth/react'
+import { useSession } from '../../context/SessionContext'
 
 const Jobs: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue

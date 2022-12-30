@@ -7,10 +7,10 @@ import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
-import { useSession } from 'next-auth/react'
 import { UserType } from '../../models/User'
 import { Close } from '@mui/icons-material'
 import axios from 'axios'
+import { useSession } from '../../context/SessionContext'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -29,7 +29,7 @@ const initState = {
 const Account: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session } = useSession()
+    const session = useSession()
 
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)

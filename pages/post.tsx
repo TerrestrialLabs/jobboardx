@@ -20,10 +20,10 @@ import { useEditor } from '../hooks/editor'
 import type { Node } from 'slate'
 import dynamic from 'next/dynamic'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { useSession } from 'next-auth/react'
 import { JobData } from '../models/Job'
 import { useUnsavedChangesHandler } from '../hooks/unsavedChanges'
 import { Employer } from '../models/User'
+import { useSession } from '../context/SessionContext'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -163,19 +163,19 @@ const OPTIONAL_FIELDS = ['addressLine2']
 const Post: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session, status } = useSession()
+    const { user, status } = useSession()
     const [signedIn, setSignedIn] = useState(false)
 
     const router = useRouter()
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.EMPLOYER)
+    const accessDenied = status === 'unauthenticated' || (user && user.role !== ROLE.EMPLOYER)
 
     useEffect(() => {
-        if (session?.user) {
+        if (user) {
             setSignedIn(true)
         }
-    }, [session?.user])
+    }, [user])
 
     useEffect(() => {
         if (accessDenied) {
@@ -218,7 +218,7 @@ type PostFormProps = {
 export const PostForm = ({ edit }: PostFormProps) => {  
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session } = useSession()
+    const session = useSession()
     
     const [job, setJob] = useState<JobData | null>(null)
     const [jobLoading, setJobLoading] = useState(edit)

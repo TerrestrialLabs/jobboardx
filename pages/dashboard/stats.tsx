@@ -10,7 +10,8 @@ import { useRouter } from 'next/router'
 import Dashboard from '../../components/Dashboard'
 import axios from 'axios'
 import { AnalticsStatsType } from '../api/analytics'
-import { useSession } from 'next-auth/react'
+import { AUTH_STATUS } from '../../const/const'
+import { useSession } from '../../context/SessionContext'
 
 const Stats: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
@@ -28,7 +29,7 @@ const Stats: NextPage = () => {
     }
 
     useEffect(() => {
-        if (status === 'authenticated') {
+        if (status === AUTH_STATUS.AUTHENTICATED) {
             fetchData()
         }
     }, [status])

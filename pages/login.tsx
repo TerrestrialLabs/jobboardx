@@ -8,7 +8,6 @@ import Link from 'next/link'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { getCsrfToken, getProviders, signIn } from 'next-auth/react'
 import CheckEmail from '../components/CheckEmail'
 
 const ERROR = {
@@ -25,11 +24,7 @@ const initState = {
     email: ''
 }
 
-interface Props {
-    csrfToken: string
-}
-
-const Login: NextPage<Props> = ({ csrfToken }) => {
+const Login: NextPage = () => {
     const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
@@ -83,7 +78,7 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
         setErrors(initErrors)
         setLoading(true)
         try {
-            await signIn('email', { email: form.email, redirect: false, callbackUrl: `${baseUrl}dashboard` })
+            await axios.post(`${baseUrlApi}auth/signin`, { email: form.email })
             setSubmitted(true)
         } catch (err) {
             // TO DO: Check for status & display message
@@ -117,8 +112,6 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
                                 <Grid xs={12}>
                                     <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
                                 </Grid>
-
-                                <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 
                                 {showErrorMessage && (
                                     <Grid xs={12}>
@@ -157,8 +150,5 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
 export default Login
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const csrfToken = await getCsrfToken(context)
-    const providers = await getProviders()
-
-    return { props: { csrfToken, providers } }
+    return { props: {} }
 }

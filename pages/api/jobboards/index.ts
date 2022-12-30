@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import JobBoard from '../../../models/JobBoard'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 import { ROLE } from '../../../const/const'
 
 export type JobBoardData = {
@@ -54,6 +54,7 @@ export default async function handler(
                 throw Error('Unauthorized')
             }
 
+            // @ts-ignore
             const jobboard = await JobBoard.create({ ...req.body, email: session.user.email })
 
             res.status(201).json(jobboard)

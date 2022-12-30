@@ -7,10 +7,10 @@ import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
-import { useSession } from 'next-auth/react'
 import axios from 'axios'
 import countryCodes from '../../data/country_codes.json'
 import { Employer } from '../../models/User'
+import { useSession } from '../../context/SessionContext'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -45,7 +45,7 @@ const OPTIONAL_FIELDS = ['addressLine2']
 const BillingDetails: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
-    const { data: session } = useSession()
+    const session = useSession()
 
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)

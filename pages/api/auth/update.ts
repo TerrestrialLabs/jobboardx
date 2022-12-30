@@ -5,7 +5,7 @@ import multer from 'multer'
 import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import User from '../../../models/User'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 import axios from 'axios'
 import { ROLE } from '../../../const/const'
 

@@ -23,7 +23,8 @@ const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     // TO DO: Enum
     role: { type: String, required: true },
-    employer: { type: EmployerSchema }
+    employer: { type: EmployerSchema },
+    emailVerified: { type: Date }
 }, { timestamps: true })
 
 function isJobboardIdRequired() {
@@ -52,6 +53,7 @@ export type UserType = {
     email: string
     role: string
     employer: EmployerType | null
+    emailVerified?: Date
 }
 
 export type Employer = UserType & {

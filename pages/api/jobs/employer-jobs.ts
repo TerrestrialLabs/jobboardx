@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 

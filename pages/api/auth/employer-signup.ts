@@ -50,6 +50,9 @@ signUp.post(async (req, res) => {
         if (user) {
             throw Error('A company with this name or email address already exists.')
         }
+        if (userData.emailVerified) {
+            throw Error('This user already exists')
+        }
 
         // 2. Upload logo image
         let cloudinaryRes, 
@@ -68,10 +71,6 @@ signUp.post(async (req, res) => {
         userData.employer.logo = cloudinaryUrl
 
         // 3. Create account
-        console.log({
-            ...userData,
-            role: ROLE.EMPLOYER
-        })
         const employer = await User.create({
             ...userData,
             role: ROLE.EMPLOYER

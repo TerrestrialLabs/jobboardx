@@ -12,9 +12,12 @@ import Layout from '../components/Layout';
 import { NextApiRequest } from 'next';
 import axios from 'axios';
 import { JobBoardContext } from '../context/JobBoardContext';
-import { useEffect, useState } from 'react';
+import { SessionContext } from '../context/SessionContext';
+import { useEffect, useRef, useState } from 'react';
 import { JobBoardData } from './api/jobboards';
-import { SessionProvider } from 'next-auth/react'
+import { UserType } from '../models/User';
+import { useRouter } from 'next/router';
+import { AUTH_STATUS } from '../const/const';
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -25,8 +28,61 @@ interface MyAppProps extends AppProps {
   baseUrlApi: string
 }
 
+type Session = {
+  status: AUTH_STATUS
+  user: UserType | null
+}
+
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi } = props;
+
+  const [session, setSession] = useState<Session>({ status: AUTH_STATUS.LOADING, user: null })
+
+  const tokenName = jobboard.title.toLowerCase().replace(' ', '_') + '_token'
+
+  const router = useRouter()
+
+  const login = (user: UserType) => {
+    setSession({ status: AUTH_STATUS.AUTHENTICATED, user })
+  }
+
+  const logout = () => {
+    localStorage.removeItem(tokenName)
+    setSession({ status: AUTH_STATUS.UNAUTHENTICATED, user: null })
+  }
+
+  // Prevent side effects if useEffect runs twice
+  const effectRan = useRef(false)
+
+  useEffect(() => {
+    // Only check if we are logged in if we're not in the process of logging in
+    if (!effectRan.current && router.pathname !== '/verify') {
+      const token = localStorage.getItem(tokenName)
+
+      const verifyToken = async () => {
+        if (token === null) {
+          setSession({ status: AUTH_STATUS.UNAUTHENTICATED, user: null })
+        } else {
+          try {
+            axios.defaults.headers.common['Authorization'] = token
+
+            const res = await axios.post(`${baseUrlApi}auth/verify`)
+
+            if (res.status === 200) {
+              login(res.data.user)
+            } else {
+              logout()
+            }
+          } catch (err) {
+            logout()
+          }
+        }
+      }
+
+      verifyToken()
+    }
+    return () => { effectRan.current = true }
+  }, [])
 
   return (
     <CacheProvider value={emotionCache}>
@@ -35,14 +91,13 @@ export default function MyApp(props: MyAppProps) {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <SessionProvider session={(pageProps as { session: any }).session}>
+        <SessionContext.Provider value={{ ...session, login, logout }}>
           <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
             <Layout>
               <Component {...pageProps} />
             </Layout>
-
           </JobBoardContext.Provider>
-        </SessionProvider>
+        </SessionContext.Provider>
       </ThemeProvider>
     </CacheProvider>
   );

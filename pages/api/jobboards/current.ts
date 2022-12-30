@@ -3,7 +3,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import Job from '../../../models/Job'
 import JobBoard from '../../../models/JobBoard'
 import type { JobBoardData } from './index'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 import { ROLE } from '../../../const/const'
 
 function getErrorMessage(error: unknown) {

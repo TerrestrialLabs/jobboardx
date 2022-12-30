@@ -7,9 +7,9 @@ import styles from '../styles/Home.module.css'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { ROLE } from '../const/const'
+import { useSession } from '../context/SessionContext'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -47,7 +47,7 @@ const initState = {
 const CreateBoardForm: NextPage = () => {
     const { baseUrlApi } = useContext(JobBoardContext) as JobBoardContextValue
     
-    const { data: session, status } = useSession()
+    const { user, status } = useSession()
     const [signedIn, setSignedIn] = useState(false)
 
     const router = useRouter()
@@ -63,13 +63,13 @@ const CreateBoardForm: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
+    const accessDenied = status === 'unauthenticated' || (user && user.role !== ROLE.ADMIN && user.role !== ROLE.SUPERADMIN)
 
     useEffect(() => {
-        if (session?.user) {
+        if (user) {
             setSignedIn(true)
         }
-    }, [session?.user])
+    }, [user])
 
     useEffect(() => {
         if (accessDenied) {

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import UserEvent from '../../../models/UserEvent'
-import { getSession } from 'next-auth/react'
+import { getSession } from '../../../api/getSession'
 import { ROLE } from '../../../const/const'
 
 function getErrorMessage(error: unknown) {
@@ -22,6 +22,7 @@ export default async function handler(
     if (method === 'POST') {
         try {
             const session = await getSession({ req })
+            // @ts-ignore
             const user = session?.user
             // @ts-ignore
             if (!user || (user?.role !== ROLE.EMPLOYER && user?.role !== ROLE.ADMIN && user?.role !== ROLE.SUPERADMIN)) {
