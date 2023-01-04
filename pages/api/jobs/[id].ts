@@ -37,7 +37,8 @@ export default async function handler(
                 await Job.deleteOne({ _id: job._id })
                 res.status(200).json(true)
             } else {
-                throw Error('Unauthorized')
+                // @ts-ignore
+                return res.status(401).json(getErrorMessage('Unauthorized'))
             }
         } catch (err) {
         // @ts-ignore

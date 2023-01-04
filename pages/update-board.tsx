@@ -4,12 +4,12 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { useRouter } from 'next/router'
-import { ROLE } from '../const/const'
+import { AUTH_STATUS, ROLE } from '../const/const'
 import { useSession } from '../context/SessionContext'
+import axiosInstance from '../api/axios'
 // import { scrapeJobs } from '../scraper'
 
 const ERROR = {
@@ -69,7 +69,7 @@ const JobBoard: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
 
     const backfillJobs = async () => {
         // setBackfillError(false)
@@ -118,7 +118,7 @@ const JobBoard: NextPage = () => {
     }, [status])
 
     // Logout
-    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+    if (status === 'loading' || (signedIn && status === AUTH_STATUS.UNAUTHENTICATED)) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
@@ -148,7 +148,7 @@ const JobBoard: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.put(`${baseUrlApi}jobboards/current`, form)
+            const res = await axiosInstance.put(`${baseUrlApi}jobboards/current`, form)
             if (res.status === 200) {
                 setErrors(initErrors)
                 setSubmitted(true)

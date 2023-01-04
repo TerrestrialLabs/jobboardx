@@ -2,11 +2,12 @@ import type { NextApiRequest } from 'next'
 import jwt from 'jsonwebtoken'
 
 export async function getSession({ req }: { req: NextApiRequest }) {
-    const headersToken = req.headers.authorization
+    const bearerToken = req.headers.authorization
 
-    if (headersToken) {
+    if (bearerToken) {
+        const token = bearerToken.replace('Bearer', '').trim()
         let userSession
-        jwt.verify(headersToken, process.env.ACCESS_TOKEN_SECRET as string, (err, session) => {
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, session) => {
             if (err) { 
                 console.log("Error verifying token")
             } else {

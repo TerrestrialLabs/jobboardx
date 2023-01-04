@@ -8,6 +8,7 @@ import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
 import axios from 'axios'
+import axiosInstance from '../../api/axios'
 import countryCodes from '../../data/country_codes.json'
 import { Employer } from '../../models/User'
 import { useSession } from '../../context/SessionContext'
@@ -127,11 +128,11 @@ const BillingDetails: NextPage = () => {
 
                 formData.set('userData', JSON.stringify(userData))
     
-                await axios.put(`${baseUrlApi}auth/update`, formData, { 
+                await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
 
-                await axios.get(`${baseUrlApi}auth/session?update`)
+                await axiosInstance.get(`${baseUrlApi}auth/session?update`)
 
                 setSubmitted(true)
                 reloadSession()

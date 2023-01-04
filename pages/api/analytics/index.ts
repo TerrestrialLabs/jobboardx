@@ -51,7 +51,8 @@ export default async function handler(
                     urlApplyClicks: events.filter(event => event.type === 'job-apply-click').filter(event => event.subtype === 'url').length,
                 })
             } else {
-                throw Error('Unauthorized')
+                // @ts-ignore
+                res.status(401).json(getErrorMessage('Unauthorized'))
             }
         } catch (err) {
             // @ts-ignore

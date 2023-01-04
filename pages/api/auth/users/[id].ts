@@ -26,7 +26,8 @@ export default async function handler(
             const session = await getSession({ req })
             // @ts-ignore
             if (!session?.user || session.user._id !== id) {
-                throw Error('Unauthorized')
+                // @ts-ignore
+                return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             const user = await User.findOne({ _id: id }).exec()
             res.status(200).json(user)

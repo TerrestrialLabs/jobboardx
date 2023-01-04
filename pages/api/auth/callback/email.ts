@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import User from '../../../../models/User'
 import VerificationToken from '../../../../models/VerificationToken'
 import dbConnect from '../../../../mongodb/dbconnect'
-import jwt from 'jsonwebtoken'
+import { generateAccessToken, generateRefreshToken, serializeCookie } from '../../../../api/token'
 
 dbConnect()
 
@@ -35,14 +35,18 @@ export default async function handler(
 
         const authenticatedUser = await User.findOneAndUpdate({ _id: user._id }, { $set: { emailVerified: new Date() } })
 
-        const jwtToken = jwt.sign({ user: authenticatedUser }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
-        if (!jwtToken) {
+        const accessToken = generateAccessToken(authenticatedUser)
+        const refreshToken = generateRefreshToken(authenticatedUser)
+
+        if (!accessToken || !refreshToken) {
             throw Error('Invalid')
         }
 
         await VerificationToken.deleteOne({ _id: token._id })
 
-        res.status(200).json({ jwtToken, user: authenticatedUser })
+        res.setHeader('Set-Cookie', serializeCookie(refreshToken))
+
+        res.status(200).json({ accessToken, user: authenticatedUser })
     } catch (err) {
         res.redirect('/login-error')
     }

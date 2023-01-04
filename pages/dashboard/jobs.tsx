@@ -7,12 +7,12 @@ import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
-import axios from 'axios'
+import axiosInstance from '../../api/axios'
 import { JobData } from '../../models/Job'
 import { useRouter } from 'next/router'
 import { AccessTime, Close, Delete, Edit, LocationOn, Paid } from '@mui/icons-material'
 import { formatSalaryRange, getTimeDifferenceString, isExpired } from '../../utils/utils'
-import { TYPE_MAP } from '../../const/const'
+import { AUTH_STATUS, TYPE_MAP } from '../../const/const'
 import Link from 'next/link'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { format, parseISO } from 'date-fns'
@@ -33,13 +33,13 @@ const Jobs: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
     const fetchData = async () => {
-        const res = await axios.get(`${baseUrlApi}jobs/employer-jobs`)
+        const res = await axiosInstance.get(`${baseUrlApi}jobs/employer-jobs`)
         setData(res.data)
         setFetched(true)
     }
 
     useEffect(() => {
-        if (status === 'authenticated') {
+        if (status === AUTH_STATUS.AUTHENTICATED) {
             fetchData()
         }
     }, [status])
@@ -48,7 +48,7 @@ const Jobs: NextPage = () => {
         setDeleting(true)
         try {
             if (jobToDelete) {
-                await axios.delete(`${baseUrlApi}jobs/${jobToDelete._id}`)
+                await axiosInstance.delete(`${baseUrlApi}jobs/${jobToDelete._id}`)
                 await fetchData()
                 setJobToDelete(null)
             }
@@ -162,7 +162,7 @@ export const JobItem = ({
                     <Box mr={2}>
                         <Box display='flex'>
                             <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
-                            {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>}
+                            {/* {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>} */}
                             {expired && <Typography ml={1} color='error' variant='subtitle1' sx={{ fontSize: '13.5px' }}>Expired</Typography>}
                         </Box>
                         <Typography variant='subtitle1' sx={{ fontWeight: '600' }}><Link href={`/jobs/${_id}`}>{title}</Link></Typography>

@@ -10,6 +10,7 @@ import Dashboard from '../../components/Dashboard'
 import { Employer, UserType } from '../../models/User'
 import { Close } from '@mui/icons-material'
 import axios from 'axios'
+import axiosInstance from '../../api/axios'
 import { useSession } from '../../context/SessionContext'
 
 const ERROR = {
@@ -159,15 +160,15 @@ const CompanyProfile: NextPage = () => {
 
                 formData.set('userData', JSON.stringify(userData))
     
-                await axios.put(`${baseUrlApi}auth/update`, formData, { 
+                await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
 
-                await axios.get(`${baseUrlApi}auth/session?update`)
+                await axiosInstance.get(`${baseUrlApi}auth/session?update`)
 
                 // TO DO: Update existing jobs
                 // Don't need to await this
-                axios.put(`${baseUrlApi}jobs/employer-jobs`, {
+                axiosInstance.put(`${baseUrlApi}jobs/employer-jobs`, {
                     company: userData.employer.company,
                     companyUrl: userData.employer.website,
                     companyLogo: userData.employer.logo

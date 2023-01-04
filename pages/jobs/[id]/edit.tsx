@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from 'react'
 import { JobBoardContext, JobBoardContextValue } from '../../../context/JobBoardContext'
 import { useRouter } from 'next/router'
 import { Box, CircularProgress, Typography } from '@mui/material'
-import { ROLE } from "../../../const/const"
+import { AUTH_STATUS, ROLE } from "../../../const/const"
 import { useSession } from "../../../context/SessionContext"
 
 // TO DO: We don't need stripe but can't conditionally use hooks in PostForm
@@ -22,7 +22,7 @@ const Edit: NextPage = () => {
     const router = useRouter()
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (user && user.role !== ROLE.EMPLOYER)
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (user && user.role !== ROLE.EMPLOYER)
 
     useEffect(() => {
         if (user) {
@@ -36,7 +36,7 @@ const Edit: NextPage = () => {
         }
     }, [status])
 
-    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+    if (status === 'loading' || (signedIn && status === AUTH_STATUS.UNAUTHENTICATED)) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />

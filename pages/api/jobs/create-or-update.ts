@@ -47,7 +47,8 @@ createOrUpdateJob.post(async (req, res) => {
 
         // @ts-ignore
         if (!session || !session.user || session.user._id !== jobData.employerId) {
-            throw Error('Unauthorized')
+            // @ts-ignore
+            return res.status(401).json(getErrorMessage('Unauthorized'))
         }
         
         // @ts-ignore

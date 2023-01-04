@@ -6,8 +6,9 @@ import Image from 'next/image'
 import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import { useRouter } from 'next/router'
-import { PERKS, ROLE, TYPE, TYPE_MAP } from '../const/const'
+import { AUTH_STATUS, PERKS, ROLE, TYPE, TYPE_MAP } from '../const/const'
 import axios from 'axios'
+import axiosInstance from '../api/axios'
 import cities from '../data/world_cities_options.json'
 import { TextEditorPlaceholder } from '../components/post/TextEditor'
 import { deserialize, serialize } from '../utils/serialize'
@@ -169,7 +170,7 @@ const Post: NextPage = () => {
     const router = useRouter()
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (user && user.role !== ROLE.EMPLOYER)
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (user && user.role !== ROLE.EMPLOYER)
 
     useEffect(() => {
         if (user) {
@@ -183,7 +184,7 @@ const Post: NextPage = () => {
         }
     }, [status])
 
-    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+    if (status === 'loading' || (signedIn && status === AUTH_STATUS.UNAUTHENTICATED)) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
@@ -466,14 +467,14 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         }
                     }
                     formData.set('userData', JSON.stringify(userData))
-                    await axios.put(`${baseUrlApi}auth/update`, formData, { 
+                    await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                         headers: { 'Content-Type': 'multipart/form-data' }
                     })
-                    await axios.get(`${baseUrlApi}auth/session?update`)
+                    await axiosInstance.get(`${baseUrlApi}auth/session?update`)
                     reloadSession()
                 }
     
-                const res = await axios.post(`${baseUrlApi}jobs/create-or-update`, formData, { 
+                const res = await axiosInstance.post(`${baseUrlApi}jobs/create-or-update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
                 
@@ -564,7 +565,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
 
             // TO DO: Clean up payment intent if transaction fails
-            const paymentIntent = await axios.post(`${baseUrlApi}stripe/create-payment-intent`, paymentIntentParams)
+            const paymentIntent = await axiosInstance.post(`${baseUrlApi}stripe/create-payment-intent`, paymentIntentParams)
 
             const cardElement = elements.getElement(CardNumberElement)
             const stripeData = {

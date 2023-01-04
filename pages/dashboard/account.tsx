@@ -10,6 +10,7 @@ import Dashboard from '../../components/Dashboard'
 import { UserType } from '../../models/User'
 import { Close } from '@mui/icons-material'
 import axios from 'axios'
+import axiosInstance from '../../api/axios'
 import { useSession } from '../../context/SessionContext'
 
 const ERROR = {
@@ -108,11 +109,11 @@ const Account: NextPage = () => {
 
                 formData.set('userData', JSON.stringify(userData))
 
-                await axios.put(`${baseUrlApi}auth/update`, formData, { 
+                await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
 
-                await axios.get(`${baseUrlApi}auth/session?update`)
+                await axiosInstance.get(`${baseUrlApi}auth/session?update`)
 
                 setSubmitted(true)
                 reloadSession()

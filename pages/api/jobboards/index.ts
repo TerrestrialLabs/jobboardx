@@ -51,7 +51,8 @@ export default async function handler(
             const session = await getSession({ req })
             // @ts-ignore
             if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                throw Error('Unauthorized')
+                // @ts-ignore
+                return res.status(401).json(getErrorMessage('Unauthorized'))
             }
 
             // @ts-ignore

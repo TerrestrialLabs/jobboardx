@@ -8,7 +8,7 @@ import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import { useRouter } from 'next/router'
 import Dashboard from '../../components/Dashboard'
-import axios from 'axios'
+import axiosInstance from '../../api/axios'
 import { AnalticsStatsType } from '../api/analytics'
 import { AUTH_STATUS } from '../../const/const'
 import { useSession } from '../../context/SessionContext'
@@ -24,7 +24,7 @@ const Stats: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500)
 
     const fetchData = async () => {
-        const res = await axios.get(`${baseUrlApi}analytics`)
+        const res = await axiosInstance.get(`${baseUrlApi}analytics`)
         setData(res.data)
     }
 

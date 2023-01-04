@@ -6,6 +6,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import axios from 'axios'
+import axiosInstance from '../api/axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { useRouter } from 'next/router'
@@ -27,18 +28,18 @@ const Verify: NextPage = () => {
     useEffect(() => {
         if (!effectRan.current) {
             const verifyToken = async () => {
-                const tokenName = jobboard.title.toLowerCase().replace(' ', '_') + '_token'
-
                 try {
                     const { data } = await axios.post(`${baseUrlApi}auth/callback/email`, router.query)
                     if (data) {
-                        localStorage.setItem(tokenName, data.jwtToken)
-                        axios.defaults.headers.common['Authorization'] = data.jwtToken
+                        axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
+                        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
+
                         login(data.user)
+
                         router.push(router.query.callbackUrl as string)
                     }
                 } catch (err) {
-                    router.push('/')
+                    router.push('/login-error')
                 }
             }
             verifyToken()

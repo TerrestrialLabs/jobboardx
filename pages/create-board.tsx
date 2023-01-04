@@ -4,11 +4,11 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import axios from 'axios'
+import axiosInstance from '../api/axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import { useRouter } from 'next/router'
-import { ROLE } from '../const/const'
+import { AUTH_STATUS, ROLE } from '../const/const'
 import { useSession } from '../context/SessionContext'
 
 const ERROR = {
@@ -63,7 +63,7 @@ const CreateBoardForm: NextPage = () => {
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === 'unauthenticated' || (user && user.role !== ROLE.ADMIN && user.role !== ROLE.SUPERADMIN)
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (user && user.role !== ROLE.ADMIN && user.role !== ROLE.SUPERADMIN)
 
     useEffect(() => {
         if (user) {
@@ -78,7 +78,7 @@ const CreateBoardForm: NextPage = () => {
     }, [status])
 
     // Logout
-    if (status === 'loading' || (signedIn && status === 'unauthenticated')) {
+    if (status === 'loading' || (signedIn && status === AUTH_STATUS.UNAUTHENTICATED)) {
         return (
             <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
                 <CircularProgress color='secondary' size={22} />
@@ -108,7 +108,7 @@ const CreateBoardForm: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}jobboards`, form)
+            const res = await axiosInstance.post(`${baseUrlApi}jobboards`, form)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)

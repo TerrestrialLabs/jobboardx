@@ -42,7 +42,8 @@ export default async function handler(
             // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
             if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                throw Error('Unauthorized')
+                // @ts-ignore
+                return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             // Hardcode default job board for local development
             // TO DO: Save default domain in env var

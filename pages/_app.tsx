@@ -9,8 +9,8 @@ import theme from '../config/theme';
 import createEmotionCache from '../config/createEmotionCache';
 import App, { AppContext, AppProps } from 'next/app';
 import Layout from '../components/Layout';
-import { NextApiRequest } from 'next';
 import axios from 'axios';
+import axiosInstance from '../api/axios';
 import { JobBoardContext } from '../context/JobBoardContext';
 import { SessionContext } from '../context/SessionContext';
 import { useEffect, useRef, useState } from 'react';
@@ -38,8 +38,6 @@ export default function MyApp(props: MyAppProps) {
 
   const [session, setSession] = useState<Session>({ status: AUTH_STATUS.LOADING, user: null })
 
-  const tokenName = jobboard.title.toLowerCase().replace(' ', '_') + '_token'
-
   const router = useRouter()
 
   const login = (user: UserType) => {
@@ -47,7 +45,7 @@ export default function MyApp(props: MyAppProps) {
   }
 
   const logout = () => {
-    localStorage.removeItem(tokenName)
+    axiosInstance.post(`${baseUrlApi}auth/logout`)
     setSession({ status: AUTH_STATUS.UNAUTHENTICATED, user: null })
   }
 
@@ -55,27 +53,23 @@ export default function MyApp(props: MyAppProps) {
   const effectRan = useRef(false)
 
   useEffect(() => {
+    axios.defaults.baseURL = baseUrl.slice(0, -1)
+
     // Only check if we are logged in if we're not in the process of logging in
     if (!effectRan.current && router.pathname !== '/verify') {
-      const token = localStorage.getItem(tokenName)
-
       const verifyToken = async () => {
-        if (token === null) {
-          setSession({ status: AUTH_STATUS.UNAUTHENTICATED, user: null })
-        } else {
-          try {
-            axios.defaults.headers.common['Authorization'] = token
+        try {
+          const res = await axios.post(`${baseUrlApi}auth/verify`)
 
-            const res = await axios.post(`${baseUrlApi}auth/verify`)
-
-            if (res.status === 200) {
-              login(res.data.user)
-            } else {
-              logout()
-            }
-          } catch (err) {
+          if (res.status === 200 && res.data.accessToken && res.data.user) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.accessToken}`
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${res.data.accessToken}`
+            login(res.data.user)
+          } else {
             logout()
           }
+        } catch (err) {
+          logout()
         }
       }
 

@@ -6,7 +6,6 @@ import dbConnect from '../../../mongodb/dbconnect'
 import sgMail from '@sendgrid/mail'
 import User from '../../../models/User'
 import { getSession } from '../../../api/getSession'
-import axios from 'axios'
 import { ROLE } from '../../../const/const'
 
 cloudinary.v2.config({
@@ -50,7 +49,8 @@ signUp.put(async (req, res) => {
         const session = await getSession({ req })
         // @ts-ignore
         if (!session?.user || userData._id !== session?.user._id) {
-            throw Error('Unauthorized')
+            // @ts-ignore
+            return res.status(401).json(getErrorMessage('Unauthorized'))
         }
 
         // 1. Check if account exists (unique email, company)
