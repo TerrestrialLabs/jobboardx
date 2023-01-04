@@ -128,7 +128,7 @@ export const JobItem = ({
     _id,
     first,
     last,
-    datePosted,
+    datePosted = new Date(),
     title,
     type,
     location,
@@ -162,7 +162,7 @@ export const JobItem = ({
                     <Box mr={2}>
                         <Box display='flex'>
                             <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
-                            {/* {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>} */}
+                            {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>}
                             {expired && <Typography ml={1} color='error' variant='subtitle1' sx={{ fontSize: '13.5px' }}>Expired</Typography>}
                         </Box>
                         <Typography variant='subtitle1' sx={{ fontWeight: '600' }}><Link href={`/jobs/${_id}`}>{title}</Link></Typography>

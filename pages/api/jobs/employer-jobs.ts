@@ -27,7 +27,7 @@ export default async function handler(
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             // @ts-ignore
-            const jobs = await Job.find({ employerId: session?.user?._id }).sort({ 'datePosted': -1 }).exec()
+            const jobs = await Job.find({ employerId: session.user._id }).sort({ 'datePosted': -1 }).exec()
             res.status(200).json(jobs)
         } catch (err) {
             // TO DO
