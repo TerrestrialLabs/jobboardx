@@ -76,52 +76,52 @@ const initEditorValue = [
     }
 ]
 
-const initJobDetails = {
-    title: '',
-    type: TYPE.FULLTIME,
-    location: '',
-    remote: false,
-    // description: '',
-    applicationLink: '',
-    skills: [],
-    perks: [],
-    salaryMin: '',
-    salaryMax: '',
-    featured: true
-}
 // const initJobDetails = {
-//     title: 'Test Stripe',
+//     title: '',
 //     type: TYPE.FULLTIME,
 //     location: '',
 //     remote: false,
-//     applicationLink: 'https://www.example.com',
-//     skills: ['HTML'],
+//     // description: '',
+//     applicationLink: '',
+//     skills: [],
 //     perks: [],
-//     salaryMin: 50000,
-//     salaryMax: 100000,
+//     salaryMin: '',
+//     salaryMax: '',
 //     featured: true
 // }
-
-const initBillingAddress = {
-    firstName: '',
-    lastName: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'US'
+const initJobDetails = {
+    title: 'Test',
+    type: TYPE.FULLTIME,
+    location: '',
+    remote: false,
+    applicationLink: 'https://www.example.com',
+    skills: ['HTML'],
+    perks: [],
+    salaryMin: 50000,
+    salaryMax: 100000,
+    featured: true
 }
+
 // const initBillingAddress = {
-//     firstName: 'Gregory',
-//     lastName: 'A',
-//     addressLine1: '12 Fake Way',
-//     addressLine2: null,
-//     city: 'Fakeville',
-//     state: 'NY',
-//     postalCode: '11215',
+//     firstName: '',
+//     lastName: '',
+//     addressLine1: '',
+//     addressLine2: '',
+//     city: '',
+//     state: '',
+//     postalCode: '',
 //     country: 'US'
 // }
+const initBillingAddress = {
+    firstName: 'Gregory',
+    lastName: 'A',
+    addressLine1: '12 Fake Way',
+    addressLine2: '',
+    city: 'Fakeville',
+    state: 'NY',
+    postalCode: '11215',
+    country: 'US'
+}
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
@@ -413,11 +413,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }
 
-    const reloadSession = () => {
-        const event = new Event("visibilitychange");
-        document.dispatchEvent(event);
-    }
-
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const createOrUpdateJob = async () => {
         if (session && session.user) {
@@ -467,11 +462,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         }
                     }
                     formData.set('userData', JSON.stringify(userData))
-                    await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
+                    const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                         headers: { 'Content-Type': 'multipart/form-data' }
                     })
-                    await axiosInstance.get(`${baseUrlApi}auth/session?update`)
-                    reloadSession()
+                    session.login(updatedUserRes.data)
                 }
     
                 const res = await axiosInstance.post(`${baseUrlApi}jobs/create-or-update`, formData, { 

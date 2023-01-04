@@ -132,11 +132,6 @@ const CompanyProfile: NextPage = () => {
         setLogoUrl('')
     }
 
-    const reloadSession = () => {
-        const event = new Event("visibilitychange");
-        document.dispatchEvent(event);
-    }
-
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const submit = async () => {
         const isValid = validate()
@@ -160,11 +155,10 @@ const CompanyProfile: NextPage = () => {
 
                 formData.set('userData', JSON.stringify(userData))
     
-                await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
+                const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
-
-                await axiosInstance.get(`${baseUrlApi}auth/session?update`)
+                session.login(updatedUserRes.data)
 
                 // TO DO: Update existing jobs
                 // Don't need to await this
@@ -175,7 +169,6 @@ const CompanyProfile: NextPage = () => {
                 })
 
                 setSubmitted(true)
-                reloadSession()
             }
         } catch (err) {
             if (axios.isAxiosError(err)) {
