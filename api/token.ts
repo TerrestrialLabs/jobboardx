@@ -15,7 +15,7 @@ export const serializeCookie = (refreshToken: string) => {
 // TO DO: Decide on user payload
 // @ts-ignore
 export const generateAccessToken = (user) => {
-    return jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '1m' })
+    return jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' })
 }
 
 // @ts-ignore

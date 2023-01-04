@@ -76,52 +76,52 @@ const initEditorValue = [
     }
 ]
 
-// const initJobDetails = {
-//     title: '',
-//     type: TYPE.FULLTIME,
-//     location: '',
-//     remote: false,
-//     // description: '',
-//     applicationLink: '',
-//     skills: [],
-//     perks: [],
-//     salaryMin: '',
-//     salaryMax: '',
-//     featured: true
-// }
 const initJobDetails = {
-    title: 'Test',
+    title: '',
     type: TYPE.FULLTIME,
     location: '',
     remote: false,
-    applicationLink: 'https://www.example.com',
-    skills: ['HTML'],
+    // description: '',
+    applicationLink: '',
+    skills: [],
     perks: [],
-    salaryMin: 50000,
-    salaryMax: 100000,
+    salaryMin: '',
+    salaryMax: '',
     featured: true
 }
-
-// const initBillingAddress = {
-//     firstName: '',
-//     lastName: '',
-//     addressLine1: '',
-//     addressLine2: '',
-//     city: '',
-//     state: '',
-//     postalCode: '',
-//     country: 'US'
+// const initJobDetails = {
+//     title: 'Test',
+//     type: TYPE.FULLTIME,
+//     location: '',
+//     remote: false,
+//     applicationLink: 'https://www.example.com',
+//     skills: ['HTML'],
+//     perks: [],
+//     salaryMin: 50000,
+//     salaryMax: 100000,
+//     featured: true
 // }
+
 const initBillingAddress = {
-    firstName: 'Gregory',
-    lastName: 'A',
-    addressLine1: '12 Fake Way',
+    firstName: '',
+    lastName: '',
+    addressLine1: '',
     addressLine2: '',
-    city: 'Fakeville',
-    state: 'NY',
-    postalCode: '11215',
+    city: '',
+    state: '',
+    postalCode: '',
     country: 'US'
 }
+// const initBillingAddress = {
+//     firstName: 'Gregory',
+//     lastName: 'A',
+//     addressLine1: '12 Fake Way',
+//     addressLine2: '',
+//     city: 'Fakeville',
+//     state: 'NY',
+//     postalCode: '11215',
+//     country: 'US'
+// }
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
@@ -242,6 +242,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
     const [billingAddressErrors, setBillingAddressErrors] = useState(initBillingAddressErrors)
 
     const [unsavedChanges, setUnsavedChanges] = useState(false)
+    const [jobPageRedirect, setJobPageRedirect] = useState('')
 
     useUnsavedChangesHandler(unsavedChanges)
 
@@ -274,6 +275,12 @@ export const PostForm = ({ edit }: PostFormProps) => {
             }
         }
     }, [session?.user])
+
+    useEffect(() => {
+        if (jobPageRedirect && !unsavedChanges) {
+            router.push(jobPageRedirect)
+        }
+    }, [jobPageRedirect, unsavedChanges])
 
     const loadJob = async () => {
         setJobLoading(true)
@@ -472,7 +479,10 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
                 
-                res.status === (edit ? 200 : 201) && router.push(`/jobs/${res.data._id}`)
+                if (res.status === (edit ? 200 : 201)) {
+                    setUnsavedChanges(false)
+                    setJobPageRedirect(`/jobs/${res.data._id}`)
+                }
             } catch (err) {
                 console.log(err)
                 setLoading(false)
