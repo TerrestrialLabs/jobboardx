@@ -145,6 +145,7 @@ export const JobItem = ({
   
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
+    const sizeSmall = !!windowSize.width && windowSize.width < 600 && windowSize.width > 499
 
     const expired = isExpired(datePosted)
 
@@ -157,9 +158,9 @@ export const JobItem = ({
             borderBottomLeftRadius: last ? 4 : 0,
             borderBottomRightRadius: last ? 4 : 0
         }}>
-            <Grid container alignItems='center'>
-                <Grid xs={9} sm={5}>
-                    <Box mr={2}>
+            <Grid container alignItems='center' spacing={1}>
+                <Grid xs={9} sm={5} p={0}>
+                    <Box mr={2} ml={0.5}>
                         <Box display='flex'>
                             <Typography variant='subtitle1' sx={{ fontSize: '13.5px' }}>{featured ? 'Featured' : 'Regular'}</Typography>
                             {!expired && <Typography ml={1} color='grey' variant='subtitle1' sx={{ fontSize: '13.5px' }}>{getTimeDifferenceString(datePosted, true)}</Typography>}
@@ -178,7 +179,16 @@ export const JobItem = ({
                     </Grid>
                 )}
 
-                <Grid xs={12} sm={6}>
+                {!mobile && sizeSmall && isFocused && (
+                    <Grid xs={3} container justifyContent='flex-end'>
+                        <Box display='flex' alignItems='center' justifyContent='flex-end'>
+                            <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
+                            <Delete onClick={deleteJob} sx={{ cursor: 'pointer' }} />
+                        </Box>
+                    </Grid>
+                )}
+
+                <Grid xs={12} sm={6} pt={1}>
                     <Box mr={2} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
                         <Box mb={0.25} display='flex' alignItems='center'>
                             <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
@@ -197,7 +207,7 @@ export const JobItem = ({
                     </Box>
                 </Grid>
 
-                {!mobile && isFocused && (
+                {!mobile && !sizeSmall && isFocused && (
                     <Grid xs={1} container>
                         <Box display='flex' alignItems='center'>
                             <Link href={`/jobs/${_id}/edit`}><Edit sx={{ marginRight: 1, cursor: 'pointer' }} /></Link>
