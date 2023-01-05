@@ -266,13 +266,19 @@ export const PostForm = ({ edit }: PostFormProps) => {
     // @ts-ignore
     const accessDenied = (edit && !!job && session?.user?._id !== job.employerId)
 
-    useEffect(() => {
+    const fetchUser = async () => {
         if (session?.user) {
-            const user = session?.user as Employer
-            if (user.employer.billingAddress) {
-                setBillingAddress(user.employer.billingAddress)
+            const res = await axiosInstance.get(`${baseUrlApi}auth/users/${session.user._id}`)
+            if (res.data.employer.billingAddress) {
+                setBillingAddress(res.data.employer.billingAddress)
                 setEditBillingAddress(false)
             }
+        }
+    }
+
+    useEffect(() => {
+        if (session?.user && session.user.role === ROLE.EMPLOYER) {
+            fetchUser()
         }
     }, [session?.user])
 

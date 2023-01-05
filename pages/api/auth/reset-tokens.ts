@@ -19,7 +19,7 @@ export default async function handler(
             let newAccessToken, newRefreshToken
 
             // @ts-ignore
-            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err, session) => {
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err) => {
                 if (err) {
                     res.setHeader('Set-Cookie', cookie.serialize('jobboardx', '', {
                         httpOnly: true,

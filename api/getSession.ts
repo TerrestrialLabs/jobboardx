@@ -1,5 +1,7 @@
 import type { NextApiRequest } from 'next'
 import jwt from 'jsonwebtoken'
+import { UserType } from '../models/User'
+import { ROLE } from '../const/const'
 
 export async function getSession({ req }: { req: NextApiRequest }) {
     const bearerToken = req.headers.authorization
@@ -17,4 +19,14 @@ export async function getSession({ req }: { req: NextApiRequest }) {
         
         return userSession
     }
+}
+
+export const getUserForSession = (user: UserType) => {
+    let updatedUser = user
+
+    if (updatedUser.role === ROLE.EMPLOYER && updatedUser.employer?.billingAddress) {
+        updatedUser.employer.billingAddress = null
+    }
+
+    return updatedUser
 }

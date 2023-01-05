@@ -3,6 +3,7 @@ import User from '../../../../models/User'
 import VerificationToken from '../../../../models/VerificationToken'
 import dbConnect from '../../../../mongodb/dbconnect'
 import { generateAccessToken, generateRefreshToken, serializeCookie } from '../../../../api/token'
+import { getUserForSession } from '../../../../api/getSession'
 
 dbConnect()
 
@@ -33,10 +34,11 @@ export default async function handler(
             throw Error('Invalid')
         }
 
-        const authenticatedUser = await User.findOneAndUpdate({ _id: user._id }, { $set: { emailVerified: new Date() } })
+        const authenticatedUser = await User.findOneAndUpdate({ _id: user._id }, { $set: { emailVerified: new Date() } }, { new: true })
+        const sessionUser = getUserForSession(authenticatedUser)
 
-        const accessToken = generateAccessToken(authenticatedUser)
-        const refreshToken = generateRefreshToken(authenticatedUser)
+        const accessToken = generateAccessToken(sessionUser)
+        const refreshToken = generateRefreshToken(sessionUser)
 
         if (!accessToken || !refreshToken) {
             throw Error('Invalid')

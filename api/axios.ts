@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Cookie from 'js-cookie'
-import { generateAccessToken } from './token'
+import { getUserForSession } from './getSession'
 
 const cookieName = 'jobboardx'
 
@@ -17,8 +17,8 @@ axiosInstance.interceptors.response.use(
     async (res) => {
         // When updating user we need to generate new access & refresh tokens
         if (res.config.url?.endsWith('/api/auth/update')) {
-            const updatedUser = res.data
-
+            const updatedUser = getUserForSession(res.data)
+            
             const { data } = await axios.post(`${axios.defaults.baseURL}/api/auth/reset-tokens`, updatedUser)
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`

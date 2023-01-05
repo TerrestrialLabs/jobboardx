@@ -59,11 +59,18 @@ const BillingDetails: NextPage = () => {
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
-    useEffect(() => {
-        if (session?.user && !formLoaded) {
-            const { billingAddress } = (session.user as Employer).employer
+    const fetchUser = async () => {
+        if (session?.user) {
+            const res = await axiosInstance.get(`${baseUrlApi}auth/users/${session.user._id}`)
+            const { billingAddress } = (res.data as Employer).employer
             setForm(billingAddress ?? initState)
             setFormLoaded(true)
+        }
+    }
+
+    useEffect(() => {
+        if (session?.user && !formLoaded) {
+            fetchUser()
         }
     }, [session?.user])
 
