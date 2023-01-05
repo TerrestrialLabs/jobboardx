@@ -77,6 +77,7 @@ export default async function handler(
                     dateFormat: "MMMM D, YYYY",
                     unsubscribeUrl: `https://${jobboard.domain}/unsubscribe/${subscription._id}`
                 },
+                // TO DO: Save in env var
                 template_id: 'd-2b27defb433c4a7e99667df4ed069625'
             }))
 
