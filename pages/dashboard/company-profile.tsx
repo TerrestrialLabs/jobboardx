@@ -195,8 +195,8 @@ const CompanyProfile: NextPage = () => {
             </Head>
 
             <Dashboard content={(
-                <Grid xs={12} pb={4}>
-                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 2 : 4} pb={mobile ? 3 : 4}>
+                <Grid xs={12} pb={2} pt={mobile ? 0 : 2}>
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 1 : 2} pb={2}>
                         <Grid xs={12}>
                             {showErrorMessage && (
                                 <Grid xs={12}>

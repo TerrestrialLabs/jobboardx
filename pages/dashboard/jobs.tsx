@@ -67,11 +67,11 @@ const Jobs: NextPage = () => {
             </Head>
 
             <Dashboard content={(
-                <Grid xs={12} pb={4}>
-                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 2 : 4} pb={mobile ? 3 : 4}>
+                <Grid xs={12} pb={2} pt={mobile ? 0 : 2}>
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 1 : 2} pb={2}>
                         <Grid xs={12}>
                             {fetched && data.length > 0 && (
-                                <Grid xs={12}>
+                                <Grid xs={12} p={0}>
                                     <Box>
                                         <Typography fontWeight='bold'>{data.length} job{data.length > 1 ? 's' : ''}</Typography>
                                     </Box>
@@ -179,7 +179,7 @@ export const JobItem = ({
                 )}
 
                 <Grid xs={12} sm={6}>
-                    <Box mt={1} mr={2} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
+                    <Box mr={2} display='flex' flexWrap='wrap' color='grey' alignItems='center'>
                         <Box mb={0.25} display='flex' alignItems='center'>
                             <LocationOn fontSize='small' style={{marginRight: '0.25rem'}} />
                             <Typography variant='subtitle2' mr={2}>{remote ? 'Remote' : location}</Typography>

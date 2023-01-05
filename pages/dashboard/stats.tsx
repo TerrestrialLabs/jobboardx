@@ -44,29 +44,29 @@ const Stats: NextPage = () => {
 
             <Dashboard content={(
                 <>
-                    <Grid xs={12} pb={mobile ? 2 : 4}>
+                    <Grid xs={12} pb={mobile ? 0 : 2} pt={mobile ? 0 : 2}>
                         <Box sx={{ backgroundColor: '#fff', borderRadius: 1 }} p={mobile ? 2 : 4}>
-                            <Grid xs={12}>
+                            <Grid xs={12} p={0}>
                                 <Box>
                                     <Typography fontWeight='bold'>This month</Typography>
                                 </Box>
                             </Grid>
 
-                            <Grid xs={12} container>
-                                <Grid pr={mobile ? 0 : 4} xs={12} sm={4}>
-                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} pt={2} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: mobile ? 0 : '1px solid #e7e7e7' }}>
+                            <Grid xs={12} container spacing={4}>
+                                <Grid xs={12} sm={4}>
+                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} pt={2} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                         <Box mb={0.75}><Typography>Job views</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.views : 0}</Typography></Box>
                                     </Box>
                                 </Grid>
                                 <Grid xs={12} sm={4}>
-                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} pt={2} pr={mobile ? 0 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: mobile ? 0 : '1px solid #e7e7e7' }}>
+                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} pt={2} pr={mobile ? 0 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                         <Box><Typography mb={0.75}>Applications via link</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.urlApplyClicks : 0}</Typography></Box>
                                     </Box>
                                 </Grid>
-                                <Grid pt={2} pl={mobile ? 0 : 4} xs={12} sm={4}>
-                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
+                                <Grid xs={12} sm={4}>
+                                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} pt={2} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                         <Box><Typography mb={0.75}>Applications via email</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.emailApplyClicks : 0}</Typography></Box>
                                     </Box>
@@ -77,7 +77,7 @@ const Stats: NextPage = () => {
 
                     <Grid xs={12}>
                         <Box sx={{ backgroundColor: '#fff', borderRadius: 1, width: '100%'}} p={mobile ? 2 : 4}>
-                            <Grid xs={12}>
+                            <Grid xs={12} p={0}>
                                 <Box>
                                     <Typography fontWeight='bold'>Total</Typography>
                                 </Box>
@@ -85,7 +85,7 @@ const Stats: NextPage = () => {
 
                             <Grid xs={12} container>
                                 <Grid xs={12} sm={4} pr={mobile ? 0 : 4}>
-                                    <Box pt={2} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} sx={{ backgroundColor: '#fff', borderRadius: 1, borderRight: mobile ? 0 : '1px solid #e7e7e7' }}>
+                                    <Box pt={2} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                         <Box mb={0.75}><Typography>Jobs posted</Typography></Box>
                                         <Box><Typography color='primary' fontSize={24} fontWeight='bold'>{data ? data.jobs : 0}</Typography></Box>
                                     </Box>
