@@ -31,7 +31,7 @@ const Companies: NextPage<Props> = ({ data }) => {
 
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center'>
-          <Grid xs={12} sm={9}>
+          <Grid xs={12} sm={10} lg={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(45vh - 58px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
               <Box p={2} sx={{ zIndex: 1 }}>
@@ -43,7 +43,7 @@ const Companies: NextPage<Props> = ({ data }) => {
         </Grid>
 
         <Grid container justifyContent='center' sx={{ position: 'relative' }}>
-          <Grid xs={11} sm={9}>
+          <Grid xs={11} sm={10} lg={9}>
             <Box pb={4} pt={2}>
 
               <Grid container spacing={2}>
@@ -77,7 +77,7 @@ const Companies: NextPage<Props> = ({ data }) => {
                             )}
 
                             <Grid pb={0} pt={mobile ? 1 : 0} xs={12} mt={mobile ? 1 : 2} display='flex' justifyContent='center' alignItems='flex-end'>
-                              <Button variant='outlined'>View jobs</Button>
+                              <Button variant='outlined' href={`/?search=${employer.employer.company}`}>View jobs</Button>
                             </Grid>
                           </Box>
 

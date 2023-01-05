@@ -25,9 +25,7 @@ export default async function handler(
             const employers = await User.find({
                 jobboardId: req.query.jobboardId,
                 role: ROLE.EMPLOYER
-            }).select('-email').select('-employer.billingAddress')
-                // .sort({ 'employer.title': 1 })
-                .exec()
+            }).select('-email').select('-employer.billingAddress').exec()
 
             const backfilledEmployers = await BackfilledEmployer.find({
                 jobboardId: req.query.jobboardId

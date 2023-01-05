@@ -31,6 +31,7 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
 
     const windowSize = useWindowSize()
     const mobile = !windowSize.width || windowSize.width < 500
+    const sizeMedium = !!windowSize.width && (windowSize.width > 500 && windowSize.width < 900)
 
     const expired = isExpired(data.datePosted)
 
@@ -81,13 +82,23 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
             </Head>
 
             <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
-                <Grid  container justifyContent='center' pt={mobile ? 0 : 2} pb={mobile ? 0 : 4}>
-                    <Grid item xs={12} sm={10} lg={9} p={mobile ? 2 : 0} pt={2} container>
-                        <Grid item xs={12} sm={8}>
+                <Grid  container justifyContent='center' pt={mobile ? 2 : 4} pb={mobile ? 0 : 4}>
+                    <Grid item xs={11} sm={10} lg={9} container spacing={mobile ? 2 : 4}>
+                        <Grid item xs={12} md={8}>
                             <Box sx={{ backgroundColor: '#fff', borderRadius: 1, position: 'relative' }}>
                                 <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ borderBottom: '1px solid #e8e8e8'}}>
                                     <Grid item xs={12}>
                                         <Typography mb={mobile ? 1.5 : 2} variant='h1' fontSize={mobile ? 22 : 30} fontWeight='bold'>{data.title}</Typography>
+
+                                        {(mobile || sizeMedium) && (
+                                            <Box mb={sizeMedium ? 2 : 0}>
+                                                <NextLink href={`/?search=${data.company}`}>
+                                                    <Typography mb={1} sx={{ cursor: 'pointer '}}>
+                                                        {data.company}
+                                                    </Typography>
+                                                </NextLink>
+                                            </Box>
+                                        )}
 
                                         <Box mb={1.5}>
                                             <Typography color='grey' variant='subtitle2'>{format(parseISO(data.datePosted ? data.datePosted.toString() : data.createdAt.toString()), 'MMM. d, yyyy')}</Typography>
@@ -196,8 +207,8 @@ const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={4}>
-                            <CompanyBox expired={expired} trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} />
+                        <Grid item xs={12} md={4}>
+                            <CompanyBox expired={expired} trackJobApplyClick={trackJobApplyClick} companyJobsCount={companyJobsCount} data={data} mobile={mobile} sizeMedium={sizeMedium} />
                         </Grid>
                     </Grid>
                 </Grid>
@@ -215,11 +226,12 @@ type CompanyBoxProps = {
     data: JobData
     expired: boolean
     mobile: boolean
+    sizeMedium: boolean
     trackJobApplyClick: () => void
 }
-const CompanyBox = ({ companyJobsCount, data, expired, mobile, trackJobApplyClick }: CompanyBoxProps) => {
+const CompanyBox = ({ companyJobsCount, data, expired, mobile, sizeMedium, trackJobApplyClick }: CompanyBoxProps) => {
     return (
-        <Box ml={mobile ? 0 : 4} mt={mobile ? 2 : 0} mb={mobile ? 2 : 4} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
+        <Box mb={mobile ? 2 : 0} p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }} display='flex' flexDirection='column' alignItems='center'>
             <Box display='flex' flexDirection='column' alignItems='center'>
                 <Box mb={1} sx={{ borderRadius: '50%', border: '1px solid #e8e8e8', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '58px', width: '60px', backgroundColor: '#e8f3fd' }}>
                     {data.companyLogo && <img style={{ borderRadius: '50%' }} src={data.companyLogo} alt="Company logo" width={'100%'} height={'100%'} />}
@@ -239,7 +251,7 @@ const CompanyBox = ({ companyJobsCount, data, expired, mobile, trackJobApplyClic
                     <Typography variant='caption'>Visit company website</Typography>
                 </Link>
             )}
-            {!mobile && !expired && (
+            {!mobile && !sizeMedium && !expired && (
                 <Button onClick={trackJobApplyClick} fullWidth href={data.applicationLink} variant='contained' disableElevation color='primary' style={{ marginTop: '1rem' }}>
                     Apply
                 </Button>

@@ -135,7 +135,7 @@ const Header = () => {
     return (
         <Box py={1} bgcolor='primary.main' color='white' sx={{ height: '58px', position: 'fixed', width: '100%', zIndex: 999 }}>
             <Grid container justifyContent='center'>
-                <Grid xs={11} sm={9} display='flex' justifyContent='space-between' alignContent='center'>
+                <Grid xs={11} sm={10} lg={9} display='flex' justifyContent='space-between' alignContent='center'>
                     
                         <Box>
                             <Link href='/'>

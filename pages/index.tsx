@@ -185,7 +185,7 @@ const Home: NextPage = () => {
 
       <main className={styles.main} style={{backgroundColor: '#f5f5f5', paddingTop: 58}}>
         <Grid container justifyContent='center'>
-          <Grid xs={12} sm={9}>
+          <Grid xs={12} sm={10} lg={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: 'calc(300px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
               <Box p={2} pb={mobile ? '60px' : '50px'} sx={{ zIndex: 1 }}>
@@ -197,7 +197,7 @@ const Home: NextPage = () => {
         </Grid>
 
         <Grid container justifyContent='center' sx={{ position: 'relative' }}>
-          <Grid xs={11} sm={9}>
+          <Grid xs={11} sm={10} lg={9}>
             <Box p={2} pt={2} mt={-5} mb={2} sx={{
               backgroundColor: '#fff',
               display: 'flex',
