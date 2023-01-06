@@ -39,7 +39,7 @@ export default async function handler(
     if (method === 'GET') {
         try {
             const jobboards = await JobBoard.find()
-            res.status(201).json(jobboards)
+            res.status(200).json(jobboards)
         } catch(err) {
             // @ts-ignore
             res.status(500).json(getErrorMessage(err))

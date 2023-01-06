@@ -13,5 +13,7 @@ jobs:
         node-version: [18.x]
     steps:
     - uses: actions/checkout@v3
+      env:
+        TWITTER_SECRET: ${{ secrets.TWITTER_SECRET }}
     - run: yarn install
     - run: node backfill-scraper.js
