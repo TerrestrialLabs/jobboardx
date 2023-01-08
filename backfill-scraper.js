@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer')
 const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
+require('dotenv').config()
 
 async function scrapeJobs(jobboard) {
     console.log('process.env.TWITTER_SECRET: ', process.env.TWITTER_SECRET)
