@@ -25,7 +25,7 @@ export default async function handler(
                 const filters = {
                     jobboardId: req.query.jobboardId,
                     backfilled: false,
-                    $gte: sinceDate
+                    datePosted: { $gte: sinceDate }
                 }
 
                 const count = await Job.countDocuments(filters).exec()
