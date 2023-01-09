@@ -28,6 +28,18 @@ export default async function handler(
 
     if (method === 'POST') {
         try {
+            console.log('API process.env.TWITTER_SECRET: ', process.env.TWITTER_SECRET)
+
+            if (req.headers.authorization) {
+                const token = req.headers.authorization.replace('Bearer', '').trim()
+console.log('API req.headers.authorization token: ', token)
+                if (token !== process.env.TWITTER_SECRET) {
+                    throw Error('Unauthorized')
+                }
+            } else {
+                throw Error('Unauthorized')
+            }
+
             const job = req.body.jobData
 
             if (!job.applicationLink.startsWith('https://www.simplyhired.com')) {
