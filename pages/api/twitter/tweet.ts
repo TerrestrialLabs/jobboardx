@@ -35,8 +35,7 @@ export default async function handler(
 
             if (process.env.ACTIONS_SECRET === token) {
                 const domain = req.headers.host
-                const jobboard = await JobBoard.findOne({ domain })
-                const postUrl = `https://${jobboard.domain}/jobs/${req.body.job._id}`
+                const postUrl = `https://${domain}/jobs/${req.body.job._id}`
                 const text = getNewPositionTweet({ job: req.body.job, postUrl })
 
                 await twitterClient.v2.tweet(text)
