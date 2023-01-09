@@ -190,7 +190,11 @@ async function scrapeJobs(jobboard) {
 
     if (savedJobs.length > 0) {
         // Tweet the last backfilled job if no employer jobs posted in the last 24 hours
-        const recentJobsRes = await axios.get(`https://${jobboard.domain}/api/jobs/latest-count?jobboardId=${jobboard._id}`)
+        const recentJobsRes = await axios.get(`https://${jobboard.domain}/api/jobs/latest-count?jobboardId=${jobboard._id}`, {
+            headers: {
+                'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
+            }
+        })
 
         console.log('Jobs posted in the last 24 hours: ', recentJobsRes.data.count)
 
