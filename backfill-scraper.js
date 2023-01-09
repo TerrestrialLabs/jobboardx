@@ -196,7 +196,7 @@ async function scrapeJobs(jobboard) {
             }
         })
 
-        console.log('Jobs posted in the last 24 hours: ', recentJobsRes.data.count)
+        console.log('Jobs posted in the last 24 hr: ', recentJobsRes.data.jobCount)
 
         if (recentJobsRes.data && recentJobsRes.data.count === 0) {
             try {

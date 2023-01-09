@@ -30,7 +30,7 @@ export default async function handler(
 
                 const count = await Job.countDocuments(filters).exec()
 
-                res.status(200).json({ count })
+                res.status(200).json({ jobCount: count })
             } else {
                 throw Error('Unauthorized')
             }
