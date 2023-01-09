@@ -171,7 +171,7 @@ async function scrapeJobs(jobboard) {
         })
     )
 
-    let error = false
+    let savedJobs = []
     for (let i = 0; i < jobsWithLogo.length; i++) { 
         try {
             const res = await axios.post(`https://${jobboard.domain}/api/jobs/backfill`, jobsWithLogo[i], {
@@ -179,15 +179,32 @@ async function scrapeJobs(jobboard) {
                     'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
                 }
             })
-            console.log(`Job saved: ${res.data.title}`)
+            savedJobsCount.push(res.data)
+            console.log(`Job ${i}: Success`)
         } catch (err) {
-            error = true
             console.log(`Job ${i}: Error`)
         }
     }
 
-    if (!error) {
-        console.log('Jobs saved: ', jobsWithLogo.length)
+    console.log('Jobs saved: ', savedJobs.length)
+
+    // TO DO: Only tweet if no employer jobs posted in the last 24 hours
+    // Tweet the last saved job
+    try {
+        const jobToTweet = savedJobs[savedJobs.length - 1]
+        const postUrl = `https://${jobboard.domain}/jobs/${jobToTweet._id}`
+        const tweetText = getNewPositionTweet(jobToTweet, postUrl)
+        
+        console.log('tweetText: ', tweetText)
+
+        await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { text: tweetText }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
+            }
+        })
+        console.log('Tweet successful')
+    } catch (err) {
+        console.log('Tweet failed: ', err)
     }
 }
 

@@ -11,6 +11,8 @@ import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
 import { getSession } from '../../../api/getSession'
 import User, { Employer, UserType } from '../../../models/User'
+import { twitterClient } from '../../../api/twitterConfig'
+import { getNewPositionTweet } from '../../../utils/twitter'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -82,6 +84,8 @@ createOrUpdateJob.post(async (req, res) => {
 
             // @ts-ignore
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
+
+            tweet({ host: req.headers.host, job })
 
             res.status(201).json(job)
         } else if (mode === 'update') {
@@ -164,5 +168,23 @@ export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConf
         }
     } catch (err) {
         throw Error('Failed to send confirmation email.')
+    }
+}
+
+type TweetParams = {
+    host: string | undefined
+    job: JobData
+}
+export const tweet = async ({ host, job }: TweetParams) => {
+    const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
+    const jobboard = await JobBoard.findOne({ domain })
+    const postUrl = `https://${jobboard.domain}/jobs/${job._id}`
+    const text = getNewPositionTweet({ job, postUrl })
+
+    try {
+        const res = await twitterClient.v2.tweet(text)
+        console.log('Twitter res: ', res)
+    } catch (err) {
+        console.log('Twitter err: ', err)
     }
 }
