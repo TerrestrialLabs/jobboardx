@@ -32,6 +32,15 @@ export default async function handler(
     // TO DO: Only send new jobs since last email/week >= timestamp of last sent job (save in DB collection)
     if (method === 'POST') {
         try {
+            if (req.headers.authorization) {
+                const token = req.headers.authorization.replace('Bearer', '').trim()
+                if (token !== process.env.ACTIONS_SECRET) {
+                    throw Error('Unauthorized')
+                }
+            } else {
+                throw Error('Unauthorized')
+            }
+
             const jobboard = req.body.jobboard
             const subscriptions = await Subscription.find({ jobboardId: jobboard._id }).exec()
 

@@ -1,11 +1,11 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Backfill Jobs Daily
+name: Subsciption Email
 
 on:
   schedule:
-  - cron: "0 21 * * *"
+  - cron: "0 13 * * 1"
 
 jobs:
   build:
@@ -17,6 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: yarn install
-    - run: node backfill-scraper.js
+    - run: node cron/send-subscription-email.js
       env:
         ACTIONS_SECRET: ${{ secrets.ACTIONS_SECRET }}
