@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { twitterClient } from '../../../api/twitterConfig'
-import { getNewPositionTweet } from '../../../utils/twitter'
+import Job from '../../../models/Job'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
@@ -20,13 +19,18 @@ export default async function handler(
             const token = bearerToken.replace('Bearer', '').trim()
 
             if (process.env.ACTIONS_SECRET === token) {
-                const domain = req.headers.host
-                const postUrl = `https://${domain}/jobs/${req.body.job._id}`
-                const text = getNewPositionTweet({ job: req.body.job, postUrl })
+                const currentDate = new Date()
+                const sinceDate = new Date(currentDate.getTime() - (24 * 60 * 60 * 1000))
 
-                await twitterClient.v2.tweet(text)
+                const filters = {
+                    jobboardId: req.query.jobboardId,
+                    backfilled: false,
+                    $gte: sinceDate
+                }
 
-                res.status(201).json(true)
+                const count = await Job.countDocuments(filters).exec()
+
+                res.status(200).json({ count })
             } else {
                 throw Error('Unauthorized')
             }

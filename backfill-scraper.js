@@ -16,8 +16,7 @@ async function scrapeJobs(jobboard) {
 
     while (endOfResults === false) {
         if (jobs.length < numJobsToScrape) {
-            // await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
-            await page.goto(`https://www.simplyhired.com/search?q=web+developer&pn=${pageNum}`)
+            await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
 
             const results = await page.evaluate(() => {
                 let jobList = []
@@ -189,21 +188,26 @@ async function scrapeJobs(jobboard) {
 
     console.log('Jobs saved: ', savedJobs.length)
 
-    // TO DO: Only tweet if no employer jobs posted in the last 24 hours
-    // Tweet the last saved job
     if (savedJobs.length > 0) {
-        try {
-            const jobToTweet = savedJobs[savedJobs.length - 1]
-            delete jobToTweet.description
+        // Tweet the last backfilled job if no employer jobs posted in the last 24 hours
+        const recentJobsRes = await axios.get(`${baseUrlApi}jobs/latest-count?jobboardId=${jobboard._id}`)
 
-            await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { job: jobToTweet }, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
-                }
-            })
-            console.log('Tweet successful')
-        } catch (err) {
-            console.log('Tweet failed: ', err)
+        console.log('Jobs posted in the last 24 hours: ', recentJobsRes.data.count)
+
+        if (recentJobsRes.data && recentJobsRes.data.count === 0) {
+            try {
+                const jobToTweet = savedJobs[savedJobs.length - 1]
+                delete jobToTweet.description
+    
+                await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { job: jobToTweet }, {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
+                    }
+                })
+                console.log('Tweet successful')
+            } catch (err) {
+                console.log('Tweet failed: ', err)
+            }
         }
     }
 }

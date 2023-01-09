@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
-import BackfilledEmployer from '../../../models/BackfilledEmployer'
-import { ROLE } from '../../../const/const'
 
 type Filters = { 
     [key: string ]: 
