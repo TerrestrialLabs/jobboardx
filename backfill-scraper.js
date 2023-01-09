@@ -3,6 +3,7 @@ const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
+const { getNewPositionTweet } = require('./utils/twitter')
 require('dotenv').config()
 
 async function scrapeJobs(jobboard) {
@@ -195,7 +196,7 @@ async function scrapeJobs(jobboard) {
         try {
             const jobToTweet = savedJobs[savedJobs.length - 1]
             const postUrl = `https://${jobboard.domain}/jobs/${jobToTweet._id}`
-            const tweetText = getNewPositionTweet(jobToTweet, postUrl)
+            const tweetText = getNewPositionTweet({ job: jobToTweet, postUrl })
             
             console.log('tweetText: ', tweetText)
     
