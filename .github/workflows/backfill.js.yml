@@ -11,9 +11,11 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-    environment: CI
+    environment: production
     steps:
     - uses: actions/checkout@v3
+      with:
+        secrets: inherit
     - run: yarn install
     - run: |
           touch .env
