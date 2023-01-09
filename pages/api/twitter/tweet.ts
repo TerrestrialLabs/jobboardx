@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { twitterClient } from '../../../api/twitterConfig'
+import JobBoard from '../../../models/JobBoard'
+import { getNewPositionTweet } from '../../../utils/twitter'
 // import { TwitterApi } from 'twitter-api-v2'
 
 // const client = new TwitterApi({
@@ -32,7 +34,12 @@ export default async function handler(
             const token = bearerToken.replace('Bearer', '').trim()
 
             if (process.env.ACTIONS_SECRET === token) {
-                await twitterClient.v2.tweet(req.body.text)
+                const domain = req.headers.host
+                const jobboard = await JobBoard.findOne({ domain })
+                const postUrl = `https://${jobboard.domain}/jobs/${req.body.job._id}`
+                const text = getNewPositionTweet({ job: req.body.job, postUrl })
+
+                await twitterClient.v2.tweet(text)
 
                 res.status(201).json(true)
             } else {

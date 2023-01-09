@@ -3,7 +3,6 @@ const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
-const { getNewPositionTweet } = require('./utils/twitter')
 require('dotenv').config()
 
 async function scrapeJobs(jobboard) {
@@ -195,12 +194,9 @@ async function scrapeJobs(jobboard) {
     if (savedJobs.length > 0) {
         try {
             const jobToTweet = savedJobs[savedJobs.length - 1]
-            const postUrl = `https://${jobboard.domain}/jobs/${jobToTweet._id}`
-            const tweetText = getNewPositionTweet({ job: jobToTweet, postUrl })
-            
-            console.log('tweetText: ', tweetText)
-    
-            await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { text: tweetText }, {
+            delete jobToTweet.description
+
+            await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { job: jobToTweet }, {
                 headers: {
                     'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
                 }
