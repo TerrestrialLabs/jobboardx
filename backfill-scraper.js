@@ -17,7 +17,7 @@ async function scrapeJobs(jobboard) {
     while (endOfResults === false) {
         if (jobs.length < numJobsToScrape) {
             // await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
-            await page.goto(`https://www.simplyhired.com/search?q=programmer&pn=${pageNum}`)
+            await page.goto(`https://www.simplyhired.com/search?q=web+developer&pn=${pageNum}`)
 
             const results = await page.evaluate(() => {
                 let jobList = []
@@ -180,7 +180,7 @@ async function scrapeJobs(jobboard) {
                     'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
                 }
             })
-            savedJobsCount.push(res.data)
+            savedJobs.push(res.data)
             console.log(`Job ${i}: Success`)
         } catch (err) {
             console.log(`Job ${i}: Error: ${err}`)
