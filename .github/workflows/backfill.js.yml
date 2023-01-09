@@ -17,8 +17,8 @@ jobs:
     - run: yarn install
     - run: |
           touch .env
-          echo GITHUB_SECRET=${{ secrets.GITHUB_SECRET }} > .env
+          echo ACTIONS_SECRET=${{ secrets.ACTIONS_SECRET }} > .env
           cat .env
     - run: node backfill-scraper.js
       env:
-        GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+        ACTIONS_SECRET: ${{ secrets.ACTIONS_SECRET }}

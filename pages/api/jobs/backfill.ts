@@ -30,7 +30,7 @@ export default async function handler(
         try {
             if (req.headers.authorization) {
                 const token = req.headers.authorization.replace('Bearer', '').trim()
-                if (token !== process.env.GITHUB_SECRET) {
+                if (token !== process.env.ACTIONS_SECRET) {
                     throw Error('Unauthorized')
                 }
             } else {

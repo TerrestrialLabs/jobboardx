@@ -176,7 +176,7 @@ async function scrapeJobs(jobboard) {
         try {
             const res = await axios.post(`https://${jobboard.domain}/api/jobs/backfill`, jobsWithLogo[i], {
                 headers: {
-                    'Authorization': `Bearer ${process.env.GITHUB_SECRET}`
+                    'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
                 }
             })
             console.log(`Job saved: ${res.data.title}`)
