@@ -192,6 +192,8 @@ async function scrapeJobs(jobboard) {
 }
 
 async function scrapeJobsForAllBoards() {
+    console.log('process.env.ACTIONS_SECRET: ', process.env.ACTIONS_SECRET)
+
     // TO DO: Replace with www.jobboardx.io
     const domain = 'www.reactdevjobs.io'
     const { data: jobboards } = await axios.get(`https://${domain}/api/jobboards`)

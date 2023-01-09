@@ -15,10 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: yarn install
-    - run: |
-          touch .env
-          echo ACTIONS_SECRET=${{ secrets.ACTIONS_SECRET }} > .env
-          cat .env
     - run: node backfill-scraper.js
       env:
         ACTIONS_SECRET: ${{ secrets.ACTIONS_SECRET }}
