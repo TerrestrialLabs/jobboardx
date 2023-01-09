@@ -16,7 +16,8 @@ async function scrapeJobs(jobboard) {
 
     while (endOfResults === false) {
         if (jobs.length < numJobsToScrape) {
-            await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
+            // await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
+            await page.goto(`https://www.simplyhired.com/search?q=frontend+developer&pn=${pageNum}`)
 
             const results = await page.evaluate(() => {
                 let jobList = []
@@ -211,8 +212,6 @@ async function scrapeJobs(jobboard) {
 }
 
 async function scrapeJobsForAllBoards() {
-    console.log('process.env.ACTIONS_SECRET: ', process.env.ACTIONS_SECRET)
-
     // TO DO: Replace with www.jobboardx.io
     const domain = 'www.reactdevjobs.io'
     const { data: jobboards } = await axios.get(`https://${domain}/api/jobboards`)
