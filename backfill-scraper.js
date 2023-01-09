@@ -9,7 +9,7 @@ async function scrapeJobs(jobboard) {
     let jobs = []
     let pageNum = 1
     let endOfResults = false
-    const numJobsToScrape = 30
+    const numJobsToScrape = 40
 
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
@@ -190,21 +190,23 @@ async function scrapeJobs(jobboard) {
 
     // TO DO: Only tweet if no employer jobs posted in the last 24 hours
     // Tweet the last saved job
-    try {
-        const jobToTweet = savedJobs[savedJobs.length - 1]
-        const postUrl = `https://${jobboard.domain}/jobs/${jobToTweet._id}`
-        const tweetText = getNewPositionTweet(jobToTweet, postUrl)
-        
-        console.log('tweetText: ', tweetText)
-
-        await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { text: tweetText }, {
-            headers: {
-                'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
-            }
-        })
-        console.log('Tweet successful')
-    } catch (err) {
-        console.log('Tweet failed: ', err)
+    if (savedJobs.length > 0) {
+        try {
+            const jobToTweet = savedJobs[savedJobs.length - 1]
+            const postUrl = `https://${jobboard.domain}/jobs/${jobToTweet._id}`
+            const tweetText = getNewPositionTweet(jobToTweet, postUrl)
+            
+            console.log('tweetText: ', tweetText)
+    
+            await axios.post(`https://${jobboard.domain}/api/twitter/tweet`, { text: tweetText }, {
+                headers: {
+                    'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
+                }
+            })
+            console.log('Tweet successful')
+        } catch (err) {
+            console.log('Tweet failed: ', err)
+        }
     }
 }
 
