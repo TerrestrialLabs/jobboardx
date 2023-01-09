@@ -33,9 +33,9 @@ export default async function handler(
             if (bearerToken) {
                 const token = bearerToken.replace('Bearer', '').trim()
 
-                if (process.env.TWITTER_SECRET === token) {
+                if (process.env.GITHUB_SECRET === token) {
                     await twitterClient.v2.tweet(req.body.text)
-                    
+
                     res.status(201).json(true)
                 } else {
                     throw Error('Unauthorized')

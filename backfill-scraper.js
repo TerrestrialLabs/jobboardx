@@ -174,10 +174,9 @@ async function scrapeJobs(jobboard) {
     let error = false
     for (let i = 0; i < jobsWithLogo.length; i++) { 
         try {
-            // axios.headers['Authorization'] = `Bearer ${process.env.TWITTER_SECRET}`
             const res = await axios.post(`https://${jobboard.domain}/api/jobs/backfill`, jobsWithLogo[i], {
                 headers: {
-                    'Authorization': `Bearer ${process.env.TWITTER_SECRET}`
+                    'Authorization': `Bearer ${process.env.GITHUB_SECRET}`
                 }
             })
             console.log(`Job saved: ${res.data.title}`)
@@ -193,8 +192,6 @@ async function scrapeJobs(jobboard) {
 }
 
 async function scrapeJobsForAllBoards() {
-    console.log('SCRIPT process.env.TWITTER_SECRET: ', process.env.TWITTER_SECRET)
-
     // TO DO: Replace with www.jobboardx.io
     const domain = 'www.reactdevjobs.io'
     const { data: jobboards } = await axios.get(`https://${domain}/api/jobboards`)

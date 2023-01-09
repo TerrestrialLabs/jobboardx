@@ -28,12 +28,9 @@ export default async function handler(
 
     if (method === 'POST') {
         try {
-            console.log('API process.env.TWITTER_SECRET: ', process.env.TWITTER_SECRET)
-
             if (req.headers.authorization) {
                 const token = req.headers.authorization.replace('Bearer', '').trim()
-console.log('API req.headers.authorization token: ', token)
-                if (token !== process.env.TWITTER_SECRET) {
+                if (token !== process.env.GITHUB_SECRET) {
                     throw Error('Unauthorized')
                 }
             } else {

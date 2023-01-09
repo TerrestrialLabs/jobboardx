@@ -17,8 +17,8 @@ jobs:
     - run: yarn install
     - run: |
           touch .env
-          echo TWITTER_SECRET=${{ secrets.TWITTER_SECRET }} > .env
+          echo GITHUB_SECRET=${{ secrets.GITHUB_SECRET }} > .env
           cat .env
     - run: node backfill-scraper.js
       env:
-        TWITTER_SECRET: ${{ secrets.TWITTER_SECRET }}
+        GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
