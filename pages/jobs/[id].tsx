@@ -27,6 +27,8 @@ interface Props {
 }
 
 const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi }) => {
+    console.log({ data, errorStatus, jobboard, baseUrlApi })
+
     if (errorStatus === 404) {
         return <ErrorPage statusCode={errorStatus} />
     }
@@ -277,6 +279,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     let data = null
     let errorStatus = null
+    let jobboard = null
 
     try {
         const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
@@ -284,16 +287,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     } catch (err) {
         // @ts-ignore
         errorStatus = err.response.status
-        console.log(err)
     }
 
-    const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
+    if (context?.req?.headers?.host && data) {
+        const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
+        jobboard = jobboardRes.data
+    }
 
     return {
         props: {
             errorStatus,
             data,
-            jobboard: jobboardRes.data,
+            jobboard,
             baseUrlApi,
             baseUrl
         }
