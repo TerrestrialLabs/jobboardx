@@ -16,15 +16,25 @@ import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
 import { JobBoardData } from '../api/jobboards'
 import { JobData } from '../../models/Job'
+import ErrorPage from 'next/error'
 
 interface Props {
     data: JobData
+    errorStatus: number | null
     baseUrl: string
     baseUrlApi: string
     jobboard: JobBoardData
 }
 
-const JobDetail: NextPage<Props> = ({ data, jobboard, baseUrlApi }) => {
+const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi }) => {
+    if (errorStatus === 404) {
+        return <ErrorPage statusCode={errorStatus} />
+    }
+
+    if (errorStatus === 500) {
+        return <ErrorPage statusCode={errorStatus} />
+    }
+
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
 
     const router = useRouter()
@@ -265,19 +275,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const baseUrl = `${protocol}://${context.req.headers.host}/`
     const baseUrlApi = `${baseUrl}api/`
 
-    const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
+    let data = null
+    let errorStatus = null
 
-    if (!res || !res.data) { 
-        return {
-          notFound: true,
-        }
+    try {
+        const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
+        data = res.data
+    } catch (err) {
+        // @ts-ignore
+        errorStatus = err.response.status
+        console.log(err)
     }
 
     const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
 
     return {
         props: {
-            data: res.data,
+            errorStatus,
+            data,
             jobboard: jobboardRes.data,
             baseUrlApi,
             baseUrl

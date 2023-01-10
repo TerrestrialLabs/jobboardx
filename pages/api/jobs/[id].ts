@@ -22,12 +22,16 @@ export default async function handler(
     dbConnect()
 
     if (method === 'GET') {
-        const job = await Job.findById(id).select('-orderId')
-        if (!job) {
-            res.status(404).json(getErrorMessage('Not found'))
-        } else {
-            // @ts-ignore
-            res.status(200).json(job)
+        try {
+            const job = await Job.findById(id).select('-orderId')
+            if (!job) {
+                return res.status(404).json(getErrorMessage('Not found'))
+            } else {
+                // @ts-ignore
+                return res.status(200).json(job)
+            }
+        } catch (err) {
+            res.status(500).json(getErrorMessage(err))
         }
     }
 
