@@ -266,6 +266,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const baseUrlApi = `${baseUrl}api/`
 
     const res = await axios.get(`${baseUrlApi}jobs/${context.params?.id}`)
+
+    if (!res || !res.data) { 
+        return {
+          notFound: true,
+        }
+    }
+
     const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
 
     return {
