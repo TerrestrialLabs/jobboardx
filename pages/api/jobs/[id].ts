@@ -12,7 +12,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobData | boolean>
+    res: NextApiResponse<JobData | boolean | string>
 ) {
     const { 
         method,
@@ -23,9 +23,12 @@ export default async function handler(
 
     if (method === 'GET') {
         const job = await Job.findById(id).select('-orderId')
-        // TO DO
-        // @ts-ignore
-        res.status(200).json(job)
+        if (!job) {
+            res.status(404).json(getErrorMessage('Not found'))
+        } else {
+            // @ts-ignore
+            res.status(200).json(job)
+        }
     }
 
     if (method === 'DELETE') {
