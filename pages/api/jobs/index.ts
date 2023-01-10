@@ -3,6 +3,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
 import { ROLE } from '../../../const/const'
 import { getSession } from '../../../api/getSession'
+import BackfilledEmployer from '../../../models/BackfilledEmployer'
 
 type Filters = { 
     [key: string ]: 
@@ -94,7 +95,8 @@ export default async function handler(
             const session = await getSession({ req })
             // @ts-ignore
             if (session && session?.user?.role === ROLE.SUPERADMIN) {
-                await Job.deleteMany()
+                await Job.deleteMany({ backfilled: true })
+                await BackfilledEmployer.deleteMany()
                 res.status(200).json(true)
             } else {
                 res.status(401).json(getErrorMessage('Unauthorized'))

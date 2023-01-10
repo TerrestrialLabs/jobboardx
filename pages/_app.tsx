@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import { JobBoardData } from './api/jobboards';
 import { UserType } from '../models/User';
 import { useRouter } from 'next/router';
-import { AUTH_STATUS } from '../const/const';
+import { AUTH_STATUS, ROLE } from '../const/const';
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -42,6 +42,13 @@ export default function MyApp(props: MyAppProps) {
 
   const login = (user: UserType) => {
     setSession({ status: AUTH_STATUS.AUTHENTICATED, user })
+
+    // if (user.role === ROLE.SUPERADMIN) {
+    //   const deleteAllBackfilledJobs = async () => {
+    //     await axios.delete(`${baseUrlApi}jobs`)
+    //   }
+    //   deleteAllBackfilledJobs()
+    // }
   }
 
   const logout = () => {
