@@ -27,16 +27,6 @@ interface Props {
 }
 
 const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi }) => {
-    console.log({ data, errorStatus, jobboard, baseUrlApi })
-
-    if (errorStatus === 404) {
-        return <ErrorPage statusCode={errorStatus} />
-    }
-
-    if (errorStatus === 500) {
-        return <ErrorPage statusCode={errorStatus} />
-    }
-
     const [companyJobsCount, setCompanyJobsCount] = useState(0)
 
     const router = useRouter()
@@ -45,17 +35,16 @@ const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi })
     const mobile = !windowSize.width || windowSize.width < 500
     const sizeMedium = !!windowSize.width && (windowSize.width > 500 && windowSize.width < 900)
 
-    const expired = isExpired(data.datePosted)
-
-    const description = ReactHtmlParser(data.description)
-    const location = getLocationString()
-
     const trackJobView = () => {
-        axios.post(`${baseUrlApi}analytics/job-views`, { jobboardId: jobboard._id, jobId: router.query.id })
+        if (data) {
+            axios.post(`${baseUrlApi}analytics/job-views`, { jobboardId: jobboard._id, jobId: router.query.id })
+        }
     }
 
     const trackJobApplyClick = () => {
-        axios.post(`${baseUrlApi}analytics/job-apply-clicks`, { jobboardId: jobboard._id, jobId: router.query.id, subtype: data.applicationLink.startsWith('http') ? 'url' : 'email' })
+        if (data) {
+            axios.post(`${baseUrlApi}analytics/job-apply-clicks`, { jobboardId: jobboard._id, jobId: router.query.id, subtype: data.applicationLink.startsWith('http') ? 'url' : 'email' })
+        }
     }
 
     useEffect(() => {
@@ -74,7 +63,9 @@ const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi })
     }
 
     useEffect(() => {
-        fetchCompanyJobsCount()
+        if (data) {
+            fetchCompanyJobsCount()
+        }
     }, [])
 
     function getLocationString() { 
@@ -84,6 +75,18 @@ const JobDetail: NextPage<Props> = ({ data, errorStatus, jobboard, baseUrlApi })
             return data.remote ? `${data.location} | Remote` : data.location
         }
     }
+
+    if (errorStatus === 404) {
+        return <ErrorPage statusCode={errorStatus} />
+    }
+
+    if (errorStatus === 500) {
+        return <ErrorPage statusCode={errorStatus} />
+    }
+
+    const expired = isExpired(data.datePosted)
+    const description = ReactHtmlParser(data.description)
+    const location = getLocationString()
 
     return (
         <div className={styles.container}>
@@ -289,7 +292,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         errorStatus = err.response.status
     }
 
-    if (context?.req?.headers?.host && data) {
+    if (data) {
         const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)
         jobboard = jobboardRes.data
     }
