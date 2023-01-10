@@ -198,7 +198,7 @@ async function scrapeJobs(jobboard) {
 
         console.log('Jobs posted in the last 24 hr: ', recentJobsRes.data.jobCount)
 
-        if (recentJobsRes.data && recentJobsRes.data.count === 0) {
+        if (recentJobsRes.data && recentJobsRes.data.jobCount === 0) {
             try {
                 const jobToTweet = savedJobs[savedJobs.length - 1]
                 delete jobToTweet.description
