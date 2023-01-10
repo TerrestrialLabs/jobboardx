@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import Job, { JobData } from '../../../models/Job'
+import { ROLE } from '../../../const/const'
+import { getSession } from '../../../api/getSession'
 
 type Filters = { 
     [key: string ]: 
@@ -57,7 +59,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobData | JobData[] | boolean>
+    res: NextApiResponse<JobData | JobData[] | boolean | string>
 ) {
     const { method } = req
 
@@ -86,15 +88,21 @@ export default async function handler(
         }
     }
 
-    // TO DO: This deletes backfilled jobs
-    // if (method === 'DELETE') {
-    //     try {
-    //         const job = await Job.deleteMany({ backfilled: true })
-    //         res.status(200).json(true)
-    //     } catch(err) {
-    //         // TO DO
-    //         // @ts-ignore
-    //         res.status(500).json(getErrorMessage(err))
-    //     }
-    // }
+    // Delete all jobs - superadmin only
+    if (method === 'DELETE') {
+        try {
+            const session = await getSession({ req })
+            // @ts-ignore
+            if (session && session?.user?.role === ROLE.SUPERADMIN) {
+                await Job.deleteMany()
+                res.status(200).json(true)
+            } else {
+                res.status(401).json(getErrorMessage('Unauthorized'))
+            }
+        } catch(err) {
+            // TO DO
+            // @ts-ignore
+            res.status(500).json(getErrorMessage(err))
+        }
+    }
 }

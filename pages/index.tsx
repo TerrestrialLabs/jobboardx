@@ -322,7 +322,7 @@ const Home: NextPage = () => {
                   />
                 )}
 
-                {!jobs.length && <Typography textAlign='center'>No jobs found</Typography>}
+                {!jobs.length && <Box mt={4}><Typography textAlign='center'>No jobs found</Typography></Box>}
 
                 {jobs.length < totalJobs && (
                   <Box mt={4} display='flex' justifyContent='center'>
