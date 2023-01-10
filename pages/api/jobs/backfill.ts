@@ -74,13 +74,13 @@ export default async function handler(
             const backfilledEmployer = await BackfilledEmployer.findOne({ 'employer.company': job.company })
             if (!backfilledEmployer) {
                 await BackfilledEmployer.create({
-                    jobboardId: job.jobboardId,
+                    jobboardId: newJob.jobboardId,
                     email: 'no-reply@example.com',
                     role: ROLE.EMPLOYER,
                     employer: {
-                        company: job.company,
-                        website: job.companyUrl,
-                        logo: job.companyLogo
+                        company: newJob.company,
+                        website: newJob.companyUrl,
+                        logo: newJob.companyLogo
                     }
                 })
             }

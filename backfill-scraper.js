@@ -180,7 +180,7 @@ async function scrapeJobs(jobboard) {
                 }
             })
             savedJobs.push(res.data)
-            console.log(`Job ${i}: Success`)
+            console.log(`Job ${i}: Success: ${res.data._id}`)
         } catch (err) {
             console.log(`Job ${i}: Error: ${err}`)
         }
