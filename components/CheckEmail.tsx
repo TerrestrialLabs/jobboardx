@@ -8,10 +8,13 @@ const CheckEmail = ({ signup }: { signup?: boolean }) => {
 
     return (
         <Grid p={mobile ? 2 : 12} container justifyContent='center'>
-            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 6} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
+            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
                 <Box mb={4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Check your email</Typography></Box>
+                <Box mb={3}>
+                    <Typography textAlign='center'>A {signup ? 'verification' : 'sign in'} link has been sent to your inbox.*</Typography>
+                </Box>
                 <Box>
-                    <Typography textAlign='center'>A {signup ? 'verification' : 'sign in'} link has been sent to your email address{signup ? '' : ' if your account exists'}.</Typography>
+                    <Typography variant='caption'>*If you don't see it, check your Spam or Promotions (Gmail) folders.</Typography>
                 </Box>
             </Box>
         </Grid>

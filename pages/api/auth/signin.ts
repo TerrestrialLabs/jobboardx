@@ -92,6 +92,7 @@ async function sendVerificationRequest(params: SendVerificationRequestParams) {
         to,
         from,
         html: "<html></html>",
+        text: `Sign in to ${jobboard.title}\n\nHello,\n\nWe've received a request to sign in to the account associated with this email address. To sign in, copy and paste the following URL into your browser:\n\n${url}.`,
         dynamic_template_data: {
             subject: `Sign in to ${jobboard.title}`,
             jobboard: {
