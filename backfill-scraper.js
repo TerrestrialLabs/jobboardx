@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer')
 const axios = require('axios')
 const uuid = require('uuid')
 const fetch = require('node-fetch')
-const core = require('@actions/core')
 require('dotenv').config()
 
 async function scrapeJobs(jobboard) {
