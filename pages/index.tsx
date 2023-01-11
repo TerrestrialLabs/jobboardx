@@ -222,6 +222,7 @@ const Home: NextPage = () => {
                       <FormControl hiddenLabel fullWidth>
                         <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Location</Typography>
                         <Autocomplete
+                          autoSelect
                           disablePortal
                           renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '4px 12px 4px' }}} />}
                           options={cities}
@@ -256,6 +257,7 @@ const Home: NextPage = () => {
                         <FormControl hiddenLabel fullWidth sx={{ marginRight: 2 }}>
                           <Typography fontWeight='bold' variant='subtitle2' sx={{ marginBottom: '0.25rem' }}>Location</Typography>
                           <Autocomplete
+                            autoSelect
                             disablePortal
                             renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: 'Location', style: { padding: '4px 12px 4px' }}} />}
                             options={cities}

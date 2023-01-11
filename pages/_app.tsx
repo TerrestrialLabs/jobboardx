@@ -18,6 +18,7 @@ import { JobBoardData } from './api/jobboards';
 import { UserType } from '../models/User';
 import { useRouter } from 'next/router';
 import { AUTH_STATUS, ROLE } from '../const/const';
+import * as ga from '../lib/ga'
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -55,6 +56,20 @@ export default function MyApp(props: MyAppProps) {
     axiosInstance.post(`${baseUrlApi}auth/logout`)
     setSession({ status: AUTH_STATUS.UNAUTHENTICATED, user: null })
   }
+
+  useEffect(() => {
+    if (baseUrl && !baseUrl.startsWith('http://localhost')) {
+      const handleRouteChange = (url: string) => {
+        ga.pageview(url)
+      }
+
+      router.events.on('routeChangeComplete', handleRouteChange)
+
+      return () => {
+        router.events.off('routeChangeComplete', handleRouteChange)
+      }
+    }
+  }, [router.events])
 
   // Prevent side effects if useEffect runs twice
   const effectRan = useRef(false)

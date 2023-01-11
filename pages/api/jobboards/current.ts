@@ -35,24 +35,4 @@ export default async function handler(
             console.log('err: ', err)
         }
     }
-
-    if (method === 'PUT') {
-        try {
-            const session = await getSession({ req })
-            // TO DO: Only jobboard creator admin should be able to update this
-            // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
-                return res.status(401).json(getErrorMessage('Unauthorized'))
-            }
-            // Hardcode default job board for local development
-            // TO DO: Save default domain in env var
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-            const jobboard = await JobBoard.findOneAndUpdate({ domain }, { $set : req.body }).select('-email')
-            // @ts-ignore
-            res.status(200).json(jobboard)
-        } catch (err) {
-            console.log('err: ', err)
-        }
-    }
 }

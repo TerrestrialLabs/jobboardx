@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@types/cookie": "^0.5.1",
+    "@types/gtag.js": "^0.0.12",
     "@types/js-cookie": "^3.0.2",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "18.11.2",

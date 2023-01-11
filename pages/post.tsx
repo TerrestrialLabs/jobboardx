@@ -25,6 +25,7 @@ import { JobData } from '../models/Job'
 import { useUnsavedChangesHandler } from '../hooks/unsavedChanges'
 import { Employer } from '../models/User'
 import { useSession } from '../context/SessionContext'
+import * as ga from '../lib/ga'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -89,18 +90,6 @@ const initJobDetails = {
     salaryMax: '',
     featured: true
 }
-// const initJobDetails = {
-//     title: 'Test',
-//     type: TYPE.FULLTIME,
-//     location: '',
-//     remote: false,
-//     applicationLink: 'https://www.example.com',
-//     skills: ['HTML'],
-//     perks: [],
-//     salaryMin: 50000,
-//     salaryMax: 100000,
-//     featured: true
-// }
 
 const initBillingAddress = {
     firstName: '',
@@ -112,16 +101,6 @@ const initBillingAddress = {
     postalCode: '',
     country: 'US'
 }
-// const initBillingAddress = {
-//     firstName: 'Gregory',
-//     lastName: 'A',
-//     addressLine1: '12 Fake Way',
-//     addressLine2: '',
-//     city: 'Fakeville',
-//     state: 'NY',
-//     postalCode: '11215',
-//     country: 'US'
-// }
 
 const initJobDetailsErrors: { [key: string]: string | null } = {
     title: null,
@@ -426,8 +405,19 @@ export const PostForm = ({ edit }: PostFormProps) => {
         }
     }
 
+    const logSubmit = () => {
+        ga.event({
+            action: "submit_post",
+            params: {
+                mode: edit ? 'edit' : 'create'
+            }
+        })
+    }
+
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const createOrUpdateJob = async () => {
+        logSubmit()
+
         if (session && session.user) {
             const isValid = validate()
             if (!isValid) {
@@ -737,6 +727,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Location</Typography>
                                         {/* TO DO: Virtualize options */}
                                         <Autocomplete
+                                            autoSelect
                                             disablePortal
                                             renderInput={(params) => <TextField error={!!jobDetailsErrors['location']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['location'], placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
                                             options={cities}
@@ -769,11 +760,12 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                     <Grid xs={12}>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
                                         <Autocomplete
+                                            autoSelect
                                             freeSolo
                                             multiple
                                             disableClearable
                                             disablePortal
-                                            renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select an option or add your own and press Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={jobboard.skills}
                                             onChange={(e, value) => handleSkillsChange(value || '')}
                                             value={jobDetails.skills}
@@ -784,11 +776,12 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                     <Grid xs={12}>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Perks</Typography>
                                         <Autocomplete
+                                            autoSelect
                                             freeSolo
                                             multiple
                                             disableClearable
                                             disablePortal
-                                            renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select an option or type your own and press Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            renderInput={(params) => <TextField variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: true, placeholder: jobDetails.perks.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={PERKS}
                                             onChange={(e, value) => handlePerksChange(value || '')}
                                             value={jobDetails.perks}

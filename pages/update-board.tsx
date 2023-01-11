@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Typography } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -10,7 +10,6 @@ import { useRouter } from 'next/router'
 import { AUTH_STATUS, ROLE } from '../const/const'
 import { useSession } from '../context/SessionContext'
 import axiosInstance from '../api/axios'
-// import { scrapeJobs } from '../scraper'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -47,7 +46,7 @@ const initState = {
 
 const JobBoard: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
-    
+
     const { user, status } = useSession()
     const [signedIn, setSignedIn] = useState(false)
 
@@ -59,55 +58,34 @@ const JobBoard: NextPage = () => {
     const [submitted, setSubmitted] = useState(false)
     const showErrorMessage = Object.keys(errors).some(field => errors[field])
 
-    const [searchTerm, setSearchTerm] = useState('')
-    const [backfillingJobs, setBackfillingJobs] = useState(false)
-    const [backfillError, setBackfillError] = useState(false)
-    const [backfillSuccess, setBackfillSuccess] = useState(false)
-    const [numBackfilled, setNumBackfilled] = useState(0)
-
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
 
     // @ts-ignore
-    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (session?.user && session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)
+    const accessDenied = status === AUTH_STATUS.UNAUTHENTICATED || (user && user?.role !== ROLE.ADMIN && user?.role !== ROLE.SUPERADMIN)
 
-    const backfillJobs = async () => {
-        // setBackfillError(false)
-        // setBackfillingJobs(true)
-        // try {
-        //     const res = await scrapeJobs()
-        //     console.log("RES: ", res)
-        //     setBackfillSuccess(true)
-        // } catch (err) {
-        //     console.log(err)
-        // }
-        // setBackfillingJobs(false)
-    }
-
-    const handleSearchTermChange = (value: string) => {
-        setSearchTerm(value)
-    }
-
-    useEffect(() => {
+    const fetchJobboard = async () => {
+        const { data } = await axiosInstance.get(`${baseUrlApi}jobboards/admin`)
         setForm({
             ...initState,
-            title: jobboard.title,
-            domain: jobboard.domain,
-            company: jobboard.company,
-            homeTitle: jobboard.homeTitle,
-            homeSubtitle: jobboard.homeSubtitle,
-            heroImage: jobboard.heroImage,
-            logoImage: jobboard.logoImage,
-            skills: jobboard.skills,
-            priceRegular: jobboard.priceRegular,
-            priceFeatured: jobboard.priceFeatured,
-            searchQuery: jobboard.searchQuery
+            title: data.title,
+            domain: data.domain,
+            company: data.company,
+            homeTitle: data.homeTitle,
+            homeSubtitle: data.homeSubtitle,
+            heroImage: data.heroImage,
+            logoImage: data.logoImage,
+            skills: data.skills,
+            priceRegular: data.priceRegular,
+            priceFeatured: data.priceFeatured,
+            searchQuery: data.searchQuery
         })
-    }, [])
+    }
 
     useEffect(() => {
         if (user) {
             setSignedIn(true)
+            fetchJobboard()
         }
     }, [user])
 
@@ -139,6 +117,10 @@ const JobBoard: NextPage = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
+    const handleSkillsChange = (value: string[]) => {
+        setForm({ ...form, skills: value })
+    }
+
     const submit = async () => {
         const isValid = validate()
         if (!isValid) {
@@ -148,7 +130,7 @@ const JobBoard: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axiosInstance.put(`${baseUrlApi}jobboards/current`, form)
+            const res = await axiosInstance.put(`${baseUrlApi}jobboards/admin`, form)
             if (res.status === 200) {
                 setErrors(initErrors)
                 setSubmitted(true)
@@ -195,41 +177,6 @@ const JobBoard: NextPage = () => {
                     </Grid>
 
                     <Grid xs={12} sm={10} lg={8} p={2} container>
-                        <Grid xs={12} sm={12} pb={mobile ? 2 : 4}>
-                            <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
-                                <Grid container spacing={2}>
-                                    {backfillError && (
-                                        <Grid xs={12}>
-                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="error">An error occurred.</Alert>
-                                        </Grid>
-                                    )}
-
-                                    {backfillSuccess && (
-                                        <Grid xs={12}>
-                                            <Alert sx={{ marginBottom: mobile ? 1 : 2}} severity="success">{numBackfilled} jobs have been backfilled.</Alert>
-                                        </Grid>
-                                    )}
-
-                                    <Grid xs={12}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Search Term</Typography>
-                                            <FilledInput disableUnderline onChange={e => handleSearchTermChange(e.target.value)} name='searchTerm' value={searchTerm} autoComplete='off' inputProps={{ label: 'Search term' }} required placeholder='Search term' fullWidth />
-                                        </FormControl>
-                                    </Grid>
-
-                                    {/* <Grid xs={12}>
-                                        <Typography textAlign='center'>14 total backfilled jobs</Typography>
-                                    </Grid> */}
-
-                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                        <Button fullWidth={mobile} disabled={true} onClick={backfillJobs} variant='contained' disableElevation color='primary' sx={{ width: '200px' }}>
-                                            {backfillingJobs ? <CircularProgress color='secondary' size={22} /> : 'Backfill jobs'}
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </Grid>
-
                         <Grid xs={12} sm={12} pb={mobile ? 2 : 4}>
                             <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1 }}>
                                 <Grid container spacing={2}>
@@ -303,11 +250,26 @@ const JobBoard: NextPage = () => {
 
                                     <Grid xs={12} sm={6}>
                                         <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills
-                                            </Typography>
-                                            <FilledInput error={!!errors['skills']} disableUnderline={!errors['skills']} onChange={handleInputChange} name='skills' value={form.skills} autoComplete='off' inputProps={{ label: 'Skills' }} required placeholder='Skills separated by commas' fullWidth />
-                                            <FormHelperText error>{errors['skills']}</FormHelperText>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Backfill Search Query</Typography>
+                                            <FilledInput error={!!errors['searchQuery']} disableUnderline={!errors['searchQuery']} onChange={handleInputChange} name='searchQuery' value={form.searchQuery} autoComplete='off' inputProps={{ label: 'Backfill Search Query' }} required placeholder='Backfill Search Query' fullWidth />
+                                            <FormHelperText error>{errors['searchQuery']}</FormHelperText>
                                         </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
+                                        <Autocomplete
+                                            freeSolo
+                                            autoSelect
+                                            multiple
+                                            disableClearable
+                                            disablePortal
+                                            renderInput={(params) => <TextField error={!!errors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['skills'], placeholder: form.skills.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            options={jobboard.skills}
+                                            onChange={(e, value) => handleSkillsChange(value || '')}
+                                            value={form.skills}
+                                        />
+                                        <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['skills']}</FormHelperText>
                                     </Grid>
 
                                     <Grid xs={6}>
@@ -323,14 +285,6 @@ const JobBoard: NextPage = () => {
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Featured Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
                                             <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
                                             <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
-                                    <Grid xs={12} sm={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Backfill Search Query</Typography>
-                                            <FilledInput error={!!errors['searchQuery']} disableUnderline={!errors['searchQuery']} onChange={handleInputChange} name='searchQuery' value={form.searchQuery} autoComplete='off' inputProps={{ label: 'Backfill Search Query' }} required placeholder='Backfill Search Query' fullWidth />
-                                            <FormHelperText error>{errors['searchQuery']}</FormHelperText>
                                         </FormControl>
                                     </Grid>
 

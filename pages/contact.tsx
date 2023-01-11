@@ -9,6 +9,7 @@ import { CONTACT_MESSAGE_TYPE } from '../const/const'
 import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import * as ga from '../lib/ga'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -48,7 +49,18 @@ const Contact: NextPage = () => {
         setMessageData({ ...messageData, [e.target.name]: e.target.value })
     }
 
+    const logSubmit = () => {
+        ga.event({
+            action: "submit_contact",
+            params: {
+                category: messageData.category
+            }
+        })
+    }
+
     const submit = async () => {
+        logSubmit()
+
         const isValid = validate()
         if (!isValid) {
             return
