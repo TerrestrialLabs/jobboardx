@@ -14,7 +14,7 @@ const CheckEmail = ({ signup }: { signup?: boolean }) => {
                     <Typography textAlign='center'>A {signup ? 'verification' : 'sign in'} link has been sent to your inbox.*</Typography>
                 </Box>
                 <Box>
-                    <Typography variant='caption'>*If you don't see it, check your Spam or Promotions (Gmail) folders.</Typography>
+                    <Typography variant='caption'>*If you don't see it, check your Spam or Promotions folders.</Typography>
                 </Box>
             </Box>
         </Grid>
