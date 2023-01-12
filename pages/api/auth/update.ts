@@ -3,7 +3,6 @@ import cloudinary from 'cloudinary'
 import nextConnect from 'next-connect'
 import multer from 'multer'
 import dbConnect from '../../../mongodb/dbconnect'
-import sgMail from '@sendgrid/mail'
 import User from '../../../models/User'
 import { getSession } from '../../../api/getSession'
 import { ROLE } from '../../../const/const'
@@ -13,8 +12,6 @@ cloudinary.v2.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
 dbConnect()
 

@@ -133,30 +133,39 @@ export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConf
 
         const startDate = job.datePosted
         const endDate = add(startDate, { days: 30 })
+        const price = job.featured ? jobboard.priceFeatured : jobboard.priceRegular
+        const formattedStartDate = format(startDate, 'MMM. d, yyyy')
+        const formattedEndDate = format(endDate, 'MMM. d, yyyy')
+        const subject = `Your job has been ${mode === 'create' ? 'posted' : 'updated'}`
+        const postType = job.featured ? 'Featured' : 'Regular'
+        const type = TYPE_MAP[job.type]
+        const salaryRange = formatSalaryRange(job.salaryMin, job.salaryMax)
+        const url = `https://${jobboard.domain}/jobs/${job._id}`
         const message = {
             to: email,
             from: `${jobboard.title} <${jobboard.email}>`,
             html: "<html></html>",
+            text: `${jobboard.title}\n\n${subject}\n\nPost type: ${postType}\nPrice: ${price}\nStart date: ${formattedStartDate}\nEnd date: ${formattedEndDate}\nJob type: ${type}\nJob title: ${job.title}\nCompany: ${job.company}\nLocation: ${job.location}\nSalary: ${salaryRange}\n${url}`,
             dynamic_template_data: {
-                subject: `Your job has been ${mode === 'create' ? 'posted' : 'updated'}`,
+                subject,
                 jobboard: {
                     domain: jobboard.domain,
                     title: jobboard.title
                 },
                 job: {
-                    postType: job.featured ? 'Featured' : 'Regular',
-                    type: TYPE_MAP[job.type],
+                    postType,
+                    type,
                     title: job.title,
                     company: job.company,
                     location: job.location,
-                    salaryRange: formatSalaryRange(job.salaryMin, job.salaryMax),
+                    salaryRange,
                     companyLogo: job.companyLogo ? job.companyLogo : null,
                     companyLogoPlaceholder: job.company.slice(0, 1).toUpperCase(),
-                    url: `https://${jobboard.domain}/jobs/${job._id}`
+                    url
                 },
-                price: job.featured ? jobboard.priceFeatured : jobboard.priceRegular,
-                startDate: format(startDate, 'MMM. d, yyyy'),
-                endDate: format(endDate, 'MMM. d, yyyy')
+                price,
+                startDate: formattedStartDate,
+                endDate: formattedEndDate
             },
             template_id: mode === 'create' ? 'd-5dbc7dfe9f7c43608b56fa9b5800b363' : 'd-d3b3ae5b86364b20b449921da615506e'
         }

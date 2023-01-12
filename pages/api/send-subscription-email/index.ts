@@ -61,18 +61,20 @@ export default async function handler(
             const jobs = await Job.find({ jobboardId: jobboard._id, datePosted: { $gte: lastEmailDate } })
                 .sort({ 'featured': -1, 'backfilled': 1, 'datePosted': -1 })
                 .limit(fetchLimit)
+            const emailJobs = jobs.slice(0, fetchLimit - 1)
 
             const messages = subscriptions.map(subscription => ({
                 to: subscription.email,
-                from: `${jobboard.title} <${jobboard.email}>`,
+                from: `${jobboard.title} <${jobboard.email}>`,                
                 html: "<html></html>",
+                text: emailJobs.map(job => `${job.title}\n${job.company}\n${job.location}\n${formatSalaryRange(job.salaryMin, job.salaryMax)}\nhttps://${jobboard.domain}/jobs/${job._id}`).join('\n\n'),
                 dynamic_template_data: {
                     subject: "New jobs for you",
                     jobboard: {
                         domain: jobboard.domain,
                         title: jobboard.title
                     },
-                    jobs: jobs.slice(0, 12).map(job => ({
+                    jobs: emailJobs.map(job => ({
                         title: job.title,
                         company: job.company,
                         location: job.location,
