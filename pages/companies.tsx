@@ -88,7 +88,7 @@ const Companies: NextPage<Props> = ({ data }) => {
                 )}
               </Grid>
 
-              {!data.length && <Typography textAlign='center'>No employers found</Typography>}
+              {!data.length && <Box mt={4}><Typography textAlign='center'>No employers found</Typography></Box>}
             </Box>
           </Grid>
         </Grid>

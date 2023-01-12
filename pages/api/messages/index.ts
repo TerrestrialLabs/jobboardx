@@ -23,7 +23,7 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+            const domain = req.headers.host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : req.headers.host
             const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
 
             await Message.create({ ...req.body, jobboardId: jobboard._id })

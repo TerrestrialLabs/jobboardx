@@ -129,7 +129,7 @@ type SendConfirmationEmailParams = {
 }
 export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConfirmationEmailParams) => {
     try {
-        const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
+        const domain = host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : host
         const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
 
         const startDate = job.datePosted
@@ -187,7 +187,7 @@ type TweetParams = {
     jobboardId: string
 }
 export const tweet = async ({ host, job, jobboardId }: TweetParams) => {
-    const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
+    const domain = host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : host
     const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
     const postUrl = `https://${jobboard.domain}/jobs/${job._id}`
     const text = getNewPositionTweet({ job, postUrl })

@@ -35,7 +35,7 @@ export default async function handler(
                 throw Error('A user with this email address already exists.')
             }
 
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
+            const domain = req.headers.host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : req.headers.host
             const jobboard = await JobBoard.findOne({ domain }).select('-email')
 
             const admin = await User.create({

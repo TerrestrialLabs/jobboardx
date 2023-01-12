@@ -18,6 +18,8 @@ const Footer = () => {
 
     const router = useRouter()
 
+    const boardTitle = jobboard ? jobboard.title : 'JobBoardX'
+
     // TO DO: Return from route functions
     const unsubscribePage = router.pathname === '/unsubscribe/[id]'
     const verifyPage = router.pathname === '/verify'
@@ -56,7 +58,7 @@ const Footer = () => {
             <Grid container justifyContent='center' pt={mobile ? 6 : 4}>
                 <Grid item xs={6} >
                     <Box display='flex' justifyContent='center'>
-                        <Typography color='grey'>{jobboard.title} &#169; 2022</Typography>
+                        <Typography color='grey'>{boardTitle} &#169; 2022</Typography>
                     </Box>
                 </Grid>
             </Grid>

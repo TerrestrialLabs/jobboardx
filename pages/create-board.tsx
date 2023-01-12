@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Typography } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, TextField, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -36,9 +36,9 @@ const initState = {
     company: '',
     homeTitle: '',
     homeSubtitle: '',
-    heroImage: 'https://media.istockphoto.com/id/1252581438/photo/retro-starburst-sunburst-background-pattern-and-vintage-color-palette-of-orange-red-beige.jpg?b=1&s=170667a&w=0&k=20&c=_PzHPg3EOXvmH5nwHrOtVYK8pFjI_-2G-8A5jKQCPEE=',
+    heroImage: 'https://res.cloudinary.com/dvwtrieuk/image/upload/v1673535771/jobboard/react_jobs_background_hero.png',
     logoImage: '',
-    skills: [],
+    skills: [] as string[],
     priceRegular: 49,
     priceFeatured: 99,
     searchQuery: ''
@@ -99,6 +99,10 @@ const CreateBoardForm: NextPage = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
+    const handleSkillsChange = (value: string[]) => {
+        setForm({ ...form, skills: value })
+    }
+
     const submit = async () => {
         const isValid = validate()
         if (!isValid) {
@@ -128,7 +132,7 @@ const CreateBoardForm: NextPage = () => {
 
         for (const field in form) {
             // @ts-ignore
-            if ((typeof form[field] === 'string' && !form[field].trim())) {
+            if ((field !== 'logoImage' && typeof form[field] === 'string' && !form[field].trim())) {
                 newErrors[field] = ERROR.EMPTY
                 isValid = false
             }
@@ -137,14 +141,6 @@ const CreateBoardForm: NextPage = () => {
         setErrors(newErrors)
 
         return isValid
-    }
-
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
     }
 
     return (
@@ -236,15 +232,6 @@ const CreateBoardForm: NextPage = () => {
                                         </FormControl>
                                     </Grid>
 
-                                    <Grid xs={12} sm={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills
-                                            </Typography>
-                                            <FilledInput error={!!errors['skills']} disableUnderline={!errors['skills']} onChange={handleInputChange} name='skills' value={form.skills} autoComplete='off' inputProps={{ label: 'Skills' }} required placeholder='Skills separated by commas' fullWidth />
-                                            <FormHelperText error>{errors['skills']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
                                     <Grid xs={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Regular Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
@@ -267,6 +254,22 @@ const CreateBoardForm: NextPage = () => {
                                             <FilledInput error={!!errors['searchQuery']} disableUnderline={!errors['searchQuery']} onChange={handleInputChange} name='searchQuery' value={form.searchQuery} autoComplete='off' inputProps={{ label: 'Backfill Search Query' }} required placeholder='Backfill Search Query' fullWidth />
                                             <FormHelperText error>{errors['searchQuery']}</FormHelperText>
                                         </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
+                                        <Autocomplete
+                                            freeSolo
+                                            autoSelect
+                                            multiple
+                                            disableClearable
+                                            disablePortal
+                                            renderInput={(params) => <TextField error={!!errors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['skills'], placeholder: form.skills.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            options={form.skills}
+                                            onChange={(e, value) => handleSkillsChange(value || '')}
+                                            value={form.skills}
+                                        />
+                                        <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['skills']}</FormHelperText>
                                     </Grid>
 
                                     <Grid xs={12} pt={2} display='flex' justifyContent='center'>

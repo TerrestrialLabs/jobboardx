@@ -36,7 +36,7 @@ export default async function handler(
 
     try {
         const local = req.headers.host?.includes('localhost')
-        const domain = local ? 'www.reactdevjobs.io' : req.headers.host
+        const domain = local ? process.env.DEFAULT_BOARD_URL : req.headers.host
         const baseUrl = local ? 'http://localhost:3000/' : `https://${domain}/`
 
         const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()

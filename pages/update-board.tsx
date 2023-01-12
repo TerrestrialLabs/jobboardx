@@ -36,7 +36,7 @@ const initState = {
     company: '',
     homeTitle: '',
     homeSubtitle: '',
-    heroImage: 'https://media.istockphoto.com/id/1252581438/photo/retro-starburst-sunburst-background-pattern-and-vintage-color-palette-of-orange-red-beige.jpg?b=1&s=170667a&w=0&k=20&c=_PzHPg3EOXvmH5nwHrOtVYK8pFjI_-2G-8A5jKQCPEE=',
+    heroImage: 'https://res.cloudinary.com/dvwtrieuk/image/upload/v1673535771/jobboard/react_jobs_background_hero.png',
     logoImage: '',
     skills: [] as string[],
     priceRegular: 49,

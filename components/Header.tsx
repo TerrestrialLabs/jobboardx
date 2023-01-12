@@ -18,6 +18,8 @@ const Header = () => {
 
     const [drawerOpen, setDrawerOpen] = useState(false)
 
+    const boardTitle = jobboard ? jobboard.title : 'JobBoardX'
+
     // @ts-ignore
     const isEmployer = session?.user && session?.user?.role === ROLE.EMPLOYER
     // @ts-ignore
@@ -140,13 +142,13 @@ const Header = () => {
                         <Box>
                             <Link href='/'>
                                 <Typography noWrap textOverflow='ellipsis' color='#fff' variant='h1' fontSize={mobile ? 20 : 28} lineHeight={'42px'} fontWeight='bold' sx={{ cursor: 'pointer', textDecoration: 'none' }}>
-                                    {jobboard.title}
+                                    {boardTitle}
                                 </Typography>
                             </Link>
                         </Box>
 
                         <Box display='flex' flexDirection='row' alignItems='center'>
-                            {!mobile && (
+                            {jobboard && !mobile && (
                                 <Box mr={3} display='flex' flexDirection='row' alignItems='center'>
                                     <Button href='/' sx={{ color: '#fff', marginRight: 1 }} variant='text'>Jobs</Button>
                                     <Button href='/companies' sx={{ color: '#fff' }} variant='text'>Companies</Button>
@@ -166,7 +168,7 @@ const Header = () => {
 
                             {menu}
 
-                            {!mobile && <Button sx={{ flexShrink: 0, marginLeft: 2 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>}
+                            {jobboard && !mobile && <Button sx={{ flexShrink: 0, marginLeft: 2 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>}
 
                             {mobile && (
                                 <Box ml={3}>
@@ -199,9 +201,9 @@ const Header = () => {
                                             </Box>
 
                                             <Box pt={3} display='flex' flexDirection='column'>
-                                                <Typography textAlign='center' mb={1} color='#fff' fontWeight='bold'>{jobboard.title}</Typography>
-                                                <Button sx={{ color: '#fff' }} href='/' variant='text'>Jobs</Button>
-                                                <Button sx={{ color: '#fff' }} href='/companies' variant='text'>Companies</Button>
+                                                <Typography textAlign='center' mb={1} color='#fff' fontWeight='bold'>{boardTitle}</Typography>
+                                                {jobboard && <Button sx={{ color: '#fff' }} href='/' variant='text'>Jobs</Button>}
+                                                {jobboard && <Button sx={{ color: '#fff' }} href='/companies' variant='text'>Companies</Button>}
                                                 <Button sx={{ color: '#fff' }} href='/terms' variant='text'>Terms of Service</Button>
                                                 <Button sx={{ color: '#fff' }} href='/privacy' variant='text'>Privacy Policy</Button>
                                                 <Button sx={{ color: '#fff' }} href='/contact' variant='text'>Contact</Button>
