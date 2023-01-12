@@ -58,7 +58,8 @@ export default async function handler(
             let logo
             var dataURI = 'data:image/jpeg;base64,' + req.body.image
             if (dataURI) {
-                logo = await cloudinary.v2.uploader.upload(dataURI, { folder: 'logos' }, (error, result) => { console.log(result, error) })
+                const folder = process.env.NODE_ENV === 'development' ? 'dev-logos' : 'logos'
+                logo = await cloudinary.v2.uploader.upload(dataURI, { folder }, (error, result) => { console.log(result, error) })
             }
             
             const newJob = await Job.create({

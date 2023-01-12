@@ -77,7 +77,7 @@ const Header = () => {
             }}
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
-            {!session?.user && <Box p='6px 16px' mb='0.5rem' sx={{ borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>{isAdmin ? 'Admin' : 'Employers'}</Typography></Box>}
+            {!session?.user && <Box p='6px 16px' mb='0.5rem' sx={{ borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>}
 
             {session?.user && isEmployer && (
                 <MenuItem onClick={handleAccountMenuClose}>
@@ -85,6 +85,17 @@ const Header = () => {
                         <Box display='flex'>
                             <GridView fontSize='small' />
                             <Typography fontSize='14px' ml={1}>Dashboard</Typography>
+                        </Box>
+                    </Link>
+                </MenuItem>
+            )}
+
+            {session?.user && isAdmin && (
+                <MenuItem onClick={handleAccountMenuClose}>
+                    <Link href='/update-board'>
+                        <Box display='flex'>
+                            <GridView fontSize='small' />
+                            <Typography fontSize='14px' ml={1}>Update board</Typography>
                         </Box>
                     </Link>
                 </MenuItem>

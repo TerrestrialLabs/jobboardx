@@ -131,7 +131,7 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
 
   const protocol = req?.headers?.host?.includes('localhost') ? 'http' : 'https'
   const baseUrl = `${protocol}://${req?.headers.host}/`
-  const baseUrlApi = `${baseUrl}api/`
+  const baseUrlApi = req?.headers.host ? `${baseUrl}api/` : 'http://localhost:3000/api/'
 
   const res = await axios.get(`${baseUrlApi}jobboards/current`)
 
