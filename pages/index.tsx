@@ -187,7 +187,7 @@ const Home: NextPage = () => {
         <Grid container justifyContent='center'>
           <Grid xs={12} sm={10} lg={9}>
             <Box py={10} bgcolor='secondary.main' color='white' sx={{ position: 'relative', height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 0.6 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
+              <Image priority={true} style={{ zIndex: 0, height: '100%', width: '100%', opacity: 1 }} alt='Hero image' src={jobboard.heroImage} layout='fill' objectFit='cover' objectPosition='center' />
               <Box p={2} pb={mobile ? '60px' : '50px'} sx={{ zIndex: 1 }}>
                 <Typography mb={2} textAlign='center' color='#fff' variant='h1' fontSize={mobile ? '36px' : '48px'} fontWeight='bold'>{jobboard.homeTitle}</Typography>
                 <Typography textAlign='center' color='#fff' variant='h2' fontSize={mobile ? '26px' : '32px'}>{jobboard.homeSubtitle}</Typography>
