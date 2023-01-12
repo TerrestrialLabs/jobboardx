@@ -38,27 +38,8 @@ export default async function handler(
 
     if (method === 'GET') {
         try {
-            const jobboards = await JobBoard.find()
+            const jobboards = await JobBoard.find().select('-ownerId').exec()
             res.status(200).json(jobboards)
-        } catch(err) {
-            // @ts-ignore
-            res.status(500).json(getErrorMessage(err))
-        }
-    }
-    
-    if (method === 'POST') {
-        try {
-            const session = await getSession({ req })
-            // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
-                return res.status(401).json(getErrorMessage('Unauthorized'))
-            }
-
-            // @ts-ignore
-            const jobboard = await JobBoard.create({ ...req.body, email: session.user.email })
-
-            res.status(201).json(jobboard)
         } catch(err) {
             // @ts-ignore
             res.status(500).json(getErrorMessage(err))

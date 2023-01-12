@@ -11,8 +11,9 @@ import { formatSalaryRange } from '../../../utils/utils'
 import JobBoard from '../../../models/JobBoard'
 import { getSession } from '../../../api/getSession'
 import User, { Employer, UserType } from '../../../models/User'
-import { twitterClient } from '../../../api/twitterConfig'
 import { getNewPositionTweet } from '../../../utils/twitter'
+import TwitterKey from '../../../models/TwitterKey'
+import { TwitterApi } from 'twitter-api-v2'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -85,7 +86,7 @@ createOrUpdateJob.post(async (req, res) => {
             // @ts-ignore
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
-            tweet({ host: req.headers.host, job })
+            tweet({ host: req.headers.host, job, jobboardId: jobData.jobboardId })
 
             res.status(201).json(job)
         } else if (mode === 'update') {
@@ -129,7 +130,7 @@ type SendConfirmationEmailParams = {
 export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConfirmationEmailParams) => {
     try {
         const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
-        const jobboard = await JobBoard.findOne({ domain })
+        const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
 
         const startDate = job.datePosted
         const endDate = add(startDate, { days: 30 })
@@ -183,14 +184,24 @@ export const sendConfirmationEmail = async ({ host, job, mode, email }: SendConf
 type TweetParams = {
     host: string | undefined
     job: JobData
+    jobboardId: string
 }
-export const tweet = async ({ host, job }: TweetParams) => {
+export const tweet = async ({ host, job, jobboardId }: TweetParams) => {
     const domain = host?.includes('localhost') ? 'www.reactdevjobs.io' : host
-    const jobboard = await JobBoard.findOne({ domain })
+    const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
     const postUrl = `https://${jobboard.domain}/jobs/${job._id}`
     const text = getNewPositionTweet({ job, postUrl })
-
+    
     try {
+        const keys = await TwitterKey.findOne({ jobboardId })
+        const client = new TwitterApi({
+            appKey: keys.apiKey,
+            appSecret: keys.apiKeySecret,
+            accessToken: keys.accessToken,
+            accessSecret: keys.accessTokenSecret
+        })
+        const twitterClient = client.readWrite
+
         const res = await twitterClient.v2.tweet(text)
         console.log('Twitter res: ', res)
     } catch (err) {

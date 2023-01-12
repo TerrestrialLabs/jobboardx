@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 const JobBoardSchema = new mongoose.Schema({
+    ownerId: { type: String, required: true },
     title: { type: String, required: true },
     domain: { type: String, required: true, unique: true },
     logo: { type: String },

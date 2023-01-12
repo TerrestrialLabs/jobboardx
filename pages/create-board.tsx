@@ -108,7 +108,7 @@ const CreateBoardForm: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axiosInstance.post(`${baseUrlApi}jobboards`, form)
+            const res = await axiosInstance.post(`${baseUrlApi}jobboards/admin`, form)
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)

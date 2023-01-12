@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Job from '../../../models/Job'
-import JobBoard from '../../../models/JobBoard'
-import type { JobBoardData } from './index'
 import { getSession } from '../../../api/getSession'
 import { ROLE } from '../../../const/const'
+import TwitterKey from '../../../models/TwitterKey'
+import JobBoard from '../../../models/JobBoard'
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) { 
@@ -15,7 +14,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobBoardData | string>
+    res: NextApiResponse<boolean | string>
 ) {
     const { 
         method
@@ -26,47 +25,22 @@ export default async function handler(
     if (method === 'GET') {
         try {
             const session = await getSession({ req })
-            // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
             if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
-            // Hardcode default job board for local development
-            // TO DO: Save default domain in env var
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-            const jobboard = await JobBoard.findOne({ domain })
+            
+            const jobboard = await JobBoard.findOne({ _id: req.query.jobboardId })
             // @ts-ignore
-            res.status(200).json(jobboard)
-        } catch (err) {
-            console.log('err: ', err)
-        }
-    }
-
-    if (method === 'PUT') {
-        try {
-            const session = await getSession({ req })
-            // TO DO: Only jobboard creator admin should be able to update this
-            // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
-                return res.status(401).json(getErrorMessage('Unauthorized'))
-            }
-            // Hardcode default job board for local development
-            // TO DO: Save default domain in env var
-            const domain = req.headers.host?.includes('localhost') ? 'www.reactdevjobs.io' : req.headers.host
-
-            const jobboardToUpdate = await JobBoard.findOne({ domain })
-            // @ts-ignore
-            if (jobboardToUpdate.ownerId !== session.user._id) {
+            if (jobboard.ownerId !== session.user._id) {
                 throw Error('Unauthorized')
             }
 
-            const jobboard = await JobBoard.findOneAndUpdate({ domain }, { $set : req.body }).select('-email')
-            // @ts-ignore
-            res.status(200).json(jobboard)
+            const keys = await TwitterKey.findOne({ jobboardId: req.query.jobboardId })
+            
+            res.status(200).json(!!keys)
         } catch (err) {
-            res.status(500).json(getErrorMessage(err))
+            console.log('err: ', err)
         }
     }
 
@@ -75,14 +49,41 @@ export default async function handler(
             const session = await getSession({ req })
             // @ts-ignore
             if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
+                return res.status(401).json(getErrorMessage('Unauthorized'))
+            }
+            
+            const jobboard = await JobBoard.findOne({ _id: req.body.jobboardId })
+            // @ts-ignore
+            if (jobboard.ownerId !== session.user._id) {
+                throw Error('Unauthorized')
+            }
+
+            await TwitterKey.create(req.body)
+
+            res.status(201).json(true)
+        } catch(err) {
+            // @ts-ignore
+            res.status(500).json(getErrorMessage(err))
+        }
+    }
+
+    if (method === 'DELETE') {
+        try {
+            const session = await getSession({ req })
+            // @ts-ignore
+            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
 
+            const jobboard = await JobBoard.findOne({ _id: req.query.jobboardId })
             // @ts-ignore
-            const jobboard = await JobBoard.create({ ...req.body, email: session.user.email, ownerId: session.user._id })
+            if (jobboard.ownerId !== session.user._id) {
+                throw Error('Unauthorized')
+            }
 
-            res.status(201).json(jobboard)
+            await TwitterKey.deleteOne({ jobboardId: req.query.jobboardId })
+
+            res.status(200).json(true)
         } catch(err) {
             // @ts-ignore
             res.status(500).json(getErrorMessage(err))

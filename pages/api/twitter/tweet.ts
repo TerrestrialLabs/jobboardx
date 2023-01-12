@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { twitterClient } from '../../../api/twitterConfig'
+import { TwitterApi } from 'twitter-api-v2'
+import TwitterKey from '../../../models/TwitterKey'
 import { getNewPositionTweet } from '../../../utils/twitter'
 
 function getErrorMessage(error: unknown) {
@@ -24,7 +25,20 @@ export default async function handler(
                 const postUrl = `https://${domain}/jobs/${req.body.job._id}`
                 const text = getNewPositionTweet({ job: req.body.job, postUrl })
 
-                await twitterClient.v2.tweet(text)
+                try {
+                    const keys = await TwitterKey.findOne({ jobboardId: req.body.jobboardId })
+                    const client = new TwitterApi({
+                        appKey: keys.apiKey,
+                        appSecret: keys.apiKeySecret,
+                        accessToken: keys.accessToken,
+                        accessSecret: keys.accessTokenSecret
+                    })
+                    const twitterClient = client.readWrite
+
+                    await twitterClient.v2.tweet(text)
+                } catch (err) {
+                    throw Error('Tweet failed')
+                }
 
                 res.status(201).json(true)
             } else {

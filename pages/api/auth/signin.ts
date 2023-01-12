@@ -39,7 +39,7 @@ export default async function handler(
         const domain = local ? 'www.reactdevjobs.io' : req.headers.host
         const baseUrl = local ? 'http://localhost:3000/' : `https://${domain}/`
 
-        const jobboard = await JobBoard.findOne({ domain })
+        const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
     
         if (!jobboard) {
             throw new Error('Sign in failed')
