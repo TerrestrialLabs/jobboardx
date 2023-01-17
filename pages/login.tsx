@@ -78,7 +78,7 @@ const Login: NextPage = () => {
         setErrors(initErrors)
         setLoading(true)
         try {
-            await axios.post(`${baseUrlApi}auth/signin`, { email: form.email })
+            await axios.post(`${baseUrlApi}auth/signin`, { email: form.email, jobboardId: jobboard._id })
             setSubmitted(true)
         } catch (err) {
             // TO DO: Check for status & display message
@@ -97,7 +97,7 @@ const Login: NextPage = () => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`${jobboard.title} | Sign in`}</title>
+                <title>{`${jobboard ? jobboard.title : 'JobBoardX'} | Sign in`}</title>
                 <meta name="description" content="Sign in" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -133,10 +133,12 @@ const Login: NextPage = () => {
                                     </Button>
                                 </Grid>
 
-                                <Grid xs={12} pt={2} display='flex' justifyContent='center'>
-                                    <Typography variant='caption' mr={0.5}>Not registered?</Typography>
-                                    <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
-                                </Grid>
+                                {jobboard && (
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Typography variant='caption' mr={0.5}>Not registered?</Typography>
+                                        <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
+                                    </Grid>
+                                )}
                             </Grid>
                         </Box>
                     </Grid>

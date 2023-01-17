@@ -1,12 +1,5 @@
 import axios from 'axios'
-import Cookie from 'js-cookie'
 import { getUserForSession } from './getSession'
-
-const cookieName = 'jobboardx'
-
-export const removeCookie = () => {
-    Cookie.remove(cookieName)
-}
 
 const axiosInstance = axios.create({
     baseURL: axios.defaults.baseURL,

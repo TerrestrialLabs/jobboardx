@@ -69,7 +69,7 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}messages`, messageData)
+            const res = await axios.post(`${baseUrlApi}messages`, { ...messageData, jobboardId: jobboard._id })
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)

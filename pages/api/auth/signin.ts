@@ -46,9 +46,9 @@ export default async function handler(
         }
 
         if (req.body.email) {
-            const user = await User.findOne({ email: req.body.email })
+            const user = await User.findOne({ email: req.body.email, role: ROLE.EMPLOYER })
             if (!user) {
-                return res.status(401).json({ error: 'An account with this email could not be found' });
+                return res.status(401).json({ error: 'An employer account with this email could not be found' });
             }
 
             const token = uuidv4()

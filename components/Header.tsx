@@ -90,17 +90,6 @@ const Header = () => {
                 </MenuItem>
             )}
 
-            {session?.user && isAdmin && (
-                <MenuItem onClick={handleAccountMenuClose}>
-                    <Link href='/update-board'>
-                        <Box display='flex'>
-                            <GridView fontSize='small' />
-                            <Typography fontSize='14px' ml={1}>Update board</Typography>
-                        </Box>
-                    </Link>
-                </MenuItem>
-            )}
-
             {session?.user && isEmployer && mobile && (
                 <MenuItem onClick={handleAccountMenuClose}>
                     <Link href='/post'>

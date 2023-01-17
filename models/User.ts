@@ -19,18 +19,12 @@ const EmployerSchema = new mongoose.Schema({
 }, { _id : false })
 
 const UserSchema = new mongoose.Schema({
-    jobboardId: { type: String, required: isJobboardIdRequired },
     email: { type: String, required: true, unique: true },
     // TO DO: Enum
     role: { type: String, required: true },
     employer: { type: EmployerSchema },
     emailVerified: { type: Date }
 }, { timestamps: true })
-
-function isJobboardIdRequired() {
-    // @ts-ignore
-    return this.role !== 'superadmin'
-}
 
 export type EmployerType = {
     company: string
