@@ -102,8 +102,8 @@ const Companies: NextPage<Props> = ({ data }) => {
 export default Companies
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const protocol = context.req.headers.host?.includes('localhost') ? 'http' : 'https'
-  const baseUrl = `${protocol}://${context.req.headers.host}/`
+  const local = context.req.headers.host?.includes('localhost')
+  const baseUrl = local ? process.env.NEXT_PUBLIC_BASE_URL_LOCAL : `https://${context.req.headers.host}/`
   const baseUrlApi = `${baseUrl}api/`
 
   const jobboardRes = await axios.get(`${baseUrlApi}jobboards/current`)

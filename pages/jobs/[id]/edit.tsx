@@ -11,7 +11,8 @@ import { AUTH_STATUS, ROLE } from "../../../const/const"
 import { useSession } from "../../../context/SessionContext"
 
 // TO DO: We don't need stripe but can't conditionally use hooks in PostForm
-const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
+const stripePublicKey = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRIPE_TEST_PK : process.env.NEXT_PUBLIC_STRIPE_LIVE_PK
+const stripe = loadStripe(stripePublicKey as string)
 
 const Edit: NextPage = () => {
     const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue

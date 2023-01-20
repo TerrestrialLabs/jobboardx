@@ -1,8 +1,8 @@
 import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
 
-export const serializeCookie = (refreshToken: string) => {
-    return cookie.serialize('jobboardx', JSON.stringify({ refreshToken }), {
+export const serializeCookie = (refreshToken: string, isAdminSite: boolean) => {
+    return cookie.serialize(`jobboardx${isAdminSite ? '_dashboard' : ''}`, JSON.stringify({ refreshToken }), {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 365 * 60 * 60, // 1y

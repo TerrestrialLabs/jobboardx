@@ -14,9 +14,9 @@ import ReactHtmlParser from 'react-html-parser'
 import NextLink from 'next/link'
 import { useWindowSize } from '../../hooks/hooks'
 import EmailFooter from '../../components/EmailFooter'
-import { JobBoardData } from '../api/jobboards'
 import { JobData } from '../../models/Job'
 import ErrorPage from 'next/error'
+import { JobBoardData } from '../../models/JobBoard'
 
 interface Props {
     data: JobData
@@ -276,8 +276,8 @@ const CompanyBox = ({ companyJobsCount, data, expired, mobile, sizeMedium, track
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const protocol = context.req.headers.host?.includes('localhost') ? 'http' : 'https'
-    const baseUrl = `${protocol}://${context.req.headers.host}/`
+    const local = context.req.headers.host?.includes('localhost')
+    const baseUrl = local ? process.env.NEXT_PUBLIC_BASE_URL_LOCAL : `https://${context.req.headers.host}/`
     const baseUrlApi = `${baseUrl}api/`
 
     let data = null

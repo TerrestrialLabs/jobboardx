@@ -26,7 +26,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
+            if (!session?.user || (session?.user?.role !== ROLE.ADMIN)) {
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             
@@ -48,7 +48,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
+            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             
@@ -71,7 +71,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
+            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
 

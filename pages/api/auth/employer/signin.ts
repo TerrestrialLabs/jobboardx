@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../mongodb/dbconnect'
-import User from '../../../models/User'
-import { ROLE } from '../../../const/const'
-import JobBoard from '../../../models/JobBoard'
-import { JobBoardData } from '../jobboards'
+import dbConnect from '../../../../mongodb/dbconnect'
+import User from '../../../../models/User'
+import { ROLE } from '../../../../const/const'
+import JobBoard from '../../../../models/JobBoard'
+import { JobBoardData } from '../../jobboards'
 import sgMail from '@sendgrid/mail'
 import { v4 as uuidv4 } from 'uuid'
-import VerificationToken from '../../../models/VerificationToken'
+import VerificationToken from '../../../../models/VerificationToken'
 import { add } from 'date-fns'
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
@@ -35,20 +35,18 @@ export default async function handler(
     dbConnect()
 
     try {
+        const jobboard = await JobBoard.findOne({ _id: req.body.jobboardId }).select('-ownerId').exec()
         const local = req.headers.host?.includes('localhost')
-        const domain = local ? process.env.DEFAULT_BOARD_URL : req.headers.host
-        const baseUrl = local ? 'http://localhost:3000/' : `https://${domain}/`
+        const baseUrl = local ? process.env.NEXT_PUBLIC_BASE_URL_LOCAL : `https://${jobboard.domain}/`
 
-        const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
-    
         if (!jobboard) {
             throw new Error('Sign in failed')
         }
 
         if (req.body.email) {
-            const user = await User.findOne({ email: req.body.email, role: ROLE.EMPLOYER })
+            const user = await User.findOne({ email: req.body.email })
             if (!user) {
-                return res.status(401).json({ error: 'An employer account with this email could not be found' });
+                return res.status(401).json({ error: 'An account with this email could not be found' });
             }
 
             const token = uuidv4()
@@ -67,6 +65,7 @@ export default async function handler(
 
             sendVerificationRequest({
                 to: req.body.email,
+                // from: `${jobboard.title} <support@jobboardx.io>`,
                 from: `${jobboard.title} <${jobboard.email}>`,
                 url,
                 jobboard
@@ -75,7 +74,7 @@ export default async function handler(
     
         res.status(200).json(true)
     } catch (err) {
-        console.log('err: ', err)
+        res.status(500).json(getErrorMessage(err))
     }
 }
 
@@ -109,6 +108,8 @@ async function sendVerificationRequest(params: SendVerificationRequestParams) {
         console.log('Sign in email sent')
     } catch(err) {
         console.log('Failed to send sign in email')
+        // @ts-ignore
+        console.log('err: ', err.response.body.errors)
     }
 }
 

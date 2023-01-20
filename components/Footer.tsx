@@ -9,7 +9,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { useSession } from '../context/SessionContext'
 
 const Footer = () => {
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { jobboard, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
 
     const session = useSession()
 
@@ -31,28 +31,48 @@ const Footer = () => {
     return (
         <footer style={{ padding: '2rem', paddingLeft: 0, paddingRight: 0, paddingBottom: '2rem', borderTop: '1px solid #eaeaea' }}>
             <Grid container justifyContent='center'>
-                <Grid justifyContent='center' item xs={11} sm={9} display='flex' flexDirection={mobile ? 'column' : 'row'}>
-                    <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
-                        <Typography fontWeight='bold' mb={1}>Job seekers</Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/'>Search jobs</Link></Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/companies'>Companies</Link></Typography>
-                    </Box>
-                    <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
-                        <Typography fontWeight='bold' mb={1}>Employers</Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href={session?.user ? '/post' : '/login'}>Post a job</Link></Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/login'>Sign in</Link></Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/signup'>Sign up</Link></Typography>
-                    </Box>
-                    <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
-                        <Typography fontWeight='bold' mb={1}>Legal</Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/terms'>Terms of Service</Link></Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/privacy'>Privacy Policy</Link></Typography>
-                    </Box>
-                    <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
-                        <Typography fontWeight='bold' mb={1}>Contact</Typography>
-                        <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/contact'>Get in touch</Link></Typography>
-                    </Box>
-                </Grid>
+                {isAdminSite && (
+                    <Grid justifyContent='center' item xs={11} sm={9} display='flex' flexDirection={mobile ? 'column' : 'row'}>
+                        <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Product</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/login'>Sign in</Link></Typography>
+                        </Box>
+                        <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Legal</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/terms'>Terms of Service</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/privacy'>Privacy Policy</Link></Typography>
+                        </Box>
+                        <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Contact</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/contact'>Get in touch</Link></Typography>
+                        </Box>
+                    </Grid>
+                )}
+
+                {!isAdminSite && (
+                    <Grid justifyContent='center' item xs={11} sm={9} display='flex' flexDirection={mobile ? 'column' : 'row'}>
+                        <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Job seekers</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/'>Search jobs</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/companies'>Companies</Link></Typography>
+                        </Box>
+                        <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Employers</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href={session?.user ? '/post' : '/employers/login'}>Post a job</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/employers/login'>Sign in</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/signup'>Sign up</Link></Typography>
+                        </Box>
+                        <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Legal</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/terms'>Terms of Service</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/privacy'>Privacy Policy</Link></Typography>
+                        </Box>
+                        <Box display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
+                            <Typography fontWeight='bold' mb={1}>Contact</Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/contact'>Get in touch</Link></Typography>
+                        </Box>
+                    </Grid>
+                )}
             </Grid>
 
             <Grid container justifyContent='center' pt={mobile ? 6 : 4}>

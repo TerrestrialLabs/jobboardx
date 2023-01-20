@@ -155,7 +155,7 @@ const CompanyProfile: NextPage = () => {
 
                 formData.set('userData', JSON.stringify(userData))
     
-                const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
+                const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/employer/update`, formData, { 
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
                 session.login(updatedUserRes.data)

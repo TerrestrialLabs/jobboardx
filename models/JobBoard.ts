@@ -18,3 +18,20 @@ const JobBoardSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 export default mongoose.models.JobBoard || mongoose.model('JobBoard', JobBoardSchema)
+
+export type JobBoardData = {
+    _id: string
+    createdAt: Date
+    title: string
+    domain: string
+    company: string
+    email: string
+    homeTitle: string
+    homeSubtitle: string
+    heroImage: string
+    logoImage: string
+    skills: string[]
+    priceFeatured: number
+    priceRegular: number
+    searchQuery: string
+}

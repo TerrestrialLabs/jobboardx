@@ -10,3 +10,10 @@ const UserEventSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 export default mongoose.models.UserEvent || mongoose.model('UserEvent', UserEventSchema)
+
+export type AnalyticsStatsType = {
+    jobs: number
+    views: number
+    emailApplyClicks: number
+    urlApplyClicks: number
+}

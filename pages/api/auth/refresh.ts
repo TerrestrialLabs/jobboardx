@@ -3,6 +3,7 @@ import dbConnect from '../../../mongodb/dbconnect'
 import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
 import { generateAccessToken } from '../../../api/token'
+import { checkIsAdminSite } from '../../../api/checkIsAdminSite'
 
 export default async function handler(
     req: NextApiRequest,
@@ -13,15 +14,19 @@ export default async function handler(
     try {
         const { cookies } = req
 
-        if (cookies.jobboardx) {
-            const parsedCookie = JSON.parse(cookies.jobboardx)
+        const isAdminSite = checkIsAdminSite(req)
+        const siteCookie = isAdminSite ? cookies.jobboardx_dashboard : cookies.jobboardx
+        const cookieName = `jobboardx${isAdminSite ? '_dashboard' : ''}`
+
+        if (siteCookie) {
+            const parsedCookie = JSON.parse(siteCookie)
             const refreshToken = parsedCookie.refreshToken
             let newAccessToken
 
             // @ts-ignore
             jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err, session) => {
                 if (err) {
-                    res.setHeader('Set-Cookie', cookie.serialize('jobboardx', '', {
+                    res.setHeader('Set-Cookie', cookie.serialize(cookieName, '', {
                         httpOnly: true,
                         secure: process.env.NODE_ENV !== 'development',
                         expires: new Date(0),

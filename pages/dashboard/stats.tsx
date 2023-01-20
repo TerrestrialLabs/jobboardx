@@ -9,16 +9,16 @@ import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardCon
 import { useRouter } from 'next/router'
 import Dashboard from '../../components/Dashboard'
 import axiosInstance from '../../api/axios'
-import { AnalticsStatsType } from '../api/analytics'
 import { AUTH_STATUS } from '../../const/const'
 import { useSession } from '../../context/SessionContext'
+import { AnalyticsStatsType } from '../../models/UserEvent'
 
 const Stats: NextPage = () => {
     const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
 
     const { status } = useSession()
 
-    const [data, setData] = useState<AnalticsStatsType>()
+    const [data, setData] = useState<AnalyticsStatsType>()
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)

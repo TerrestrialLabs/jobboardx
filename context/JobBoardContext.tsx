@@ -1,7 +1,8 @@
 import React from 'react'
-import { JobBoardData } from '../pages/api/jobboards'
+import { JobBoardData } from '../models/JobBoard'
 
 export interface JobBoardContextValue {
+    isAdminSite: boolean
     jobboard: JobBoardData
     baseUrl: string
     baseUrlApi: string

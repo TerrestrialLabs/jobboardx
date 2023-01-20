@@ -8,8 +8,7 @@ export enum AUTH_STATUS {
 
 export enum ROLE {
     EMPLOYER = 'employer',
-    ADMIN = 'admin',
-    SUPERADMIN = 'superadmin'
+    ADMIN = 'admin'
 }
 
 export const TYPE = {

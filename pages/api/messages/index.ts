@@ -23,14 +23,13 @@ export default async function handler(
     
     if (method === 'POST') {
         try {
-            const domain = req.headers.host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : req.headers.host
-            const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
+            const jobboard = await JobBoard.findOne({ _id: req.body.jobboardId }).select('-ownerId').exec()
 
-            await Message.create({ ...req.body, jobboardId: jobboard._id })
+            await Message.create(req.body)
 
             const message = {
-                to: jobboard.email,
-                from: `${jobboard.title} <${jobboard.email}>`,
+                to: req.body.isAdminSite ? 'support@jobboardx.io' : jobboard.email,
+                from: req.body.isAdminSite ?  'JobBoardX <support@jobboardx.io>' : `${jobboard.title} <${jobboard.email}>`,
                 subject: `Message | ${req.body.category}`,
                 html: 
                     `<html>

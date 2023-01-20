@@ -28,7 +28,7 @@ const initState = {
 }
 
 const Contact: NextPage = () => {
-    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [messageData, setMessageData] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -69,7 +69,7 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}messages`, { ...messageData, jobboardId: jobboard._id })
+            const res = await axios.post(`${baseUrlApi}messages`, { ...messageData, jobboardId: jobboard._id, isAdminSite })
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)
@@ -114,7 +114,7 @@ const Contact: NextPage = () => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`${jobboard.title} | Contact`}</title>
+                <title>{`${isAdminSite ? 'JobBoardX' : jobboard.title} | Contact`}</title>
                 <meta name="description" content="Contact" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

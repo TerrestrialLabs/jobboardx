@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 import { useSession } from '../context/SessionContext'
 
 const Verify: NextPage = () => {
-    const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrl, baseUrlApi, jobboard, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500)
@@ -29,7 +29,7 @@ const Verify: NextPage = () => {
         if (!effectRan.current) {
             const verifyToken = async () => {
                 try {
-                    const { data } = await axios.post(`${baseUrlApi}auth/callback/email`, router.query)
+                    const { data } = await axios.post(`${baseUrlApi}auth/email-callback`, router.query)
                     if (data) {
                         axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
                         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
@@ -50,7 +50,7 @@ const Verify: NextPage = () => {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{`${jobboard.title} | Sign in`}</title>
+                <title>{isAdminSite ? 'JobBoardX' : jobboard.title} | Sign in</title>
                 <meta name="description" content="Sign in" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

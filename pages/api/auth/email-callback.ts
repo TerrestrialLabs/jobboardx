@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import User from '../../../../models/User'
-import VerificationToken from '../../../../models/VerificationToken'
-import dbConnect from '../../../../mongodb/dbconnect'
-import { generateAccessToken, generateRefreshToken, serializeCookie } from '../../../../api/token'
-import { getUserForSession } from '../../../../api/getSession'
+import User from '../../../models/User'
+import VerificationToken from '../../../models/VerificationToken'
+import dbConnect from '../../../mongodb/dbconnect'
+import { generateAccessToken, generateRefreshToken, serializeCookie } from '../../../api/token'
+import { getUserForSession } from '../../../api/getSession'
+import { checkIsAdminSite } from '../../../api/checkIsAdminSite'
 
 dbConnect()
 
@@ -14,6 +15,8 @@ export default async function handler(
     dbConnect()
 
     try {
+        const isAdminSite = checkIsAdminSite(req)
+
         // Check for necessary body params
         if (!req.body.callbackUrl || !req.body.token || !req.body.email) {
             throw Error('Invalid')
@@ -46,7 +49,7 @@ export default async function handler(
 
         await VerificationToken.deleteOne({ _id: token._id })
 
-        res.setHeader('Set-Cookie', serializeCookie(refreshToken))
+        res.setHeader('Set-Cookie', serializeCookie(refreshToken, isAdminSite))
 
         res.status(200).json({ accessToken, user: authenticatedUser })
     } catch (err) {

@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
     async (res) => {
         // When updating user we need to generate new access & refresh tokens
-        if (res.config.url?.endsWith('/api/auth/update')) {
+        if (res.config.url?.endsWith('/api/auth/employer/update')) {
             const updatedUser = getUserForSession(res.data)
             
             const { data } = await axios.post(`${axios.defaults.baseURL}/api/auth/reset-tokens`, updatedUser)

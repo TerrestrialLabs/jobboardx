@@ -136,7 +136,8 @@ const unselectedPostTypeStyle = {
     outlineStyle: 'solid'
 }
 
-const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PK as string)
+const stripePublicKey = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRIPE_TEST_PK : process.env.NEXT_PUBLIC_STRIPE_LIVE_PK
+const stripe = loadStripe(stripePublicKey as string)
 
 const OPTIONAL_FIELDS = ['addressLine2']
 
@@ -465,7 +466,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                         }
                     }
                     formData.set('userData', JSON.stringify(userData))
-                    const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/update`, formData, { 
+                    const updatedUserRes = await axiosInstance.put(`${baseUrlApi}auth/employer/update`, formData, { 
                         headers: { 'Content-Type': 'multipart/form-data' }
                     })
                     session.login(updatedUserRes.data)
@@ -727,7 +728,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Location</Typography>
                                         {/* TO DO: Virtualize options */}
                                         <Autocomplete
-                                            autoSelect
                                             disablePortal
                                             renderInput={(params) => <TextField error={!!jobDetailsErrors['location']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['location'], placeholder: 'Location', style: { padding: '9px 12px 10px' }}} />}
                                             options={cities}
@@ -760,14 +760,13 @@ export const PostForm = ({ edit }: PostFormProps) => {
                                     <Grid xs={12}>
                                         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Skills</Typography>
                                         <Autocomplete
-                                            autoSelect
                                             freeSolo
                                             multiple
                                             disableClearable
                                             disablePortal
                                             renderInput={(params) => <TextField error={!!jobDetailsErrors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !jobDetailsErrors['skills'], placeholder: jobDetails.skills.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={jobboard.skills}
-                                            onChange={(e, value) => handleSkillsChange(value || '')}
+                                            onChange={(e, value) => handleSkillsChange(value || [])}
                                             value={jobDetails.skills}
                                         />
                                         <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{jobDetailsErrors['skills']}</FormHelperText>

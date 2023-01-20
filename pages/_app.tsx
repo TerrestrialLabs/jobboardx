@@ -14,16 +14,17 @@ import axiosInstance from '../api/axios';
 import { JobBoardContext } from '../context/JobBoardContext';
 import { SessionContext } from '../context/SessionContext';
 import { useEffect, useRef, useState } from 'react';
-import { JobBoardData } from './api/jobboards';
 import { UserType } from '../models/User';
 import { useRouter } from 'next/router';
 import { AUTH_STATUS, ROLE } from '../const/const';
 import * as ga from '../lib/ga'
+import { JobBoardData } from '../models/JobBoard';
 
 const clientSideEmotionCache = createEmotionCache();
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
+  isAdminSite: boolean
   jobboard: JobBoardData
   baseUrl: string
   baseUrlApi: string
@@ -35,7 +36,7 @@ type Session = {
 }
 
 export default function MyApp(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi } = props;
+  const { Component, emotionCache = clientSideEmotionCache, pageProps, jobboard, baseUrl, baseUrlApi, isAdminSite } = props;
 
   const [session, setSession] = useState<Session>({ status: AUTH_STATUS.LOADING, user: null })
 
@@ -43,13 +44,6 @@ export default function MyApp(props: MyAppProps) {
 
   const login = (user: UserType) => {
     setSession({ status: AUTH_STATUS.AUTHENTICATED, user })
-
-    // if (user.role === ROLE.SUPERADMIN) {
-    //   const deleteAllBackfilledJobs = async () => {
-    //     await axios.delete(`${baseUrlApi}jobs`)
-    //   }
-    //   deleteAllBackfilledJobs()
-    // }
   }
 
   const logout = () => {
@@ -58,7 +52,7 @@ export default function MyApp(props: MyAppProps) {
   }
 
   useEffect(() => {
-    if (baseUrl && !baseUrl.startsWith('http://localhost')) {
+    if (baseUrl && !baseUrl.startsWith('http://localhost') && !isAdminSite) {
       const handleRouteChange = (url: string) => {
         ga.pageview(url)
       }
@@ -108,7 +102,7 @@ export default function MyApp(props: MyAppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SessionContext.Provider value={{ ...session, login, logout }}>
-          <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi }}>
+          <JobBoardContext.Provider value={{ jobboard, baseUrl, baseUrlApi, isAdminSite }}>
             <Layout>
               <Component {...pageProps} />
             </Layout>
@@ -129,15 +123,26 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
   const pageProps = await App.getInitialProps(appContext)
   const { req } = appContext.ctx
 
-  const protocol = req?.headers?.host?.includes('localhost') ? 'http' : 'https'
+  const local = req?.headers?.host?.includes('localhost')
+  const protocol = local ? 'http' : 'https'
   const baseUrl = `${protocol}://${req?.headers.host}/`
-  const baseUrlApi = req?.headers.host ? `${baseUrl}api/` : 'http://localhost:3000/api/'
+  const baseUrlApi = `${baseUrl}api/`
+  const isAdminSite = (req?.headers?.host === process.env.NEXT_PUBLIC_ADMIN_SITE_HOST || req?.headers?.host === process.env.NEXT_PUBLIC_ADMIN_SITE_HOST_LOCAL)
 
-  const res = await axios.get(`${baseUrlApi}jobboards/current`)
+  let jobboard = null
+  if (!isAdminSite) {
+    try {
+      const res = await axios.get(`${baseUrlApi}jobboards/current`)
+      jobboard = res.data
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return { 
     ...pageProps,
-    jobboard: res.data,
+    isAdminSite,
+    jobboard,
     baseUrl,
     baseUrlApi
   }

@@ -34,7 +34,7 @@ const LoginError: NextPage = () => {
                         </Box>
 
                         <Grid xs={12} sm={12} pt={4} display='flex' justifyContent='center'>
-                            <Button href='/login' fullWidth={mobile} variant='contained' disableElevation color='primary'>
+                            <Button href='/employers/login' fullWidth={mobile} variant='contained' disableElevation color='primary'>
                                 Go to sign in
                             </Button>
                         </Grid>

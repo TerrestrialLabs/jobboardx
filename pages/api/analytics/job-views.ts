@@ -25,7 +25,7 @@ export default async function handler(
             // @ts-ignore
             const user = session?.user
             // @ts-ignore
-            if (!user || (user?.role !== ROLE.EMPLOYER && user?.role !== ROLE.ADMIN && user?.role !== ROLE.SUPERADMIN)) {
+            if (!user || (user?.role !== ROLE.EMPLOYER && user?.role !== ROLE.ADMIN)) {
                 const ipAddress = req.headers['x-forwarded-for']  || req.socket.remoteAddress
 
                 await UserEvent.create({

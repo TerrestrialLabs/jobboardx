@@ -2,14 +2,13 @@ import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHel
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import React, { useContext, useEffect, useState } from 'react'
-import styles from '../styles/Home.module.css'
+import React, { useContext, useState } from 'react'
+import styles from '../../styles/Home.module.css'
 import Link from 'next/link'
 import axios from 'axios'
-import { useWindowSize } from '../hooks/hooks'
-import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
-import CheckEmail from '../components/CheckEmail'
-import { useRouter } from 'next/router'
+import { useWindowSize } from '../../hooks/hooks'
+import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
+import CheckEmail from '../../components/CheckEmail'
 import ErrorPage from 'next/error'
 
 const ERROR = {
@@ -27,7 +26,7 @@ const initState = {
 }
 
 const Login: NextPage = () => {
-    const { baseUrlApi, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -38,7 +37,7 @@ const Login: NextPage = () => {
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )
-    
+
     const handleInputChange = (e: { persist: () => void; target: { name: any; value: any } }) => {
         e.persist()
         setForm({ ...form, [e.target.name]: e.target.value })
@@ -80,7 +79,10 @@ const Login: NextPage = () => {
         setErrors(initErrors)
         setLoading(true)
         try {
-            await axios.post(`${baseUrlApi}auth/admin/signin`, { email: form.email })
+            await axios.post(`${baseUrlApi}auth/employer/signin`, { email: form.email, jobboardId: jobboard._id }, { 
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } 
+            })
+
             setSubmitted(true)
         } catch (err) {
             // TO DO: Check for status & display message
@@ -96,14 +98,10 @@ const Login: NextPage = () => {
         }
     }
 
-    if (!isAdminSite) {
-        return <ErrorPage statusCode={404} />
-    }
-
     return (
         <div className={styles.container}>
             <Head>
-                <title>JobBoardX | Sign in</title>
+                <title>{`${jobboard ? jobboard.title : 'JobBoardX'} | Sign in`}</title>
                 <meta name="description" content="Sign in" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -116,7 +114,7 @@ const Login: NextPage = () => {
                         <Box p={mobile ? 2 : 4} pt={mobile ? 3 : 4} pb={mobile ? 3 : 4} sx={{ backgroundColor: '#fff', borderRadius: 1, width: 'mobile' ? 'auto' : '260px', maxWidth: mobile ? 'auto' : '420px' }}>
                             <Grid container>
                                 <Grid xs={12}>
-                                    <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Sign In</Typography></Box>
+                                    <Box mb={showErrorMessage ? 2 : 4}><Typography fontWeight='bold' variant='h1' fontSize={22} align='center'>Employer Sign In</Typography></Box>
                                 </Grid>
 
                                 {showErrorMessage && (
@@ -138,6 +136,13 @@ const Login: NextPage = () => {
                                         {loading ? <CircularProgress color='secondary' size={22} /> : 'Sign in'}
                                     </Button>
                                 </Grid>
+
+                                {jobboard && (
+                                    <Grid xs={12} pt={2} display='flex' justifyContent='center'>
+                                        <Typography variant='caption' mr={0.5}>Not registered?</Typography>
+                                        <Typography variant='caption' color='primary.main'><Link href='signup'>Create an account</Link></Typography>
+                                    </Grid>
+                                )}
                             </Grid>
                         </Box>
                     </Grid>

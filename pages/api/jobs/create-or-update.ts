@@ -45,6 +45,10 @@ createOrUpdateJob.post(async (req, res) => {
     const stripePaymentIntentId = req.body['stripePaymentIntentId']
     const mode = req.body['mode']
 
+    const local = req.headers.host?.includes('localhost')
+    
+    const stripeSecretKey = process.env.NODE_ENV === 'development' ? process.env.STRIPE_TEST_SECRET_KEY : process.env.STRIPE_LIVE_SECRET_KEY
+
     try {
         const session = await getSession({ req })
 
@@ -60,7 +64,7 @@ createOrUpdateJob.post(async (req, res) => {
         // 1. Check for payment (create job)
         let orderId
         if (mode === 'create') {
-            const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+            const stripe = require('stripe')(stripeSecretKey)
             const paymentIntent = await stripe.paymentIntents.retrieve(stripePaymentIntentId)
             // Make sure no other job has been created with the same orderId
             const jobsWithSameOrderId = await Job.find({ orderId: paymentIntent.metadata.orderId }).exec()
@@ -86,8 +90,10 @@ createOrUpdateJob.post(async (req, res) => {
             // @ts-ignore
             await sendConfirmationEmail({ host: req.headers.host, job, mode, email: session.user.email as string })
 
-            tweet({ host: req.headers.host, job, jobboardId: jobData.jobboardId })
-
+            if (!local) {
+                tweet({ host: req.headers.host, job, jobboardId: jobData.jobboardId })
+            }
+            
             res.status(201).json(job)
         } else if (mode === 'update') {
             const job = await Job.findOneAndUpdate(

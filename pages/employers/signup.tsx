@@ -3,12 +3,12 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useState } from 'react'
-import styles from '../styles/Home.module.css'
+import styles from '../../styles/Home.module.css'
 import axios from 'axios'
-import { useWindowSize } from '../hooks/hooks'
-import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
+import { useWindowSize } from '../../hooks/hooks'
+import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import { Close } from '@mui/icons-material'
-import CheckEmail from '../components/CheckEmail'
+import CheckEmail from '../../components/CheckEmail'
 
 // TO DO: Import from const
 const ERROR = {
@@ -35,7 +35,7 @@ const initState = {
 }
 
 const EmployerSignUp: NextPage = () => {
-    const { baseUrl, baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
     
     const [form, setForm] = useState(initState)
     const [loading, setLoading] = useState(false)
@@ -162,12 +162,12 @@ const EmployerSignUp: NextPage = () => {
 
             formData.set('userData', JSON.stringify(userData))
 
-            const res = await axios.post(`${baseUrlApi}auth/employer-signup`, formData, { 
+            const res = await axios.post(`${baseUrlApi}auth/employer/signup`, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
             
             if (res.status === 201) {
-                await axios.post(`${baseUrlApi}auth/signin`, { email: form.email })
+                await axios.post(`${baseUrlApi}auth/employer/signin`, { email: form.email, jobboardId: jobboard._id })
                 setSubmitted(true)
             }
         } catch (err) {

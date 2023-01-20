@@ -2,10 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import cloudinary from 'cloudinary'
 import nextConnect from 'next-connect'
 import multer from 'multer'
-import dbConnect from '../../../mongodb/dbconnect'
-import User from '../../../models/User'
-import { getSession } from '../../../api/getSession'
-import { ROLE } from '../../../const/const'
+import dbConnect from '../../../../mongodb/dbconnect'
+import User from '../../../../models/User'
+import { getSession } from '../../../../api/getSession'
+import { ROLE } from '../../../../const/const'
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_NAME,

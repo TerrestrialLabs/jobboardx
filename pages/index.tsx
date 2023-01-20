@@ -8,7 +8,7 @@ import styles from '../styles/Home.module.css'
 import { getTimeDifferenceString } from '../utils/utils'
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { TYPE, TYPE_MAP } from '../const/const'
+import { AUTH_STATUS, TYPE, TYPE_MAP } from '../const/const'
 import { formatSalaryRange } from '../utils/utils'
 import axios from 'axios'
 import cities from '../data/world_cities_options.json'
@@ -18,6 +18,8 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import { ListItem, ListItemMobile } from '../components/ListItem'
 import { JobData } from '../models/Job'
 import { FiltersPanel, SalaryField } from '../components/jobs/FiltersPanel'
+import { useSession } from '../context/SessionContext'
+import axiosInstance from '../api/axios'
 
 type Filters = {
   search: string,
@@ -344,9 +346,12 @@ const JobsList = () => {
 }
 
 const Home: NextPage = () => {
-  const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+  const { baseUrl, baseUrlApi, jobboard, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
+  const session = useSession()
   
   const [adminMessage, setAdminMessage] = useState('')
+
+  const router = useRouter()
 
   useEffect(() => {
     if (baseUrlApi.startsWith('http://localhost') && !jobboard) {
@@ -354,12 +359,35 @@ const Home: NextPage = () => {
     }
   }, [])
 
-  if (adminMessage) {
-    return <Box p={4} pt={12}><Typography textAlign='center'>{adminMessage}</Typography></Box>
+  useEffect(() => {
+    if (isAdminSite && session.status !== AUTH_STATUS.LOADING) {
+      redirect()
+    }
+  }, [session.status])
+
+  const redirect = async () => {
+    if (session.status === AUTH_STATUS.AUTHENTICATED) {
+      const { data } = await axiosInstance.get(`${baseUrlApi}jobboards/admin`)
+      if (data) {
+        router.push('/admin/update-board')
+      } else {
+        router.push('/admin/create-board')
+      }
+    } else {
+      router.push('/login')
+    }
+  }
+
+  if (isAdminSite) {
+    return (
+      <Box height='100vh' display='flex' alignItems='center' justifyContent='center'>
+          <CircularProgress color='secondary' size={22} />
+      </Box>
+    )
   }
 
   if (!jobboard) {
-    return null
+    return <Box p={4} pt={12}><Typography textAlign='center'>Please create a default job board in the admin panel.</Typography></Box>
   }
 
   return <JobsList />

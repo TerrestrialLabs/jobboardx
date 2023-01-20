@@ -12,7 +12,7 @@ import { useSession } from '../context/SessionContext'
 const Header = () => {
     const router = useRouter()
 
-    const { jobboard } = useContext(JobBoardContext) as JobBoardContextValue
+    const { jobboard, isAdminSite } = useContext(JobBoardContext) as JobBoardContextValue
 
     const session = useSession()
 
@@ -23,7 +23,7 @@ const Header = () => {
     // @ts-ignore
     const isEmployer = session?.user && session?.user?.role === ROLE.EMPLOYER
     // @ts-ignore
-    const isAdmin = session?.user && (session?.user?.role === ROLE.ADMIN || session?.user?.role === ROLE.SUPERADMIN)
+    const isAdmin = session?.user && session?.user?.role === ROLE.ADMIN
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const accountMenuOpen = Boolean(anchorEl)
@@ -45,7 +45,7 @@ const Header = () => {
 
     let buttonLink = '/post'
     if (!session?.user) {
-        buttonLink = '/login'
+        buttonLink = '/employers/login'
     }
     if (postFormPage) {
         buttonLink = '/'
@@ -77,7 +77,7 @@ const Header = () => {
             }}
             sx={{ fontSize: '14px', marginTop: '0.5rem' }}
         >
-            {!session?.user && <Box p='6px 16px' mb='0.5rem' sx={{ borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>}
+            {!isAdminSite && !session?.user && <Box p='6px 16px' mb='0.5rem' sx={{ borderBottom: '1px solid #e7e7e7' }}><Typography fontWeight='bold'>Employers</Typography></Box>}
 
             {session?.user && isEmployer && (
                 <MenuItem onClick={handleAccountMenuClose}>
@@ -114,7 +114,7 @@ const Header = () => {
 
             {(!session || !session.user) && (
                 <MenuItem onClick={handleAccountMenuClose}>
-                    <Link href='/login'>
+                    <Link href={isAdminSite ? '/login' : '/employers/login'}>
                         <Box display='flex'>
                             <Key fontSize='small' />
                             <Typography fontSize='14px' ml={1}>Log in</Typography>
@@ -123,7 +123,7 @@ const Header = () => {
                 </MenuItem>
             )}
 
-            {(!session || !session.user) && (<MenuItem onClick={handleAccountMenuClose}>
+            {!isAdminSite && (!session || !session.user) && (<MenuItem onClick={handleAccountMenuClose}>
                 <Link href='/signup'>
                     <Box display='flex'>
                         <PersonAddAlt fontSize='small' />
@@ -168,7 +168,7 @@ const Header = () => {
 
                             {menu}
 
-                            {jobboard && !mobile && <Button sx={{ flexShrink: 0, marginLeft: 2 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>}
+                            {!isAdminSite && jobboard && !mobile && <Button sx={{ flexShrink: 0, marginLeft: 2 }} href={buttonLink} variant='contained' color='secondary' disableElevation>{postFormPage ? 'All jobs' : 'Post a job'}</Button>}
 
                             {mobile && (
                                 <Box ml={3}>

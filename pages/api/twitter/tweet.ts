@@ -21,8 +21,7 @@ export default async function handler(
             const token = bearerToken.replace('Bearer', '').trim()
 
             if (process.env.ACTIONS_SECRET === token) {
-                const domain = req.headers.host
-                const postUrl = `https://${domain}/jobs/${req.body.job._id}`
+                const postUrl = `https://${req.body.domain}/jobs/${req.body.job._id}`
                 const text = getNewPositionTweet({ job: req.body.job, postUrl })
 
                 try {

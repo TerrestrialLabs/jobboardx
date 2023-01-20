@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
 import jwt from 'jsonwebtoken'
-import cookie from 'cookie'
-import { generateAccessToken, serializeCookie } from '../../../api/token'
+import { generateAccessToken } from '../../../api/token'
+import { checkIsAdminSite } from '../../../api/checkIsAdminSite'
 
 dbConnect()
 
@@ -23,8 +23,11 @@ export default async function handler(
         // TO DO: Duplicate code in refresh endpoint
         const { cookies } = req
 
-        if (cookies.jobboardx) {
-            const parsedCookie = JSON.parse(cookies.jobboardx)
+        const isAdminSite = checkIsAdminSite(req)
+        const cookie = isAdminSite ? cookies.jobboardx_dashboard : cookies.jobboardx
+
+        if (cookie) {
+            const parsedCookie = JSON.parse(cookie)
             const refreshToken = parsedCookie.refreshToken
             let newAccessToken, user
 

@@ -28,15 +28,12 @@ export default async function handler(
             const session = await getSession({ req })
             // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
-                // @ts-ignore
+            if (!session?.user || (session?.user?.role !== ROLE.ADMIN)) {
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
-            // Hardcode default job board for local development
-            // TO DO: Save default domain in env var
-            const domain = req.headers.host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : req.headers.host
-            const jobboard = await JobBoard.findOne({ domain })
             // @ts-ignore
+            const jobboard = await JobBoard.findOne({ ownerId: session.user._id })
+
             res.status(200).json(jobboard)
         } catch (err) {
             console.log('err: ', err)
@@ -48,21 +45,19 @@ export default async function handler(
             const session = await getSession({ req })
             // TO DO: Only jobboard creator admin should be able to update this
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
+            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
                 // @ts-ignore
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
-            // Hardcode default job board for local development
-            // TO DO: Save default domain in env var
-            const domain = req.headers.host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : req.headers.host
+            // @ts-ignore
+            const jobboardToUpdate = await JobBoard.findOne({ ownerId: session.user._id })
 
-            const jobboardToUpdate = await JobBoard.findOne({ domain })
             // @ts-ignore
             if (jobboardToUpdate.ownerId !== session.user._id) {
                 throw Error('Unauthorized')
             }
 
-            const jobboard = await JobBoard.findOneAndUpdate({ domain }, { $set : req.body }).select('-email')
+            const jobboard = await JobBoard.findOneAndUpdate({ _id: jobboardToUpdate._id }, { $set : req.body }).select('-email')
             // @ts-ignore
             res.status(200).json(jobboard)
         } catch (err) {
@@ -74,7 +69,7 @@ export default async function handler(
         try {
             const session = await getSession({ req })
             // @ts-ignore
-            if (!session?.user || (session?.user?.role !== ROLE.ADMIN && session?.user?.role !== ROLE.SUPERADMIN)) {
+            if (!session?.user || (session?.user?.role !== ROLE.ADMIN)) {
                 // @ts-ignore
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }

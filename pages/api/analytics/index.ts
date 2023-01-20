@@ -13,7 +13,7 @@ export type UserEventType = {
     ipAddress: string
 }
 
-export type AnalticsStatsType = {
+export type AnalyticsStatsType = {
     jobs: number
     views: number
     emailApplyClicks: number
@@ -29,12 +29,12 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<AnalticsStatsType>
+    res: NextApiResponse<AnalyticsStatsType | string>
 ) {
     const { method } = req
 
     dbConnect()
-    
+
     if (method === 'GET') {
         try {
             const session = await getSession({ req })
