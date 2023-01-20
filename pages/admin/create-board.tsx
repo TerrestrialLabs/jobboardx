@@ -122,7 +122,8 @@ const CreateBoardForm: NextPage = () => {
                 setErrors(initErrors)
                 setSubmitted(true)
                 setForm(initState)
-                scrollTo(0, 0)
+                // scrollTo(0, 0)
+                router.push('/admin')
             }
         } catch (err) {
             console.log(err)

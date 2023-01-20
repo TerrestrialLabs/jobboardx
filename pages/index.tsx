@@ -368,8 +368,8 @@ const Home: NextPage = () => {
   const redirect = async () => {
     if (session.status === AUTH_STATUS.AUTHENTICATED) {
       const { data } = await axiosInstance.get(`${baseUrlApi}jobboards/admin`)
-      if (data) {
-        router.push('/admin/update-board')
+      if (data.length) {
+        router.push('/admin')
       } else {
         router.push('/admin/create-board')
       }

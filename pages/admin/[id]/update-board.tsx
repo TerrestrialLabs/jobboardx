@@ -3,13 +3,13 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import React, { useContext, useEffect, useState } from 'react'
-import styles from '../../styles/Home.module.css'
-import { useWindowSize } from '../../hooks/hooks'
-import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
+import styles from '../../../styles/Home.module.css'
+import { useWindowSize } from '../../../hooks/hooks'
+import { JobBoardContext, JobBoardContextValue } from '../../../context/JobBoardContext'
 import { useRouter } from 'next/router'
-import { AUTH_STATUS, ROLE } from '../../const/const'
-import { useSession } from '../../context/SessionContext'
-import axiosInstance from '../../api/axios'
+import { AUTH_STATUS, ROLE } from '../../../const/const'
+import { useSession } from '../../../context/SessionContext'
+import axiosInstance from '../../../api/axios'
 import ErrorPage from 'next/error'
 
 const ERROR = {
@@ -90,7 +90,7 @@ const JobBoard: NextPage = () => {
     const accessDenied = !isAdminSite || status === AUTH_STATUS.UNAUTHENTICATED || (user && user?.role !== ROLE.ADMIN)
 
     const fetchJobboard = async () => {
-        const { data } = await axiosInstance.get(`${baseUrlApi}jobboards/admin`)
+        const { data } = await axiosInstance.get(`${baseUrlApi}jobboards/admin/${router.query.id}`)
         setForm({
             ...initState,
             title: data.title,
@@ -168,7 +168,7 @@ const JobBoard: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axiosInstance.put(`${baseUrlApi}jobboards/admin`, form)
+            const res = await axiosInstance.put(`${baseUrlApi}jobboards/admin/${router.query.id}`, form)
             if (res.status === 200) {
                 setErrors(initErrors)
                 setSubmitted(true)

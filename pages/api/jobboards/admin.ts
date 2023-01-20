@@ -15,7 +15,7 @@ function getErrorMessage(error: unknown) {
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<JobBoardData | string>
+    res: NextApiResponse<JobBoardData[] | string>
 ) {
     const { 
         method
@@ -32,36 +32,11 @@ export default async function handler(
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
             // @ts-ignore
-            const jobboard = await JobBoard.findOne({ ownerId: session.user._id })
+            const jobboards = await JobBoard.find({ ownerId: session.user._id })
 
-            res.status(200).json(jobboard)
+            res.status(200).json(jobboards)
         } catch (err) {
             console.log('err: ', err)
-        }
-    }
-
-    if (method === 'PUT') {
-        try {
-            const session = await getSession({ req })
-            // TO DO: Only jobboard creator admin should be able to update this
-            // @ts-ignore
-            if (!session?.user || session?.user?.role !== ROLE.ADMIN) {
-                // @ts-ignore
-                return res.status(401).json(getErrorMessage('Unauthorized'))
-            }
-            // @ts-ignore
-            const jobboardToUpdate = await JobBoard.findOne({ ownerId: session.user._id })
-
-            // @ts-ignore
-            if (jobboardToUpdate.ownerId !== session.user._id) {
-                throw Error('Unauthorized')
-            }
-
-            const jobboard = await JobBoard.findOneAndUpdate({ _id: jobboardToUpdate._id }, { $set : req.body }).select('-email')
-            // @ts-ignore
-            res.status(200).json(jobboard)
-        } catch (err) {
-            res.status(500).json(getErrorMessage(err))
         }
     }
 
