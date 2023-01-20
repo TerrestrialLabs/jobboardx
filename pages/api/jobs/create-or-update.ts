@@ -196,7 +196,7 @@ export const tweet = async ({ host, job, jobboardId }: TweetParams) => {
     const domain = host?.includes('localhost') ? process.env.DEFAULT_BOARD_URL : host
     const jobboard = await JobBoard.findOne({ domain }).select('-ownerId').exec()
     const postUrl = `https://${jobboard.domain}/jobs/${job._id}`
-    const text = getNewPositionTweet({ job, postUrl })
+    const text = getNewPositionTweet({ job, postUrl, twitterHashtags: jobboard.twitterHashtags })
     
     try {
         const keys = await TwitterKey.findOne({ jobboardId })

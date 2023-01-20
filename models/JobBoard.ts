@@ -14,7 +14,8 @@ const JobBoardSchema = new mongoose.Schema({
     skills: { type: [String], default: [] },
     priceRegular: { type: Number, required: true },
     priceFeatured: { type: Number, required: true },
-    searchQuery: { type: String, required: true }
+    searchQuery: { type: String, required: true },
+    twitterHashtags: { type: [String], default: [] },
 }, { timestamps: true })
 
 export default mongoose.models.JobBoard || mongoose.model('JobBoard', JobBoardSchema)
@@ -34,4 +35,5 @@ export type JobBoardData = {
     priceFeatured: number
     priceRegular: number
     searchQuery: string
+    twitterHashtags: string[]
 }

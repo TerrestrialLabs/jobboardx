@@ -59,7 +59,8 @@ export default async function handler(
                 return res.status(401).json(getErrorMessage('Unauthorized'))
             }
 
-            const jobboard = await JobBoard.findOneAndUpdate({ _id: jobboardToUpdate._id }, { $set : req.body }).select('-email')
+            // const jobboard = await JobBoard.findOneAndUpdate({ _id: jobboardToUpdate._id }, { $set: req.body, twitterHashtags: req.body.twitterHashtags }).select('-email')
+            const jobboard = await JobBoard.findOneAndUpdate({ _id: jobboardToUpdate._id }, { $set: req.body }, { new: true }).select('-email')
             // @ts-ignore
             res.status(200).json(jobboard)
         } catch (err) {

@@ -202,7 +202,7 @@ async function scrapeJobs(jobboard) {
                 const jobToTweet = savedJobs[savedJobs.length - 1]
                 delete jobToTweet.description
     
-                await axios.post(`https://www.jobboardx.io/api/twitter/tweet`, { job: jobToTweet, jobboardId: jobboard._id, domain: jobboard.domain }, {
+                await axios.post(`https://www.jobboardx.io/api/twitter/tweet`, { job: jobToTweet, jobboardId: jobboard._id, domain: jobboard.domain, twitterHashtags: jobboard.twitterHashtags }, {
                     headers: {
                         'Authorization': `Bearer ${process.env.ACTIONS_SECRET}`
                     }

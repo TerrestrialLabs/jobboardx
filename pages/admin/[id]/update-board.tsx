@@ -42,7 +42,8 @@ const initState = {
     skills: [] as string[],
     priceRegular: 49,
     priceFeatured: 99,
-    searchQuery: ''
+    searchQuery: '',
+    twitterHashtags: [] as string[]
 }
 
 const initTwitterKeys = {
@@ -103,7 +104,8 @@ const JobBoard: NextPage = () => {
             skills: data.skills,
             priceRegular: data.priceRegular,
             priceFeatured: data.priceFeatured,
-            searchQuery: data.searchQuery
+            searchQuery: data.searchQuery,
+            twitterHashtags: data.twitterHashtags || []
         })
 
         const { data: value } = await axiosInstance.get(`${baseUrlApi}twitter/keys?jobboardId=${data._id}`)
@@ -158,6 +160,10 @@ const JobBoard: NextPage = () => {
 
     const handleSkillsChange = (value: string[]) => {
         setForm({ ...form, skills: value })
+    }
+
+    const handleTwitterHashtagsChange = (value: string[]) => {
+        setForm({ ...form, twitterHashtags: value })
     }
 
     const submit = async () => {
@@ -360,7 +366,7 @@ const JobBoard: NextPage = () => {
                                             disablePortal
                                             renderInput={(params) => <TextField error={!!errors['skills']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['skills'], placeholder: form.skills.length ? '' : 'Select one or type & hit Enter', style: { padding: '9px 12px 10px' }}} />}
                                             options={form.skills}
-                                            onChange={(e, value) => handleSkillsChange(value || '')}
+                                            onChange={(e, value) => handleSkillsChange(value || [])}
                                             value={form.skills}
                                         />
                                         <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['skills']}</FormHelperText>
@@ -380,6 +386,21 @@ const JobBoard: NextPage = () => {
                                             <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
                                             <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
                                         </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Twitter Hashtags <span style={{ fontWeight: 'normal' }}>(exclude "#" symbol)</span></Typography>
+                                        <Autocomplete
+                                            freeSolo
+                                            multiple
+                                            disableClearable
+                                            disablePortal
+                                            renderInput={(params) => <TextField error={!!errors['twitterHashtags']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['twitterHashtags'], placeholder: form.twitterHashtags.length ? '' : 'Type a hashtag & hit Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            options={form.twitterHashtags}
+                                            onChange={(e, value) => handleTwitterHashtagsChange(value || [])}
+                                            value={form.twitterHashtags}
+                                        />
+                                        <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }}>Optional</FormHelperText>
                                     </Grid>
 
                                     <Grid xs={12} pt={2} display='flex' justifyContent='center'>

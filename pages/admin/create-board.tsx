@@ -42,7 +42,8 @@ const initState = {
     skills: [] as string[],
     priceRegular: 49,
     priceFeatured: 99,
-    searchQuery: ''
+    searchQuery: '',
+    twitterHashtags: [] as string[]
 }
 
 const CreateBoardForm: NextPage = () => {
@@ -106,6 +107,10 @@ const CreateBoardForm: NextPage = () => {
 
     const handleSkillsChange = (value: string[]) => {
         setForm({ ...form, skills: value })
+    }
+
+    const handleTwitterHashtagsChange = (value: string[]) => {
+        setForm({ ...form, twitterHashtags: value })
     }
 
     const submit = async () => {
@@ -238,22 +243,6 @@ const CreateBoardForm: NextPage = () => {
                                         </FormControl>
                                     </Grid>
 
-                                    <Grid xs={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Regular Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
-                                            <FilledInput error={!!errors['priceRegular']} disableUnderline={!errors['priceRegular']}  type='number' fullWidth onChange={handleInputChange} name='priceRegular' value={form.priceRegular} autoComplete='off' required placeholder='Regular Post Price' sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "9999", step: "1" }} />
-                                            <FormHelperText error>{errors['priceRegular']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
-                                    <Grid xs={6}>
-                                        <FormControl hiddenLabel fullWidth>
-                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Featured Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
-                                            <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
-                                            <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
-                                        </FormControl>
-                                    </Grid>
-
                                     <Grid xs={12} sm={6}>
                                         <FormControl hiddenLabel fullWidth>
                                             <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Backfill Search Query</Typography>
@@ -275,6 +264,37 @@ const CreateBoardForm: NextPage = () => {
                                             value={form.skills}
                                         />
                                         <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }} error>{errors['skills']}</FormHelperText>
+                                    </Grid>
+
+                                    <Grid xs={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Regular Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
+                                            <FilledInput error={!!errors['priceRegular']} disableUnderline={!errors['priceRegular']}  type='number' fullWidth onChange={handleInputChange} name='priceRegular' value={form.priceRegular} autoComplete='off' required placeholder='Regular Post Price' sx={{ marginRight: '0.25rem' }}  inputProps={{ min: "0", max: "9999", step: "1" }} />
+                                            <FormHelperText error>{errors['priceRegular']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={6}>
+                                        <FormControl hiddenLabel fullWidth>
+                                            <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Featured Post Price <span style={{ fontWeight: 'normal' }}>(USD)</span></Typography>
+                                            <FilledInput error={!!errors['priceFeatured']} disableUnderline={!errors['priceFeatured']}  type='number' fullWidth onChange={handleInputChange} name='priceFeatured' value={form.priceFeatured} autoComplete='off' required placeholder='Featured Post Price' inputProps={{ min: "0", max: "9999", step: "1" }} />
+                                            <FormHelperText error>{errors['priceFeatured']}</FormHelperText>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid xs={12}>
+                                        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Twitter Hashtags <span style={{ fontWeight: 'normal' }}>(exclude "#" symbol)</span></Typography>
+                                        <Autocomplete
+                                            freeSolo
+                                            multiple
+                                            disableClearable
+                                            disablePortal
+                                            renderInput={(params) => <TextField error={!!errors['twitterHashtags']} variant='filled' {...params} InputProps={{...params.InputProps, disableUnderline: !errors['twitterHashtags'], placeholder: form.twitterHashtags.length ? '' : 'Type a hashtag & hit Enter', style: { padding: '9px 12px 10px' }}} />}
+                                            options={form.twitterHashtags}
+                                            onChange={(e, value) => handleTwitterHashtagsChange(value || [])}
+                                            value={form.twitterHashtags}
+                                        />
+                                        <FormHelperText sx={{ marginLeft: '14px', marginRight: '14px' }}>Optional</FormHelperText>
                                     </Grid>
 
                                     <Grid xs={12} pt={2} display='flex' justifyContent='center'>
