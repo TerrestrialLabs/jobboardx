@@ -47,7 +47,7 @@ export default async function handler(
             console.log('Subscriptions: ', subscriptions.length)
 
             if (!subscriptions.length) {
-                res.status(201).json(true)
+                res.status(201).json(false)
                 return
             }
 
