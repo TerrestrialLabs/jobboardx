@@ -43,9 +43,6 @@ export default async function handler(
             const jobboard = req.body.jobboard
             const subscriptions = await Subscription.find({ jobboardId: jobboard._id }).exec()
 
-            console.log('jobboardId: ', jobboard._id)
-            console.log('Subscriptions: ', subscriptions.length)
-
             if (!subscriptions.length) {
                 res.status(201).json(false)
                 return
