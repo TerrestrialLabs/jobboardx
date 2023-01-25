@@ -28,7 +28,6 @@ export default async function handler(
 
     dbConnect()
 
-    // TO DO: Split up into batches of 1,000 emails
     // TO DO: Only send new jobs since last email/week >= timestamp of last sent job (save in DB collection)
     if (method === 'POST') {
         try {
