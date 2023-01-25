@@ -10,8 +10,7 @@ async function run() {
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ jobboard })
                 }).then(emailRes => {
-                    const emailData = emailRes.json()
-                    console.log('emailData: ', emailData)
+                    emailRes.json().then(emailData => console.log(emailData))
                 }).catch(err => console.log("ERROR"))
             })
         })
