@@ -5,6 +5,9 @@ const fetch = require('node-fetch')
 require('dotenv').config()
 
 async function scrapeJobs(jobboard) {
+    const { data: existingJobs } = await axios.get(`https://www.jobboardx.io/api/jobs/backfilled?jobboardId=${jobboard._id}`)
+    const applicationLinks = existingJobs.map(job => job.applicationLink)
+
     let jobs = []
     let pageNum = 1
     let endOfResults = false
@@ -93,9 +96,12 @@ async function scrapeJobs(jobboard) {
         }
     }
 
-    for (let i = 0; i < jobs.length; i++) {
-        const job = jobs[i]
-        const url = jobs[i].applicationLink;
+    // Job has not been backfilled already
+    const newJobs = jobs.filter(item => !applicationLinks.includes(item.applicationLink))
+
+    for (let i = 0; i < newJobs.length; i++) {
+        const job = newJobs[i]
+        const url = newJobs[i].applicationLink;
 
         await page.goto(`${url}`);
         const extraDetails = await page.evaluate((job) => {
@@ -137,14 +143,14 @@ async function scrapeJobs(jobboard) {
                 datePosted: getPastDate(job.datePosted).toISOString()
             }
         }, job)
-        jobs[i] = { ...jobs[i], ...extraDetails }
+        newJobs[i] = { ...newJobs[i], ...extraDetails }
     }
 
     await browser.close()
 
     const supportedJobTypes = ['fulltime', 'parttime', 'contract']
     // Remove jobs that are missing important data
-    const jobsToSave = jobs
+    const jobsToSave = newJobs
         .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
         .filter(job => !!job.companyLogo)
         .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
