@@ -28,13 +28,14 @@ export default async function handler(
 
     if (method === 'POST') {
         try {
-            const user = await User.findOne({ email: req.body.email })
+            const email = req.body.email.trim().toLowerCase()
+            const user = await User.findOne({ email })
             if (user) {
                 throw Error('A user with this email address already exists.')
             }
 
             const admin = {
-                email: req.body.email,
+                email,
                 role: ROLE.ADMIN
             }
 

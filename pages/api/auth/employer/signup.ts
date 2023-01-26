@@ -43,7 +43,7 @@ signUp.post(async (req, res) => {
 
     try {
         // 1. Check if account exists (unique email, company)
-        const user = await User.findOne({ email: userData.email, 'employer.company': userData.employer.company })
+        const user = await User.findOne({ email: userData.email.trim().toLowerCase(), 'employer.company': userData.employer.company })
         if (user) {
             throw Error('A company with this name or email address already exists.')
         }

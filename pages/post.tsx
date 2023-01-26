@@ -26,6 +26,7 @@ import { useUnsavedChangesHandler } from '../hooks/unsavedChanges'
 import { Employer } from '../models/User'
 import { useSession } from '../context/SessionContext'
 import * as ga from '../lib/ga'
+import { isValidEmail } from '../utils/utils'
 
 // Slate doesn't play nicely with SSR, throws hydration error
 const TextEditor = dynamic(() => import('../components/post/TextEditor'), {
@@ -398,14 +399,6 @@ export const PostForm = ({ edit }: PostFormProps) => {
         return url.protocol === "http:" || url.protocol === "https:"
     }
 
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
-    }
-
     const logSubmit = () => {
         ga.event({
             action: "submit_post",
@@ -446,7 +439,7 @@ export const PostForm = ({ edit }: PostFormProps) => {
                     title: jobDetails.title.trim(),
                     backfilled: false,
                     description: serialize({ children: descriptionEditorValue }),
-                    applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim()}` : jobDetails.applicationLink.trim()
+                    applicationLink: isValidEmail(jobDetails.applicationLink.trim()) ? `mailto:${jobDetails.applicationLink.trim().toLowerCase()}` : jobDetails.applicationLink.trim()
                 }
     
                 formData.set('jobData', JSON.stringify(jobData))

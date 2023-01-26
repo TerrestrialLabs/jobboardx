@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Grid, IconButton, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { JobBoardContext, JobBoardContextValue } from "../context/JobBoardContext"
+import { isValidEmail } from "../utils/utils"
 
 const EmailFooter = () => {
   const { baseUrlApi, jobboard } = useContext(JobBoardContext) as JobBoardContextValue
@@ -21,14 +22,6 @@ const EmailFooter = () => {
     return email.length > 0 && isValidEmail(email)
   }
   
-    const isValidEmail = (email: string) => {
-      if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-          return (true)
-      } else {
-          return (false)
-      }
-    }
-  
     const createSubscription = async () => {
         setLoading(true)
         if (!validate()) {
@@ -37,7 +30,7 @@ const EmailFooter = () => {
             return
         }
         setError(false)
-        await axios.post(`${baseUrlApi}subscriptions`, { jobboardId: jobboard._id, email })
+        await axios.post(`${baseUrlApi}subscriptions`, { jobboardId: jobboard._id, email: email.trim().toLowerCase() })
         setLoading(false)
         setSubmitted(true)
     }

@@ -12,6 +12,7 @@ import { Close } from '@mui/icons-material'
 import axios from 'axios'
 import axiosInstance from '../../api/axios'
 import { useSession } from '../../context/SessionContext'
+import { isValidEmail } from '../../utils/utils'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -79,14 +80,6 @@ const Account: NextPage = () => {
         return isValid
     }
 
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
-    }
-
     // TO DO: Validate urls - provide https if absent or add prefix before input
     const submit = async () => {
         const isValid = validate()
@@ -99,7 +92,7 @@ const Account: NextPage = () => {
                 const formData = new FormData()
                 const userData = {
                     ...session.user,
-                    email: form.email.trim()
+                    email: form.email.trim().toLowerCase()
                 }
 
                 formData.set('userData', JSON.stringify(userData))

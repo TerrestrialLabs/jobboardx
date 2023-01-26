@@ -20,3 +20,11 @@ export const isExpired = (datePosted: Date) => {
     const thirtyDaysAgoDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
     return (new Date(datePosted)) < thirtyDaysAgoDate
 }
+
+export const isValidEmail = (email: string) => {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim())) {
+        return (true)
+    } else {
+        return (false)
+    }
+  }

@@ -11,6 +11,7 @@ import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContex
 import CheckEmail from '../components/CheckEmail'
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
+import { isValidEmail } from '../utils/utils'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -63,14 +64,6 @@ const Login: NextPage = () => {
         return isValid
     }
 
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
-    }
-
     const login = async () => {
         const isValid = validate()
         if (!isValid) {
@@ -80,7 +73,7 @@ const Login: NextPage = () => {
         setErrors(initErrors)
         setLoading(true)
         try {
-            await axios.post(`${baseUrlApi}auth/admin/signin`, { email: form.email })
+            await axios.post(`${baseUrlApi}auth/admin/signin`, { email: form.email.trim().toLowerCase() })
             setSubmitted(true)
         } catch (err) {
             // TO DO: Check for status & display message

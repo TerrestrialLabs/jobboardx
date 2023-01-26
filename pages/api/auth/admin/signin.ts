@@ -33,7 +33,7 @@ export default async function handler(
         const baseUrl = local ? `http://${process.env.NEXT_PUBLIC_ADMIN_SITE_HOST_LOCAL}/` : `https://${req.headers.host}/`
 
         if (req.body.email) {
-            const user = await User.findOne({ email: req.body.email, role: ROLE.ADMIN })
+            const user = await User.findOne({ email: req.body.email.trim().toLowerCase(), role: ROLE.ADMIN })
             if (!user) {
                 return res.status(401).json({ error: 'An account with this email could not be found' });
             }
@@ -53,7 +53,7 @@ export default async function handler(
             }
 
             sendVerificationRequest({
-                to: req.body.email,
+                to: user.email,
                 from: `JobBoardX <support@jobboardx.io>`,
                 url
             })

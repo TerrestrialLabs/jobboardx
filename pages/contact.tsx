@@ -10,6 +10,7 @@ import axios from 'axios'
 import { useWindowSize } from '../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../context/JobBoardContext'
 import * as ga from '../lib/ga'
+import { isValidEmail } from '../utils/utils'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',
@@ -69,7 +70,7 @@ const Contact: NextPage = () => {
         setErrors(initErrors)
         setSubmitted(false)
         try {
-            const res = await axios.post(`${baseUrlApi}messages`, { ...messageData, jobboardId: jobboard._id, isAdminSite })
+            const res = await axios.post(`${baseUrlApi}messages`, { ...messageData, email: messageData.email.trim().toLowerCase(), jobboardId: jobboard._id, isAdminSite })
             if (res.status === 201) {
                 setErrors(initErrors)
                 setSubmitted(true)
@@ -86,7 +87,7 @@ const Contact: NextPage = () => {
         let isValid = true
         const newErrors = Object.assign({}, initErrors)
 
-        if (!isValidEmail(messageData.email)) {
+        if (!isValidEmail(messageData.email.trim())) {
             newErrors['email'] = ERROR.EMAIL
             isValid = false
         }
@@ -101,14 +102,6 @@ const Contact: NextPage = () => {
         setErrors(newErrors)
 
         return isValid
-    }
-
-    const isValidEmail = (email: string) => {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return (true)
-        } else {
-            return (false)
-        }
     }
 
     return (
