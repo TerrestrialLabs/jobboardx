@@ -124,7 +124,7 @@ const Header = () => {
             )}
 
             {!isAdminSite && (!session || !session.user) && (<MenuItem onClick={handleAccountMenuClose}>
-                <Link href='/signup'>
+                <Link href='/employers/signup'>
                     <Box display='flex'>
                         <PersonAddAlt fontSize='small' />
                         <Typography fontSize='14px' ml={1}>Sign up</Typography>

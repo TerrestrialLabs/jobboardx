@@ -60,7 +60,7 @@ const Footer = () => {
                             <Typography fontWeight='bold' mb={1}>Employers</Typography>
                             <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href={session?.user ? '/post' : '/employers/login'}>Post a job</Link></Typography>
                             <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/employers/login'>Sign in</Link></Typography>
-                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/signup'>Sign up</Link></Typography>
+                            <Typography sx={{ cursor: 'pointer' }} mb={0.5} mr={mobile ? 0 : 4}><Link href='/employers/signup'>Sign up</Link></Typography>
                         </Box>
                         <Box pr={mobile ? 0 : 4} mb={mobile ? 2 : 0} display='flex' flexDirection='column' alignItems={mobile ? 'center' : 'flex-start'}>
                             <Typography fontWeight='bold' mb={1}>Legal</Typography>
