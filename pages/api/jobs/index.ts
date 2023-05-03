@@ -17,7 +17,7 @@ type Filters = {
 export const getFilters = (query: NextApiRequest['query']) => {
     delete query.pageIndex
 
-    const days = 31 // For last 4 days
+    const days = 31
     const currentDate = new Date()
     const sinceDate = new Date(currentDate.getTime() - (days * 24 * 60 * 60 * 1000))
 
@@ -81,6 +81,8 @@ export default async function handler(
                 .skip(pageIndex * resultsPerPage)
                 .limit(resultsPerPage)
                 .exec() 
+            // console.log('filters: ', filters)
+            // const jobs = await Job.find({ jobboardId: filters.jobboardId })
             res.status(200).json(jobs)
         } catch (err) {
             // TO DO

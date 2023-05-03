@@ -35,7 +35,7 @@ export default async function handler(
                 }
             } else {
                 throw Error('Unauthorized')
-            }
+            } 
 
             const job = req.body.jobData
 

@@ -26,19 +26,24 @@ async function scrapeJobs(jobboard) {
                 const convertHourlyToAnnualPay = (pay) => {
                     return pay * 40 * 52
                 }
+
+                const convertWeeklyToAnnualPay = (pay) => {
+                    return pay * 1000
+                }
         
-                const selection = document.querySelectorAll('.SerpJob-jobCard')
-        
+                const selection = document.querySelectorAll("[data-testid='searchSerpJob']")
+
                 for (const element of selection) {
-                    const location = element.querySelector('.jobposting-location').textContent.trim()
+                    const location = element.querySelector("[data-testid='searchSerpJobLocation']").textContent.trim()
                     const remote = location === 'Remote'
-        
+                    const dateStamp = element.querySelector("[data-testid='searchSerpJobDateStamp']")
+
                     jobList.push({
-                        title: element.querySelector('.jobposting-title').textContent.trim(),
-                        company: element.querySelector('.jobposting-company').textContent.trim(),
+                        title: element.querySelector("[data-testid='searchSerpJobTitle']").textContent.trim(),
+                        company: element.querySelector("[data-testid='companyName']").textContent.trim(),
                         location,
                         remote,
-                        applicationLink: 'https://www.simplyhired.com' + element.querySelector('.SerpJob-link').getAttribute('href'),
+                        applicationLink: 'https://www.simplyhired.com' + element.querySelector("[data-testid='searchSerpJobTitle']").querySelector('a').getAttribute('href'),
                         backfilled: true,
                         // Placeholders
                         salaryMin: 0,
@@ -46,26 +51,49 @@ async function scrapeJobs(jobboard) {
                         description: '',
                         companyUrl: 'N/A',
                         companyLogo: '',
-                        datePosted: element.querySelector('time').textContent
+                        datePosted: dateStamp ? element.querySelector("[data-testid='searchSerpJobDateStamp']").textContent : ''
                     })
                 }
         
-                const salaries = document.querySelectorAll('.jobposting-salary')
+                const salaries = document.querySelectorAll("[data-testid='searchSerpJobSalaryEst']")
                 let index = 0
                 for (const element of salaries) {
                     const hourly = element.textContent.includes('hour')
-                    const salaryArr = element.textContent
+                    const weekly = element.textContent.includes('week')
+                    let salaryStr = element.textContent
+                    if (element.textContent.includes('.') && element.textContent.includes('K')) {
+                        salaryStr = salaryStr
+                            .replace('.', ',')
+                            .replace('K', '00')
+                            .replace('.', ',')
+                            .replace('K', '00')
+                    }
+                    const salaryArr = salaryStr
                         .replace('Estimated: ', '')
                         .replace(' a year', '')
+                        .replace(' a week', '')
                         .replace(' an hour', '')
+                        .replace('K', ',000')
+                        .replace('K', ',000')
                         .replaceAll('$', '')
                         .split(' - ')
                     const salaryMin = parseInt(salaryArr[0] ? salaryArr[0].replace(',', '') : 0)
                     const salaryMax = parseInt(salaryArr[1] ? salaryArr[1].replace(',', '') : 0)
         
-                    jobList[index].salaryMin = hourly && salaryArr[0] ? convertHourlyToAnnualPay(salaryArr[0]) : salaryMin
-                    jobList[index].salaryMax = hourly && salaryArr[1] ? convertHourlyToAnnualPay(salaryArr[1]) : salaryMax
-        
+                    jobList[index].salaryMin = salaryMin
+                    if (hourly && salaryArr[0]) {
+                        jobList[index].salaryMin = convertHourlyToAnnualPay(salaryArr[0])
+                    } else if (weekly && salaryArr[0]) {
+                        jobList[index].salaryMin = convertWeeklyToAnnualPay(salaryArr[0])
+                    }
+
+                    jobList[index].salaryMax = salaryMax
+                    if (hourly && salaryArr[1]) {
+                        jobList[index].salaryMax = convertHourlyToAnnualPay(salaryArr[1])
+                    } else if (weekly && salaryArr[1]) {
+                        jobList[index].salaryMax = convertWeeklyToAnnualPay(salaryArr[1])
+                    }
+
                     index += 1
                 }
         
@@ -74,7 +102,7 @@ async function scrapeJobs(jobboard) {
                         .filter(item => item.datePosted)
                         .filter(item => item.salaryMin || item.salaryMax)
 
-                const nextButton = document.getElementsByClassName("Pagination-link next-pagination")
+                const nextButton = document.querySelectorAll("[aria-label='next page']")
 
                 return {
                     jobs: jobList,
@@ -119,26 +147,33 @@ async function scrapeJobs(jobboard) {
                 return new Date()
             }
 
-            let type = document.querySelector('.viewjob-jobType')?.textContent
+            const detailEls = [...document.querySelectorAll("[data-testid='detailText']")]
+            let type = ''
+            detailEls.forEach(el => {
+                const detailText = el.textContent
+                let isType = detailText.includes('Part-time') || detailText.includes('Full-time') || detailText.includes('Contract')
+                if (isType && detailText === 'Part-time') {
+                    type = 'parttime'
+                }
+                if (isType && detailText === 'Full-time') {
+                    type = 'fulltime'
+                }
+                if (isType && detailText.includes('Contract')) {
+                    type = 'contract'
+                }
+            })
 
-            if (type && type === 'Part-time') {
-                type = 'parttime'
-            }
-            if (type && type === 'Full-time') {
-                type = 'fulltime'
-            }
-            if (type && type.includes('Contract')) {
-                type = 'contract'
-            }
-
-            const logoEl = document.querySelector('.viewjob-company-logoImg')
+            const logoEl = document.querySelector("[data-testid='companyVJLogo']")
             const companyLogo = logoEl ? `https://www.simplyhired.com${logoEl.getAttribute('src')}` : ''
+
+            const skills = document.querySelector('[data-testid="viewJobQualificationsContainer"]')
+            const perks = document.querySelector('[data-testid="viewJobBodyJobBenefits"]')
 
             return {
                 type,
-                description: document.querySelector('[data-testid="VJ-section-content-jobDescription"]').outerHTML,
-                skills: Array.from(document.querySelectorAll('.viewjob-qualification')).map(x => x.textContent),
-                perks: Array.from(document.querySelectorAll('.viewjob-benefit')).map(x => x.textContent),
+                description: document.querySelector('[data-testid="viewJobBodyJobFullDescriptionContent"]').outerHTML,
+                skills: skills ? Array.from(skills.querySelectorAll('li')).map(x => x.textContent.trim()) : [],
+                perks: perks ? Array.from(perks.querySelectorAll('li')).map(x => x.textContent.trim()) : [],
                 companyLogo,
                 datePosted: getPastDate(job.datePosted).toISOString()
             }
@@ -154,7 +189,6 @@ async function scrapeJobs(jobboard) {
         .filter(job => job.type && supportedJobTypes.indexOf(job.type) > -1)
         .filter(job => !!job.companyLogo)
         .map(job => ({ ...job, datePosted: new Date(job.datePosted) }))
-
 
     const jobsWithLogo = await Promise.all(
         jobsToSave.map(async job => {
