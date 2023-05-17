@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Job, { JobData } from '../../../models/Job'
+import { JobData } from '../../../models/Job'
 import User from '../../../models/User'
 import { ROLE } from '../../../const/const'
 import BackfilledEmployer from '../../../models/BackfilledEmployer'

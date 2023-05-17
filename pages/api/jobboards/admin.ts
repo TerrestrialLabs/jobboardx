@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../mongodb/dbconnect'
-import Job from '../../../models/Job'
 import JobBoard from '../../../models/JobBoard'
 import type { JobBoardData } from './index'
 import { getSession } from '../../../api/getSession'

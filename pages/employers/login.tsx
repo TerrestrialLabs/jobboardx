@@ -9,7 +9,6 @@ import axios from 'axios'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import CheckEmail from '../../components/CheckEmail'
-import ErrorPage from 'next/error'
 
 const ERROR = {
     EMPTY: 'Field cannot be empty',

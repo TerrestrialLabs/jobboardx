@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../../mongodb/dbconnect'
 import User from '../../../../models/User'
-import { ROLE } from '../../../../const/const'
 import JobBoard from '../../../../models/JobBoard'
 import { JobBoardData } from '../../jobboards'
 import sgMail from '@sendgrid/mail'

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, IconButton, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, FilledInput, FormControl, FormHelperText, Typography } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
@@ -7,8 +7,6 @@ import styles from '../../styles/Home.module.css'
 import { useWindowSize } from '../../hooks/hooks'
 import { JobBoardContext, JobBoardContextValue } from '../../context/JobBoardContext'
 import Dashboard from '../../components/Dashboard'
-import { UserType } from '../../models/User'
-import { Close } from '@mui/icons-material'
 import axios from 'axios'
 import axiosInstance from '../../api/axios'
 import { useSession } from '../../context/SessionContext'
@@ -40,8 +38,6 @@ const Account: NextPage = () => {
     const [formLoaded, setFormLoaded] = useState(false)
 
     const showErrorMessage = Object.keys(errors).some(field => errors[field])
-
-    const user = session?.user as UserType
 
     const windowSize = useWindowSize()
     const mobile = !!(windowSize.width && windowSize.width < 500 )

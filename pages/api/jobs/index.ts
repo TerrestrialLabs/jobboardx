@@ -81,7 +81,6 @@ export default async function handler(
                 .skip(pageIndex * resultsPerPage)
                 .limit(resultsPerPage)
                 .exec() 
-            // console.log('filters: ', filters)
             // const jobs = await Job.find({ jobboardId: filters.jobboardId })
             res.status(200).json(jobs)
         } catch (err) {
