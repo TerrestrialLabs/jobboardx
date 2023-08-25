@@ -13,9 +13,7 @@ async function scrapeJobs(jobboard) {
     let endOfResults = false
     const numJobsToScrape = 40
 
-    const browser = await puppeteer.launch({
-        headless: false
-    })
+    const browser = await puppeteer.launch()
     const page = await browser.newPage()
 
     while (endOfResults === false) {
