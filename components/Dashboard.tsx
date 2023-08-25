@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Box, CircularProgress, Typography, styled } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2/Grid2'
 import React, { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
@@ -7,6 +7,13 @@ import { useWindowSize } from '../hooks/hooks'
 import { useRouter } from 'next/router'
 import { AUTH_STATUS, ROLE } from '../const/const'
 import { useSession } from '../context/SessionContext'
+
+const SELECTED_COLOR = '#000000DE'
+const DEFAULT_COLOR = 'grey'
+
+const TabLink = styled(Typography)({
+    fontWeight: 'bold'
+});
 
 const Dashboard = ({ content }: { content: JSX.Element }) => {
     const { status, user } = useSession()
@@ -57,29 +64,29 @@ const Dashboard = ({ content }: { content: JSX.Element }) => {
                             <Grid xs={12} md={3}>
                                 <Box sx={{ backgroundColor: '#fff', borderRadius: 1, padding: 4, paddingLeft: mobile ? 2 : 4, width: '100%' }}>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('stats') ? '#000000DE' : 'grey'}>
+                                        <TabLink color={router.pathname.endsWith('stats') ? SELECTED_COLOR : DEFAULT_COLOR}>
                                             <Link href='/dashboard/stats'>Stats</Link>
-                                        </Typography>
+                                        </TabLink>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('jobs') ? '#000000DE' : 'grey'}>
+                                        <TabLink color={router.pathname.endsWith('jobs') ? SELECTED_COLOR : DEFAULT_COLOR}>
                                             <Link href='/dashboard/jobs'>Jobs</Link>
-                                        </Typography>
+                                        </TabLink>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('company-profile') ? '#000000DE' : 'grey'}>
+                                        <TabLink color={router.pathname.endsWith('company-profile') ? SELECTED_COLOR : DEFAULT_COLOR}>
                                             <Link href='/dashboard/company-profile'>Company Profile</Link>
-                                        </Typography>
+                                        </TabLink>
                                     </Box>
                                     <Box pb={2}>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('billing-details') ? '#000000DE' : 'grey'}>
+                                        <TabLink color={router.pathname.endsWith('billing-details') ? SELECTED_COLOR : DEFAULT_COLOR}>
                                             <Link href='/dashboard/billing-details'>Billing Details</Link>
-                                        </Typography>
+                                        </TabLink>
                                     </Box>
                                     <Box>
-                                        <Typography fontWeight='bold' color={router.pathname.endsWith('account') ? '#000000DE' : 'grey'}>
+                                        <TabLink color={router.pathname.endsWith('account') ? SELECTED_COLOR : DEFAULT_COLOR}>
                                             <Link href='/dashboard/account'>Account</Link>
-                                        </Typography>
+                                        </TabLink>
                                     </Box>
                                 </Box>
                             </Grid>
