@@ -94,6 +94,8 @@ async function scrapeJobs(jobboard) {
                         datePosted: dateStamp ? element.querySelector("[data-testid='searchSerpJobDateStamp']").textContent : ''
                     })
                 }
+
+                const count = jobList.length
         
                 // Remove jobs that are missing important data
                 jobList = jobList
@@ -104,11 +106,14 @@ async function scrapeJobs(jobboard) {
 
                 return {
                     jobs: jobList,
+                    jobsFound: count,
                     hasNextButton: nextButton.length > 0
                 }
             })
 
             jobs = jobs.concat(results.jobs)
+
+            console.log("Jobs found: ", results.jobsFound)
 
             if (results.hasNextButton) {
                 // Go to next page
@@ -124,6 +129,8 @@ async function scrapeJobs(jobboard) {
 
     // Job has not been backfilled already
     const newJobs = jobs.filter(item => !applicationLinks.includes(item.applicationLink))
+
+    console.log('New jobs: ', newJobs.length)
 
     for (let i = 0; i < newJobs.length; i++) {
         const job = newJobs[i]
