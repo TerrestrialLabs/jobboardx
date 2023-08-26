@@ -20,6 +20,8 @@ async function scrapeJobs(jobboard) {
         if (jobs.length < numJobsToScrape) {
             await page.goto(`https://www.simplyhired.com/search?q=${jobboard.searchQuery}&pn=${pageNum}`)
 
+            console.log(await page.content())
+
             const results = await page.evaluate(() => {
                 let jobList = []
         
