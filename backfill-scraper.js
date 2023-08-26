@@ -38,6 +38,46 @@ async function scrapeJobs(jobboard) {
                     const remote = location === 'Remote'
                     const dateStamp = element.querySelector("[data-testid='searchSerpJobDateStamp']")
 
+                    // SALARY
+                    let salary = element.querySelector('[data-testid="searchSerpJobSalaryEst"]')
+                    let salaryMin = 0
+                    let salaryMax = 0
+                    if (salary) {
+                        salary = salary.textContent.trim()
+                        const hourly = salary.includes('hour')
+                        const weekly = salary.includes('week')
+                        if (salary.includes('.') && salary.includes('K')) {
+                            salary = salary
+                                .replace('.', ',')
+                                .replace('K', '00')
+                                .replace('.', ',')
+                                .replace('K', '00')
+                        }
+                        const salaryArr = salary
+                            .replace('Estimated: ', '')
+                            .replace(' a year', '')
+                            .replace(' a week', '')
+                            .replace(' an hour', '')
+                            .replace('K', ',000')
+                            .replace('K', ',000')
+                            .replaceAll('$', '')
+                            .split(' - ')
+                        salaryMin = parseInt(salaryArr[0] ? salaryArr[0].replace(',', '') : 0)
+                        salaryMax = parseInt(salaryArr[1] ? salaryArr[1].replace(',', '') : 0)
+            
+                        if (hourly && salaryArr[0]) {
+                            salaryMin = convertHourlyToAnnualPay(salaryArr[0])
+                        } else if (weekly && salaryArr[0]) {
+                            salaryMin = convertWeeklyToAnnualPay(salaryArr[0])
+                        }
+    
+                        if (hourly && salaryArr[1]) {
+                            salaryMax = convertHourlyToAnnualPay(salaryArr[1])
+                        } else if (weekly && salaryArr[1]) {
+                            salaryMax = convertWeeklyToAnnualPay(salaryArr[1])
+                        }
+                    }
+
                     jobList.push({
                         title: element.querySelector("[data-testid='searchSerpJobTitle']").textContent.trim(),
                         company: element.querySelector("[data-testid='companyName']").textContent.trim(),
@@ -45,56 +85,14 @@ async function scrapeJobs(jobboard) {
                         remote,
                         applicationLink: 'https://www.simplyhired.com' + element.querySelector("[data-testid='searchSerpJobTitle']").querySelector('a').getAttribute('href'),
                         backfilled: true,
+                        salaryMin,
+                        salaryMax,
                         // Placeholders
-                        salaryMin: 0,
-                        salaryMax: 0,
                         description: '',
                         companyUrl: 'N/A',
                         companyLogo: '',
                         datePosted: dateStamp ? element.querySelector("[data-testid='searchSerpJobDateStamp']").textContent : ''
                     })
-                }
-        
-                const salaries = document.querySelectorAll("[data-testid='searchSerpJobSalaryEst']")
-                let index = 0
-                for (const element of salaries) {
-                    const hourly = element.textContent.includes('hour')
-                    const weekly = element.textContent.includes('week')
-                    let salaryStr = element.textContent
-                    if (element.textContent.includes('.') && element.textContent.includes('K')) {
-                        salaryStr = salaryStr
-                            .replace('.', ',')
-                            .replace('K', '00')
-                            .replace('.', ',')
-                            .replace('K', '00')
-                    }
-                    const salaryArr = salaryStr
-                        .replace('Estimated: ', '')
-                        .replace(' a year', '')
-                        .replace(' a week', '')
-                        .replace(' an hour', '')
-                        .replace('K', ',000')
-                        .replace('K', ',000')
-                        .replaceAll('$', '')
-                        .split(' - ')
-                    const salaryMin = parseInt(salaryArr[0] ? salaryArr[0].replace(',', '') : 0)
-                    const salaryMax = parseInt(salaryArr[1] ? salaryArr[1].replace(',', '') : 0)
-        
-                    jobList[index].salaryMin = salaryMin
-                    if (hourly && salaryArr[0]) {
-                        jobList[index].salaryMin = convertHourlyToAnnualPay(salaryArr[0])
-                    } else if (weekly && salaryArr[0]) {
-                        jobList[index].salaryMin = convertWeeklyToAnnualPay(salaryArr[0])
-                    }
-
-                    jobList[index].salaryMax = salaryMax
-                    if (hourly && salaryArr[1]) {
-                        jobList[index].salaryMax = convertHourlyToAnnualPay(salaryArr[1])
-                    } else if (weekly && salaryArr[1]) {
-                        jobList[index].salaryMax = convertWeeklyToAnnualPay(salaryArr[1])
-                    }
-
-                    index += 1
                 }
         
                 // Remove jobs that are missing important data
@@ -147,21 +145,20 @@ async function scrapeJobs(jobboard) {
                 return new Date()
             }
 
-            const detailEls = [...document.querySelectorAll("[data-testid='detailText']")]
             let type = ''
-            detailEls.forEach(el => {
-                const detailText = el.textContent
-                let isType = detailText.includes('Part-time') || detailText.includes('Full-time') || detailText.includes('Contract')
-                if (isType && detailText === 'Part-time') {
+            let typeContainer = document.querySelector('[data-testid="viewJobBodyJobDetailsJobType"]')
+            if (typeContainer) {
+                type = typeContainer.querySelector('[data-testid="detailText"]').textContent
+                if (type === 'Part-time') {
                     type = 'parttime'
                 }
-                if (isType && detailText === 'Full-time') {
+                if (type === 'Full-time') {
                     type = 'fulltime'
                 }
-                if (isType && detailText.includes('Contract')) {
+                if (type.includes('Contract')) {
                     type = 'contract'
-                }
-            })
+                } 
+            }
 
             const logoEl = document.querySelector("[data-testid='companyVJLogo']")
             const companyLogo = logoEl ? `https://www.simplyhired.com${logoEl.getAttribute('src')}` : ''
